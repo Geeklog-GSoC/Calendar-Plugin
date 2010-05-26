@@ -1,0 +1,19 @@
+<link href="{site_url}/calendarv2/javascript/jquery-ui.css" rel="stylesheet" type="text/css"/>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+<script src="{site_url}/calendarv2/javascript/jquery.js"</script>     
+<table>
+<tr> <td> 
+<div> {calendar} </div>
+<div>
+<input id="datepicker" type="hidden"/>
+<div id = "date"></div>
+</div>
+<div>
+</td><td align = "right">
+{event_form}
+</td>
+</tr>
+</table>
+{display_today_events}
+</div> 
