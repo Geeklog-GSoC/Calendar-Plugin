@@ -4,9 +4,9 @@
 // +---------------------------------------------------------------------------+
 // | calendarv2 Plugin 0.1                                                     |
 // +---------------------------------------------------------------------------+
-// | english.php                                                               |
+// | index.php                                                                 |
 // |                                                                           |
-// | English language file                                                     |
+// | Public plugin page                                                        |
 // +---------------------------------------------------------------------------+
 // | Copyright (C) 2010 by the following authors:                              |
 // |                                                                           |
@@ -35,54 +35,25 @@
 * @package calendarv2
 */
 
-/**
-* Import Geeklog plugin messages for reuse
-*
-* @global array $LANG32
-*/
-global $LANG32;
+require_once '../lib-common.php';
 
-// +---------------------------------------------------------------------------+
-// | Array Format:                                                             |
-// | $LANGXX[YY]:  $LANG - variable name                                       |
-// |               XX    - specific array name                                 |
-// |               YY    - phrase id or number                                 |
-// +---------------------------------------------------------------------------+
+// take user back to the homepage if the plugin is not active
+if (! in_array('calendarv2', $_PLUGINS)) {
+    echo COM_refresh($_CONF['site_url'] . '/index.php');
+    exit;
+}
 
-$LANG_CALENDARV2_1 = array(
-    'plugin_name' => 'calendarv2',
-    'hello' => 'Hello, world!' // this is an example only - feel free to remove
-);
-
-$LANG_CALENDARV2_FORM = array (
-    'lang_intro_msg' => 'Add Event' ,
-    'lang_event_title' => 'Event title',
-    'lang_event_location' => 'Event location',
-    'lang_event_description' => 'Event description',
-    'lang_add' => 'Save Event',
-    'lang_event_at' => 'at',
-    'lang_event_ends' => 'Event ends',
-    'lang_event_starts' => 'Event starts',
-    'lang_event_all_day' => 'All day event'
-);
-
-$LANG_CALENDARV2_MONTH = array (
-    '1' => 'January',
-    '2' => 'February',
-    '3' => 'March',
-    '4' => 'April',
-    '5' => 'May',
-    '6' => 'June',
-    '7' => 'July', 
-    '8' => 'August',
-    '9' => 'September',
-    '10' => 'Octomber',
-    '11' => 'November',
-    '12' => 'December'
-);
+$display = '';
 
 
-// Messages for the plugin upgrade
-$PLG_calendarv2_MESSAGE3002 = $LANG32[9]; // "requires a newer version of Geeklog"
+// MAIN
+$display .= COM_siteHeader('menu', $LANG_CALENDARV2_1['plugin_name']);
+$display .= COM_startBlock($LANG_CALENDARV2_1['plugin_name']);
+$display .= '<p>Welcome to the ' . $LANG_CALENDARV2_1['plugin_name'] . ' plugin, '
+         . $_USER['username'] . '!</p>';
+$display .= COM_endBlock();
+$display .= COM_siteFooter();
+
+echo $display;
 
 ?>

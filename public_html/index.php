@@ -43,6 +43,15 @@ if (! in_array('calendarv2', $_PLUGINS)) {
     exit;
 }
 
+require_once $_CONF['path_system'] . 'classes/calendarv2.class.php';
+$A = $_REQUEST;
+
+$calendar = new Calendarv2 (); 
+if(!isset($A['month'])) {
+    $A['month'] = date ('m' , time());
+    $A['year'] = date('Y' , time());
+}
+$matrix = $calendar->c2_generateMatrix($A['month'] , $A['year']);
 $display = '';
 
 
@@ -51,7 +60,7 @@ $display .= COM_siteHeader('menu', $LANG_CALENDARV2_1['plugin_name']);
 $display .= COM_startBlock($LANG_CALENDARV2_1['plugin_name']);
 $display .= '<p>Welcome to the ' . $LANG_CALENDARV2_1['plugin_name'] . ' plugin, '
          . $_USER['username'] . '!</p>';
-$display .= calendarv2_display();
+$display .= calendarv2_display($matrix, $A['month'], $A['year']);
 $display .= COM_endBlock();
 $display .= COM_siteFooter();
 

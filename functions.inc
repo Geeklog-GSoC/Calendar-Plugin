@@ -46,6 +46,8 @@ if (strpos(strtolower($_SERVER['PHP_SELF']), 'functions.inc') !== false) {
 $plugin_path = $_CONF['path'] . 'plugins/calendarv2/';
 $langfile = $plugin_path . 'language/' . $_CONF['language'] . '.php';
 
+
+
 if (file_exists($langfile)) {
     require_once $langfile;
 } else {
@@ -350,8 +352,19 @@ function calendarv2_templatePath ($path = '')
 
     return $retval;
 }
+ 
+ /**
+* Creates the main page from the template
+*
+* @param    array  $matrix   matrix of the month
+* @param    int  $month   current Month to be displayed
+* @param    int  $year   current Year to be displayed
+*
+* @return   string      proper page made from template
+*
+*/  
 
-function calendarv2_display()
+function calendarv2_display($matrix, $month, $year)
 {
     global $_CONF;
     $page = new Template(calendarv2_templatePath());
@@ -361,9 +374,18 @@ function calendarv2_display()
     $page->set_var('display_today_events', 'today events');
     $form = calendarv2_form_display();
     $page->set_var('event_form', $form);
+    $minimal = calendarv2_minimal_display($matrix, $month, $year);
+    $page->set_var('minimal' , $minimal);
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 }
+
+  /**
+* Creates the form page from the template
+*
+* @return   string  the page from template
+*
+*/  
 
 function calendarv2_form_display()
 {
@@ -385,5 +407,67 @@ function calendarv2_form_display()
     return $retval; 
      
 }
+
+/**
+* Creates the calendar from the template
+*
+* @param    array  $matrix   matrix of the month
+* @param    int  $month   current Month to be displayed
+* @param    int  $year   current Year to be displayed
+*
+* @return   string      proper page made from template
+*
+*/ 
+
+function calendarv2_minimal_display($matrix, $month, $year)
+{
+    global $_CONF, $LANG_CALENDARV2_MONTH;
+    $page = new Template(calendarv2_templatePath());
+    $page->set_file(array ('page' => 'month_view.thtml',
+                            'each_element' => 'each_element.thtml',
+                            'each_element2'=> 'each_element2.thtml'));
+    $link = $_CONF['site_url'] . '/calendarv2/index.php?';
+    $prev_month = $month - 1;
+    if ($prev_month == 0) {
+        $prev_year = -1;
+        $prev_month = 12;
+    }
+    $prev_year += $year;
+    $prev = COM_createLink('<<', $link . 'year=' . $prev_year .'&'. 'month=' . $prev_month);
+    $page->set_var('prev', $prev);
+    
+    
+    $next_month = $month + 1;
+    if ($next_month == 13) {
+        $next_month = 1;
+        $next_year =  1;
+    }
+    $next_year += $year;
+    $next = COM_createLink('>>', $link . 'year=' . $next_year . '&' . 'month=' . $next_month);
+    $page->set_var('next', $next);
+    
+    $month_name = $LANG_CALENDARV2_MONTH[$month];
+    $page->set_var('month', $month_name);
+    $page->set_var('year' , $year);
+    $i = 0;
+    for ($i = 1; $i <= 6; $i++) {
+        for ($j = 0; $j < 7; $j++) {
+            if(!empty($matrix[$i][$j])) {
+                $day_link = COM_createLink($matrix[$i][$j], $link . 'day=' . $matrix[$i][$j] . '&year=' . $year . '&month=' . $month);
+                $page->set_var('value', $day_link);
+                $page->parse('line' . $i , 'each_element2', true);
+            }
+            else {
+                $page->set_var('value', ' ');
+                $page->parse('line' . $i, 'each_element2', true);
+            }
+        }
+    $page->finish($page->parse('calendar_view', 'each_element')); 
+    }
+    $retval .= $page->finish($page->parse('output', 'page'));
+    return $retval;
+}
+        
+
 
 ?>

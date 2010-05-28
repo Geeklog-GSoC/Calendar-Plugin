@@ -1,0 +1,6 @@
+<table>
+<tr><td> {prev} </td> <td> {month} <td> {year} </td></td><td> {next} </td></tr>
+</table>
+<table>
+{calendar_view}
+</table>

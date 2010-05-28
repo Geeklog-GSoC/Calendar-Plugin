@@ -4,11 +4,7 @@
 <script src="{site_url}/calendarv2/javascript/jquery.js"</script>     
 <table>
 <tr> <td> 
-<div> {calendar} </div>
-<div>
-<input id="datepicker" type="hidden"/>
-<div id = "date"></div>
-</div>
+<div> {minimal} </div>
 <div>
 </td><td align = "right">
 {event_form}
@@ -16,4 +12,4 @@
 </tr>
 </table>
 {display_today_events}
-</div> 
+</div>
