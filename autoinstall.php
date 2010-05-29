@@ -85,6 +85,18 @@ function plugin_autoinstall_calendarv2($pi_name)
     return $inst_parms;
 }
 
+
+
+function plugin_load_configuration_calendarv2($pi_name)
+{
+    global $_CONF;
+    $base_path = $_CONF['path'] . 'plugins/' . $pi_name . '/';
+    require_once $_CONF['path_system'] . 'classes/config.class.php';
+    require_once $base_path . 'install_defaults.php'; 
+    
+    return plugin_initconfig_calendarv2();
+}
+
 /**
 * Check if the plugin is compatible with this Geeklog version
 *
@@ -92,6 +104,7 @@ function plugin_autoinstall_calendarv2($pi_name)
 * @return   boolean             true: plugin compatible; false: not compatible
 *
 */
+
 function plugin_compatible_with_this_version_calendarv2($pi_name)
 {
     global $_CONF, $_DB_dbms;

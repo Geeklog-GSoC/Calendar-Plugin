@@ -81,6 +81,18 @@ $LANG_CALENDARV2_MONTH = array (
     '12' => 'December'
 );
 
+$LANG_confignames['calendarv2'] = array(
+    'folder' => 'Default plugin folder'
+);
+
+$LANG_configsubgroups['calendarv2'] = array(
+    'sg_main' => 'Main Settings'
+);
+
+$LANG_fs['calendarv2'] = array(
+    'fs_main' => 'Calendar Settings'
+);
+
 
 // Messages for the plugin upgrade
 $PLG_calendarv2_MESSAGE3002 = $LANG32[9]; // "requires a newer version of Geeklog"

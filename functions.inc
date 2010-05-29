@@ -59,6 +59,15 @@ if (file_exists($langfile)) {
  */
 $_TABLES['calendarv2'] = $_DB_table_prefix . 'calendarv2';
 
+/**
+* Load the config settings
+*/
+require_once $_CONF['path_system'] . 'classes/config.class.php';
+
+$ca_config = config::get_instance();
+$_CAV2_CONF = $ca_config->get_config('calendarv2');
+$_CAV2_CONF['site_url'] = $_CONF['site_url'] . '/' . $_CAV2_CONF['folder'];
+
 
 // +---------------------------------------------------------------------------+
 // | Geeklog Plugin API Implementation                                         |
@@ -75,9 +84,9 @@ $_TABLES['calendarv2'] = $_DB_table_prefix . 'calendarv2';
 */
 function plugin_getmenuitems_calendarv2()
 {
-    global $_CONF, $LANG_CALENDARV2_1;
+    global $_CONF,$_CAV2_CONF, $LANG_CALENDARV2_1;
 
-    $url = $_CONF['site_url'] . '/calendarv2/index.php';
+    $url = $_CAV2_CONF['site_url'] . 'index.php';
     $menuitems[$LANG_CALENDARV2_1['plugin_name']] = $url;
 
     return $menuitems;
@@ -421,12 +430,12 @@ function calendarv2_form_display()
 
 function calendarv2_minimal_display($matrix, $month, $year)
 {
-    global $_CONF, $LANG_CALENDARV2_MONTH;
+    global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH;
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'month_view.thtml',
                             'each_element' => 'each_element.thtml',
                             'each_element2'=> 'each_element2.thtml'));
-    $link = $_CONF['site_url'] . '/calendarv2/index.php?';
+    $link = $_CAV2_CONF['site_url'] . 'index.php?';
     $prev_month = $month - 1;
     if ($prev_month == 0) {
         $prev_year = -1;
