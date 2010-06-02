@@ -224,7 +224,7 @@ function plugin_cclabel_calendarv2()
 /**
 * Return plugin entry for the Admins Only block
 *
-* @return array Array containing (plugin name, plugin admin url, # of plugin items or '')
+* @return array Array containing (plugin name, plugin admin url,  of plugin items or '')
 */
 function plugin_getadminoption_calendarv2()
 {
@@ -373,17 +373,18 @@ function calendarv2_templatePath ($path = '')
 *
 */  
 
-function calendarv2_display($matrix, $month, $year)
+function calendarv2_display($matrix, $A)
 {
+    
     global $_CONF;
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'main.thtml'));
     $page->set_var('site_url', $_CONF['site_url']);
     $page->set_var('calendar', "test_text");
     $page->set_var('display_today_events', 'today events');
-    $form = calendarv2_form_display();
+    $form = calendarv2_form_display($A);
     $page->set_var('event_form', $form);
-    $minimal = calendarv2_minimal_display($matrix, $month, $year);
+    $minimal = calendarv2_minimal_display($matrix, $A);
     $page->set_var('minimal' , $minimal);
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
@@ -396,22 +397,40 @@ function calendarv2_display($matrix, $month, $year)
 *
 */  
 
-function calendarv2_form_display()
+function calendarv2_form_display($A)
 {
+    
     global $_CONF, $LANG_CALENDARV2_FORM;
+    if(isset($A['year'])) {
+        $year = $A['year'];
+    }
+    if(isset($A['month'])) {
+        $month = $A['month'];
+    }
+    if(isset($A['day'])) {
+        $day = $A['day'];
+    }
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'form.thtml'));
     $lang = $LANG_CALENDARV2_FORM;
     foreach ($lang as $key => $value) {
         $page->set_var($key, $value);
     }
-    $time = time();
-    $date = date('m/d/Y');
-    $start_minute = date('h:i A');
-    $page->set_var('default_start_date', $date);
-    $page->set_var('default_end_date' , $date);
-    $page->set_var('default_start_time', $start_minute);
-    $page->set_var('default_end_time', $start_minute);
+    if(empty($day)) {
+        $date = date('m/d/Y');
+        $start_minute = date('h:i A');
+        $page->set_var('default_start_date', $date);
+        $page->set_var('default_end_date' , $date);
+        $page->set_var('default_start_time', $start_minute);
+        $page->set_var('default_end_time', $start_minute);
+    }
+    else {
+        $date = date('m/d/Y' , mktime(0, 0, 0, intval($month), intval($day), intval($year)));
+        $page->set_var('default_start_date' , $date);
+        $page->set_var('default_end_date' , $date);
+        $page->set_var('default_start_time', '12:00 AM');
+        $page->set_var('default_end_time', '12:00 AM');
+    }
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval; 
      
@@ -428,9 +447,19 @@ function calendarv2_form_display()
 *
 */ 
 
-function calendarv2_minimal_display($matrix, $month, $year)
+function calendarv2_minimal_display($matrix, $A)
 {
+    
     global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH;
+    if(isset($A['year'])) {
+        $year = $A['year'];
+    }
+    if(isset($A['month'])) {
+        $month = $A['month'];
+    }
+    if(isset($A['day'])) {
+        $day = $A['day'];
+    }
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'month_view.thtml',
                             'each_element' => 'each_element.thtml',
@@ -444,7 +473,6 @@ function calendarv2_minimal_display($matrix, $month, $year)
     $prev_year += $year;
     $prev = COM_createLink('<<', $link . 'year=' . $prev_year .'&'. 'month=' . $prev_month);
     $page->set_var('prev', $prev);
-    
     
     $next_month = $month + 1;
     if ($next_month == 13) {

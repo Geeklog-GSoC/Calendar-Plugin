@@ -60,10 +60,10 @@ $display .= COM_siteHeader('menu', $LANG_CALENDARV2_1['plugin_name']);
 $display .= COM_startBlock($LANG_CALENDARV2_1['plugin_name']);
 $display .= '<p>Welcome to the ' . $LANG_CALENDARV2_1['plugin_name'] . ' plugin, '
          . $_USER['username'] . '!</p>';
-$display .= calendarv2_display($matrix, $A['month'], $A['year']);
+$display .= calendarv2_display($matrix, $A);
 $display .= COM_endBlock();
 $display .= COM_siteFooter();
 
-echo $display;
+COM_output($display);
 
 ?>

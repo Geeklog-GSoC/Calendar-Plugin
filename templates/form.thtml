@@ -1,37 +1,23 @@
-<div> {lang_intro_msg} </div>
-<form method = "post" action = "self">
-<table>
-		<tr>
-			<td align = "right">
-				<label for = "event_title"> {lang_event_title} </label>
-			</td>
-			<td>
-			<input id = "event_title" type = "text" value = "" size = "46"/>
-			</td>
-		</tr><tr> 
-			<td align = "right">
-			<label for = "event_starts"> {lang_event_starts} </label> </td><td>
-			<input id = "start_date" value = "{default_start_date}"/> 
-			{lang_event_at}
-			<input id = "start_time" value = "{default_start_time}" />
-			</td>
-		</tr><tr>
-			<td align = "right">
-			<label for = "event_ends"> {lang_event_ends} </label> </td><td>
-			<input id = "end_date" value = "{default_end_date}"/> 
-			{lang_event_at}
-			<input id = "end_time" value = "{default_end_time}"/> </td>
-		</tr><tr>
-			<td align = "right">
-  			 {lang_event_all_day} </td> <td>  <input type = "checkbox" id = "all_day"> </td>
-		</tr><tr> 
-                        <td align = "right">
-			<label for = "event_location"> {lang_event_location} </label> </td><td>
-			<input id = "event_location" type = "text" value = "" size = "46" /> </td>
-		</tr><tr>
-			<td align = "right">
-			<label for = "event_description"> {lang_event_description} </label </td><td>
-			<textarea rows="2" cols="34" id = "event_description"> </textarea> </td>
-</table>
-			<input type="submit" value="{lang_add}"/>
+<p id = "form_message"> {lang_intro_msg} </p>
+<form id = "submit_form" method = "post" action = "self">
+			<dl><dt>
+			<label for = "event_title"> {lang_event_title}: </label> </dt>
+			<dd><input id = "event_title" type = "text" value = "" size = "46"/></dd>
+			<dt><label for = "event_starts"> {lang_event_starts}: </label> </dt>
+			<dd><input id = "start_date" value = "{default_start_date}"/>
+			{lang_event_at}:
+			<input id = "start_time" value = "{default_start_time}" /> 
+			</dd>
+			<dt>
+			<label for = "event_ends"> {lang_event_ends}: </label>  </dt> 
+			<dd> <input id = "end_date" value = "{default_end_date}"/> 
+			{lang_event_at}:
+			<input id = "end_time" value = "{default_end_time}"/>   </dd>
+  			<dt> <label for = "all_day" >{lang_event_all_day}: </label> </dt> 
+			<dd> <input type = "checkbox" id = "all_day">  </dd>
+			<dt><label for = "event_location"> {lang_event_location}: </label> </dt>
+			<dd> <input id = "event_location" type = "text" value = "" size = "46" /> </dd> 
+			<dt> <label for = "event_description"> {lang_event_description}: </label> </dt>
+			<dd> <textarea id = "event_description"> </textarea> </dd> 
+			<dd> <input type="submit" value="{lang_add}"/> </dd>
 </form>

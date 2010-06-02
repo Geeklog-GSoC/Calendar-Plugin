@@ -1,5 +1,5 @@
 <table>
-<tr><td> {prev} </td> <td> {month} <td> {year} </td></td><td> {next} </td></tr>
+<tr><td> {prev} </td> <td> {month} </td><td> {year} </td><td> {next} </td></tr>
 </table>
 <table>
 {calendar_view}

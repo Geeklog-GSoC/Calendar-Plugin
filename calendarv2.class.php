@@ -37,14 +37,28 @@
 
 class Calendarv2 {
     var $_creation_date;
-    var $lang_days = array( 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday','Saturday','Sunday');
     var $day_number = 0;
-    var $matrix = array(); 
-    // Constructor
+    var $matrix = array();
+ 
+    /**
+    *
+    * Constructor
+    *
+    * Initializes calendar object
+    *
+    */
+
     function Calendarv2() {
         $this->_creation_date = getdate(time());
     }
 
+    /**
+    * Returns a matrix with days of a month
+    * 
+    * @param    int     $month  the month number
+    * @param    int     $year   the year number
+    * @return   array   
+    */ 
     function c2_generateMatrix($month, $year) {
         $start_date = mktime(0,0,0, $month, 1, $year);
         $days_in_month = date('t', $start_date);
