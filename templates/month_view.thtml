@@ -1,6 +1,10 @@
-<table>
-<tr><td> {prev} </td> <td> {month} </td><td> {year} </td><td> {next} </td></tr>
-</table>
-<table>
+<div id = "month_center">
+	<span> {month} {year} </span>
+</div>
+<div id = "month_something">
+<span id = "month_prev"> {prev} </span>
+<span id = "month_next"> {next} </span>
+</div>
+<table id = "month_view">
 {calendar_view}
 </table>

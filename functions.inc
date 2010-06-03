@@ -86,7 +86,7 @@ function plugin_getmenuitems_calendarv2()
 {
     global $_CONF,$_CAV2_CONF, $LANG_CALENDARV2_1;
 
-    $url = $_CAV2_CONF['site_url'] . 'index.php';
+    $url = $_CAV2_CONF['site_url'] . '/index.php';
     $menuitems[$LANG_CALENDARV2_1['plugin_name']] = $url;
 
     return $menuitems;
@@ -334,7 +334,7 @@ function plugin_autouninstall_calendarv2()
 }
 
  /**
-* Get path for the tmplate files.
+* Get path for the template files.
 *
 * @param    string  $path   subdirectory within the base template path
 * @return   string          full path to template directory
@@ -451,20 +451,29 @@ function calendarv2_minimal_display($matrix, $A)
 {
     
     global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH;
-    if(isset($A['year'])) {
+    if (isset($A['year'])) {
         $year = $A['year'];
     }
-    if(isset($A['month'])) {
+    else {
+        $year = date('Y', time());
+    }
+    if (isset($A['month'])) {
         $month = $A['month'];
     }
-    if(isset($A['day'])) {
+    else {
+        $month = date('m', time());
+    }
+    if (isset($A['day'])) {
         $day = $A['day'];
+    }
+    else {
+        $day = date('d' , time());
     }
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'month_view.thtml',
                             'each_element' => 'each_element.thtml',
                             'each_element2'=> 'each_element2.thtml'));
-    $link = $_CAV2_CONF['site_url'] . 'index.php?';
+    $link = $_CAV2_CONF['site_url'] . '/index.php?';
     $prev_month = $month - 1;
     if ($prev_month == 0) {
         $prev_year = -1;
@@ -483,6 +492,7 @@ function calendarv2_minimal_display($matrix, $A)
     $next = COM_createLink('>>', $link . 'year=' . $next_year . '&' . 'month=' . $next_month);
     $page->set_var('next', $next);
     
+    $month = intval($month);
     $month_name = $LANG_CALENDARV2_MONTH[$month];
     $page->set_var('month', $month_name);
     $page->set_var('year' , $year);

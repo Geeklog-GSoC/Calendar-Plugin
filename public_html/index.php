@@ -47,10 +47,6 @@ require_once $_CONF['path_system'] . 'classes/calendarv2.class.php';
 $A = $_REQUEST;
 
 $calendar = new Calendarv2 (); 
-if(!isset($A['month'])) {
-    $A['month'] = date ('m' , time());
-    $A['year'] = date('Y' , time());
-}
 $matrix = $calendar->c2_generateMatrix($A['month'] , $A['year']);
 $display = '';
 
