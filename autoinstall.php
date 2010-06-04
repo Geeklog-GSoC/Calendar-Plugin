@@ -71,7 +71,8 @@ function plugin_autoinstall_calendarv2($pi_name)
     );
 
     $tables = array(
-        'calendarv2'
+        'calendarv2',
+        'c2events'
     );
 
     $inst_parms = array(

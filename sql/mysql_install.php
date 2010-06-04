@@ -43,4 +43,26 @@ CREATE TABLE {$_TABLES['calendarv2']} (
 ) TYPE=MyISAM
 ";
 
+$_SQL[] = "
+CREATE TABLE {$_TABLES['c2events']} (
+  eid varchar(20) NOT NULL default '',
+  pid varchar(20) default NULL,
+  title varchar(128) default NULL,
+  description text,
+  datestart date default NULL,
+  dateend date default NULL,
+  timestart time default NULL,
+  timeend time default NULL,
+  owner_id mediumint(8) unsigned NOT NULL default '1',
+  group_id mediumint(8) unsigned NOT NULL default '1',
+  perm_owner tinyint(1) unsigned NOT NULL default '3',
+  perm_group tinyint(1) unsigned NOT NULL default '3',
+  perm_members tinyint(1) unsigned NOT NULL default '2',
+  perm_anon tinyint(1) unsigned NOT NULL default '2',
+  location varchar(40) default NULL,
+  allday tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (eid)
+) ENGINE=MyISAM
+"; 
+
 ?>

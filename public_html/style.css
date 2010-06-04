@@ -1,0 +1,86 @@
+#calendar-container {
+	margin: auto;
+}
+
+#calendar-content {
+	float: left;
+	width: 50%;
+	margin: auto;
+}
+
+#form-content {
+	width: 50%;
+	float: right;
+}
+
+#submit_form DT {
+   clear:both;
+   float:left;
+   text-align:right;
+}
+
+#submit_form DD {
+   margin: auto;
+   float: right;
+   width: 70%;
+	
+}
+
+#event_title {
+   width: 93%;
+}
+
+#event_location {
+   width: 93%;
+}
+
+#event_description {
+	width: 93%;
+	height: 30px;
+}
+
+/* Calendar layout CSS */
+
+#month_view {
+ width: 85%;
+ padding: 0;
+ margin: auto;
+ font: normal 12px/20px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+ color: #616B76;
+ text-align: center;
+ background-color: #fff;
+}
+
+#month_view td {
+ width: 14.28%;
+ height: 14.28%;
+ text-align: center;
+}
+
+#month_view td a:link, td a:visited {
+ color: #608194;
+}
+
+#month_view td a:hover, td a:active {
+ color: #6aa3ae;
+}
+
+#month_center {
+	margin: auto;
+	/*width: 50%;*/
+}
+#month_something {
+	width: 70%;
+	margin: auto;
+}
+
+#month_next {
+	float: right;
+	width: 10%;
+}
+
+#month_prev {
+	float: left;
+}
+
+

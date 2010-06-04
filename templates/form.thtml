@@ -13,6 +13,15 @@
 			<dd> <input id = "end_date" value = "{default_end_date}"/> 
 			{lang_event_at}:
 			<input id = "end_time" value = "{default_end_time}"/>   </dd>
+			<dt> <label for = "repeats">  {lang_repeats}: </label> </dt>
+			<dd> <select>
+				<option> {lang_does_not} </option>
+				<option> {lang_daily} </option>
+				<option> {lang_weekley} </option>
+				<option> {lang_monthly} </option>
+				<option> {lang_yearly} </option>
+			     </select>
+			</dd>
   			<dt> <label for = "all_day" >{lang_event_all_day}: </label> </dt> 
 			<dd> <input type = "checkbox" id = "all_day">  </dd>
 			<dt><label for = "event_location"> {lang_event_location}: </label> </dt>
