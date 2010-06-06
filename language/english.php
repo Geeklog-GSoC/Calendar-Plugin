@@ -55,6 +55,7 @@ $LANG_CALENDARV2_1 = array(
 );
 
 $LANG_CALENDARV2_FORM = array (
+    'lang_days' => 'Days',
     'lang_intro_msg' => 'Add Event' ,
     'lang_event_title' => 'Event title',
     'lang_event_location' => 'Event location',
@@ -64,12 +65,23 @@ $LANG_CALENDARV2_FORM = array (
     'lang_event_ends' => 'Event ends',
     'lang_event_starts' => 'Event starts',
     'lang_event_all_day' => 'All day event',
-    'lang_daily' => 'Daily',
-    'lang_weekley' => 'Weekley',
-    'lang_monthly' => 'Monthly',
-    'lang_yearly' => 'Yearly',
+    'lang_daily' => 'Every Day',
+    'lang_weekley' => 'Every week day',
+    'lang_monthly' => 'Every Month',
+    'lang_yearly' => 'Every Year',
     'lang_repeats' => 'Repeats',
-    'lang_does_not' => 'Does not repeat'
+    'lang_does_not' => 'Does not repeat',
+    'lang_monday' => 'Monday',
+    'lang_tuesday' => 'Tuesday',
+    'lang_wednesday' => 'Wensday',
+    'lang_thursday' => 'Thursday',
+    'lang_friday' => 'Friday',
+    'lang_saturday' => 'Saturday',
+    'lang_sunday' => 'Sunday',
+    'lang_which_day' => 'Which day',
+    'lang_date_recurring' => 'Recuring ends',
+    'lang_date_never' => 'Never',
+    'lang_every' => 'Every'
 );
 
 $LANG_CALENDARV2_MONTH = array (
