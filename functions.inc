@@ -58,6 +58,7 @@ if (file_exists($langfile)) {
  * calendarv2 plugin table(s)
  */
 $_TABLES['calendarv2'] = $_DB_table_prefix . 'calendarv2';
+$_TABLES['c2events'] = $_DB_table_prefix . 'c2events';
 
 /**
 * Load the config settings
