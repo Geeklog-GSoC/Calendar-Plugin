@@ -55,6 +55,7 @@ $LANG_CALENDARV2_1 = array(
 );
 
 $LANG_CALENDARV2_FORM = array (
+    'lang_on' => 'on',
     'lang_days' => 'Days',
     'lang_intro_msg' => 'Add Event' ,
     'lang_event_title' => 'Event title',

@@ -4,13 +4,13 @@
 
 #calendar-content {
 	float: left;
-	width: 50%;
-	margin: auto;
+	width: 20%;
 }
 
 #form-content {
-	width: 50%;
+	width: 77%;
 	float: right;
+	margin-top: 20px;
 }
 
 #submit_form DT {
@@ -68,6 +68,8 @@
 #month_center {
 	margin: auto;
 	/*width: 50%;*/
+	text-align: center;
+	margin-top: 20px;
 }
 #month_something {
 	width: 70%;

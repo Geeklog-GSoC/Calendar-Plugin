@@ -319,7 +319,7 @@ function plugin_autouninstall_calendarv2()
 {
     $out = array (
         /* give the name of the tables, without $_TABLES[] */
-        'tables' => array('calendarv2'),
+        'tables' => array('calendarv2', 'c2events'),
         /* give the full name of the group, as in the db */
         'groups' => array('calendarv2 Admin'),
         /* give the full name of the feature, as in the db */
@@ -419,6 +419,10 @@ function calendarv2_form_display($A)
     if(empty($day)) {
         $date = date('m/d/Y');
         $start_minute = date('h:i A');
+        $day_from_month = date('d');
+        $day_from_year = date('m/d/Y');
+        $page->set_var('month_recurring_day' , intval($day_from_month));
+        $page->set_var('year_recurring_day' , $day_from_year);
         $page->set_var('default_start_date', $date);
         $page->set_var('default_end_date' , $date);
         $page->set_var('default_start_time', $start_minute);

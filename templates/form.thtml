@@ -49,9 +49,17 @@
 					</select> 
 					{lang_days}
 					
+				</div>	
+				<div id = "monthly_recurring">
+					{lang_every_month} {lang_on}: 
+					<input id = "every_month" value = "{month_recurring_day}" /> 
 				</div> 
+				<div id = "yearly_recurring">	
+					{lang_every_year} {lang_on}
+					<input id = "every_year" value = "{year_recurring_day}" /> 
+				</div>
 				{lang_date_recurring}:
-				<input id = "end_date" value = "{end_date_recurring}"> <br>
+				<input id = "recurring_ends"> <br>
 				{lang_date_never}
 				<input id = "date_never" type = "checkbox">  
 				</div> 
