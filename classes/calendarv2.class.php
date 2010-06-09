@@ -8,9 +8,6 @@
 // |                                                                           |
 // | Geeklog calendar library.                                                 |
 // +---------------------------------------------------------------------------+
-// | Much of this code is from Jim Wright jdlwright AT yahoo DOT com with      |
-// | minor customizations.                                                     |
-// |                                                                           |
 // | Copyright (C) 2000-2010 by the following authors:                         |
 // |                                                                           |
 // | Authors: Vlad Voicu       - vladvoic AT gmail DOT com                     |

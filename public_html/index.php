@@ -43,10 +43,12 @@ if (! in_array('calendarv2', $_PLUGINS)) {
     exit;
 }
 
-require_once $_CONF['path_system'] . 'classes/calendarv2.class.php';
-$A = $_REQUEST;
+require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';
+require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
+$A = $_GET;
 
-$calendar = new Calendarv2 (); 
+$calendar = new Calendarv2 ();
+$event = new Event($_POST); 
 $matrix = $calendar->c2_generateMatrix($A['month'] , $A['year']);
 $display = '';
 
