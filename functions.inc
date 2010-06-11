@@ -385,12 +385,12 @@ function calendarv2_display($matrix, $A)
     $page->set_var('display_today_events', 'today events');
     $form = calendarv2_form_display($A);
     $page->set_var('event_form', $form);
-    $minimal = calendarv2_minimal_display($matrix, $A);
+    $minimal = calendarv2_minimal_display($matrix, $A, $events);
     $page->set_var('minimal' , $minimal);
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 }
-
+ 
   /**
 * Creates the form page from the template
 *
@@ -434,12 +434,78 @@ function calendarv2_form_display($A)
         $page->set_var('default_start_date' , $date);
         $page->set_var('default_end_date' , $date);
         $page->set_var('default_start_time', '12:00 AM');
-        $page->set_var('default_end_time', '12:00 AM');
+        $page->set_var('default_end_time', '12:15 AM');
     }
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval; 
      
 }
+ /**
+ *
+ * returns events for a certain date if that date is submited or for
+ * the current date if not.
+ *
+ *
+ */   
+
+function calendarv2_day_events($A)
+{
+    global $_CAV2_CONF, $LANG_CALENDARV2_EVENT;
+    if (isset($A['day'])) {
+        $day = $A['day'];
+        $year = $A['year'];
+        $month = $A['month'];
+    }
+    else {
+        $now = time();
+        $day = date('d', $now);
+        $month = date('m', $now);
+        $year = date('Y', $now);
+    }
+    $events = calendarv2_get_events($A['day'], $A['month'], $A['year']);
+    $page = new Template(calendarv2_templatePath()); 
+    $page->set_file(array ('page' => 'something.thtml'));
+    for ($i = 1; $i <= 24; $i++) {
+        $page->set_var($i . '_hour' , date('h:i A' , mktime($i-1 , 0 ,0 ,0, 0 )));
+    }
+    $go_back_link = $_CAV2_CONF['site_url'] . '/index.php';
+    $prev = COM_createLink($LANG_CALENDARV2_EVENT['back'] , $go_back_link);
+    $page->set_var('go_back_link' , $prev);
+    if($events != NULL) {
+        foreach($events as $key => $event) {
+                $page->set_var (date('G',  $event['datestart']) . '_event', $event['title']);
+        }
+    }
+    $retval .= $page->finish($page->parse('output', 'page'));
+    return $retval; 
+}
+    
+         
+
+ 
+/**
+ *
+ * returns a list of events from a certain month and year
+ *
+ * Saves information to database from an event object
+ *
+ */   
+
+function calendarv2_get_events($day, $month, $year) 
+{     
+    global $_TABLES;
+    $start_date = mktime(0 , 0 , 0, $month , $day , $year);
+    $day += 1;
+    $end_date = mktime(0 , 0, 0, $month, $day, $year);
+    $sql = "select * from {$_TABLES['c2events']} where datestart >= {$start_date} AND dateend < {$end_date}";
+    $result = DB_query($sql);
+    $i = 0;
+    while($events[$i++] = DB_fetchArray($result)){};
+    if ($events[0] == NULL)
+        return NULL;
+    return $events;
+}
+
 
 /**
 * Creates the calendar from the template
@@ -452,7 +518,7 @@ function calendarv2_form_display($A)
 *
 */ 
 
-function calendarv2_minimal_display($matrix, $A)
+function calendarv2_minimal_display($matrix, $A, &$events)
 {
     
     global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH;
@@ -478,14 +544,15 @@ function calendarv2_minimal_display($matrix, $A)
     $page->set_file(array ('page' => 'month_view.thtml',
                             'each_element' => 'each_element.thtml',
                             'each_element2'=> 'each_element2.thtml'));
-    $link = $_CAV2_CONF['site_url'] . '/index.php?';
+    $link = $_CAV2_CONF['site_url'] . '/event.php?';
+    $link2 = $_CAV2_CONF['site_url'] . '/index.php?';
     $prev_month = $month - 1;
     if ($prev_month == 0) {
         $prev_year = -1;
         $prev_month = 12;
     }
     $prev_year += $year;
-    $prev = COM_createLink('<<', $link . 'year=' . $prev_year .'&'. 'month=' . $prev_month);
+    $prev = COM_createLink('<<', $link2 . 'year=' . $prev_year .'&'. 'month=' . $prev_month);
     $page->set_var('prev', $prev);
     
     $next_month = $month + 1;
@@ -494,7 +561,7 @@ function calendarv2_minimal_display($matrix, $A)
         $next_year =  1;
     }
     $next_year += $year;
-    $next = COM_createLink('>>', $link . 'year=' . $next_year . '&' . 'month=' . $next_month);
+    $next = COM_createLink('>>', $link2 . 'year=' . $next_year . '&' . 'month=' . $next_month);
     $page->set_var('next', $next);
     
     $month = intval($month);
@@ -505,8 +572,18 @@ function calendarv2_minimal_display($matrix, $A)
     for ($i = 1; $i <= 6; $i++) {
         for ($j = 0; $j < 7; $j++) {
             if(!empty($matrix[$i][$j])) {
+                $page->set_var('strong' ,'');
+                $page->set_var('end_strong', ''); 
                 $day_link = COM_createLink($matrix[$i][$j], $link . 'day=' . $matrix[$i][$j] . '&year=' . $year . '&month=' . $month);
                 $page->set_var('value', $day_link);
+                // I used $something to get only the values that are not NULL and to avoid
+                // double query
+                if (($something = calendarv2_get_events($matrix[$i][$j], $month, $year)) !== NULL) {
+                    $events[$matrix[$i][$j]] = $something; 
+                    $page->set_var('strong' ,'<strong>');
+                    $page->set_var('end_strong', '</strong>');
+                }
+                
                 $page->parse('line' . $i , 'each_element2', true);
             }
             else {

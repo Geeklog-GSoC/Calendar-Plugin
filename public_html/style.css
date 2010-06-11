@@ -1,7 +1,6 @@
 #calendar-container {
-	margin: auto;
+	height : 250px;
 }
-
 #calendar-content {
 	float: left;
 	width: 20%;
@@ -84,5 +83,12 @@
 #month_prev {
 	float: left;
 }
+
+#event-container {
+	float: left;
+}
+
+
+
 
 

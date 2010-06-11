@@ -45,14 +45,12 @@ CREATE TABLE {$_TABLES['calendarv2']} (
 
 $_SQL[] = "
 CREATE TABLE {$_TABLES['c2events']} (
-  eid varchar(20) NOT NULL default '',
-  pid varchar(20) default NULL,
+  eid int(10) unsigned  NOT NULL auto_increment,
+  pid int(10) unsigned NOT NULL default '0',
   title varchar(128) default NULL,
   description text,
-  datestart date default NULL,
-  dateend date default NULL,
-  timestart time default NULL,
-  timeend time default NULL,
+  datestart int(10) unsigned default NULL,
+  dateend int(10) unsigned default NULL,
   owner_id mediumint(8) unsigned NOT NULL default '1',
   group_id mediumint(8) unsigned NOT NULL default '1',
   perm_owner tinyint(1) unsigned NOT NULL default '3',

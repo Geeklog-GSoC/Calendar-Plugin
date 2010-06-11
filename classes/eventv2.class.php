@@ -35,19 +35,13 @@
 class Event {
     var $_creation_date;
     var $_event_title;
-    var $_event_start_date;
-    var $_event_end_date;
-    var $_event_start_day;
-    var $_event_start_year;
-    var $_event_start_month;
-    var $_event_end_day;
-    var $_event_end_year;
-    var $_event_end_month;
-    var $_event_start_hour;
-    var $_event_end_hour;
+    var $_event_start;
+    var $_event_end;
     var $_recurring;
     var $_location;
     var $_description;
+    var $_allday;
+    var $_valid;
 
     /**
     *
@@ -57,8 +51,8 @@ class Event {
     *
     */ 
 
-    function Event($A) {
-        $this->load_event_from_array($A);
+    function Event() {
+        $this->_valid = true;
     }
 
     /**
@@ -95,7 +89,11 @@ class Event {
         }
         list($hour, $garbage) = explode(':' , $matches[0]);
         list($minutes, $amorpm) = explode(' ', $garbage);
-        $time = array('hour' => $hour, 'minutes' => $minutes, 'amorpm' => $amorpm);
+ 
+        //Nice trick to transform 12 hour date format in 24 hour date format
+        list($hour,$minutes) = explode(':' , (date("H:i", strtotime("$hour:". "$minutes". "$amorpm"))));
+            
+        $time = array('hour' => $hour, 'minutes' => $minutes);
         return $time;
     }  
     /**
@@ -108,29 +106,57 @@ class Event {
     *
     */  
     function load_event_from_array($A) {
-        //var_dump($A);
         $this->_event_title = addslashes($A['event_title']);
         $date = $this->check_date($A['start_date']);
         if ($date) {
-            $this->_event_start_day = $date['day'];
-            $this->_event_start_month = $date['month'];
-            $this->_event_start_year = $date['month'];
+            $day = $date['day'];
+            $month = $date['month'];
+            $year = $date['year'];
         }
+ 
+        $start_time = $this->check_time($A['start_time']);
+        $this->_event_start = mktime($start_time['hour'], $start_time['minutes'], NULL, $day , $month, $year);
         $date = $this->check_date($A['end_date']);
         if ($date) {
-            $this->_event_end_day = $date['day'];
-            $this->_event_end_month = $date['month'];
-            $this->_event_end_year = $date['month'];
+            $day = $date['day'];
+            $month = $date['month'];
+            $year = $date['year'];
         }
-        //TODO make time from that info and add it in the database GMT
-        $start_time = $this->check_time($A['start_time']);
-        $end_time = $this->check_time($A['end_time']);
+        $end_time = $this->check_time($A['end_time']); 
+        $this->_event_end = mktime($end_time['hour'], $end_time['minutes'], NULL, $day , $month, $year);
+        if ($this->_event_start > $this->_event_end) {
+            $this->_valid = false;
+        }
+
+        
         //TODO depending on recurring_type get recurring events info
         $recurring_type = COM_applyFilter($A['recurring_type'], true);
         $this->_event_description = addslashes($A['event_description']);
         $this->_event_location = addslashes($A['event_location']);
-    }     
-
+        if ($A['all_day'] == 'on') {
+            $this->_allday = 1;
+        }
+        else { 
+            $this->_allday = 1;
+        }
+    } 
+    /**
+    *
+    * save to database
+    *
+    * Saves information to database from an event object
+    *
+    */   
+    
+    function save_to_database()
+    {
+        global $_TABLES;
+        if ($this->_valid == false)
+            return false;
+        $fields = 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday';
+        $elements = "'$this->_event_title' ," . "'$this->_event_description' ," . "'$this->_event_start'," . "'$this->_event_end'," . "'$this->_event_location'," . "'$this->_allday'";
+        DB_save($_TABLES['c2events'], $fields, $elements);
+    }
 }
 
 ?>

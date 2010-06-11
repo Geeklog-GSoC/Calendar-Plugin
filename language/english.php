@@ -100,6 +100,10 @@ $LANG_CALENDARV2_MONTH = array (
     '12' => 'December'
 );
 
+$LANG_CALENDARV2_EVENT = array (
+    'back' => '[ Go back to Calendar ]'
+); 
+
 $LANG_confignames['calendarv2'] = array(
     'folder' => 'Default plugin folder'
 );
