@@ -88,6 +88,13 @@
 	float: left;
 }
 
+.tdevent {
+	border-bottom: solid;
+	border-bottom-color: gray;
+	border-width: 1px;
+	width: 500px;
+}
+
 
 
 

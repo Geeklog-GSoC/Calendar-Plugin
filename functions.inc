@@ -377,10 +377,10 @@ function calendarv2_templatePath ($path = '')
 function calendarv2_display($matrix, $A)
 {
     
-    global $_CONF;
+    global $_CONF, $_CAV2_CONF;
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'main.thtml'));
-    $page->set_var('site_url', $_CONF['site_url']);
+    $page->set_var('site_url', $_CAV2_CONF['site_url']);
     $page->set_var('calendar', "test_text");
     $page->set_var('display_today_events', 'today events');
     $form = calendarv2_form_display($A);
@@ -394,6 +394,7 @@ function calendarv2_display($matrix, $A)
   /**
 * Creates the form page from the template
 *
+* @param    array   Post Variables.
 * @return   string  the page from template
 *
 */  
@@ -442,10 +443,11 @@ function calendarv2_form_display($A)
 }
  /**
  *
- * returns events for a certain date if that date is submited or for
- * the current date if not.
- *
- *
+ * Searches for events in the current day in the database. If there
+ * are events there are displayed at a certain hour.
+ * 
+ * @param   array   Post Variables
+ * @return  string  display from template
  */   
 
 function calendarv2_day_events($A)
@@ -461,10 +463,11 @@ function calendarv2_day_events($A)
         $day = date('d', $now);
         $month = date('m', $now);
         $year = date('Y', $now);
-    }
+    };
     $events = calendarv2_get_events($A['day'], $A['month'], $A['year']);
     $page = new Template(calendarv2_templatePath()); 
-    $page->set_file(array ('page' => 'something.thtml'));
+    $page->set_file(array ('page' => 'dayevent.thtml'));
+    $page->set_var('site_url', $_CAV2_CONF['site_url']); 
     for ($i = 1; $i <= 24; $i++) {
         $page->set_var($i . '_hour' , date('h:i A' , mktime($i-1 , 0 ,0 ,0, 0 )));
     }
@@ -473,7 +476,11 @@ function calendarv2_day_events($A)
     $page->set_var('go_back_link' , $prev);
     if($events != NULL) {
         foreach($events as $key => $event) {
-                $page->set_var (date('G',  $event['datestart']) . '_event', $event['title']);
+                $event_link = $_CAV2_CONF['site_url'] . '/event.php?eid=' . $event['eid']; 
+                $event_start = date('h:i A', $event['datestart']);
+                $event_end =date('h:i A', $event['dateend']);
+                $new_event = COM_createLink($event_start . ' - ' . $event_end . $event['title'] . ' ', $event_link);
+                $page->set_var(date('G',  $event['datestart']) + 1 . '_event', $new_event);
         }
     }
     $retval .= $page->finish($page->parse('output', 'page'));
@@ -481,13 +488,10 @@ function calendarv2_day_events($A)
 }
     
          
-
- 
 /**
  *
  * returns a list of events from a certain month and year
  *
- * Saves information to database from an event object
  *
  */   
 

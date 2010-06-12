@@ -44,6 +44,10 @@ if (! in_array('calendarv2', $_PLUGINS)) {
 }
 
 $A = $_GET;
+// Check if we need to display a single event.
+if (isset($A['eid'])) {
+    $page = calendarv2_single_event($eid);
+}
 if (is_array ($A)) {
     $page = calendarv2_day_events($_GET);
 }
