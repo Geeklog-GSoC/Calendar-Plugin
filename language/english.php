@@ -100,6 +100,15 @@ $LANG_CALENDARV2_MONTH = array (
     '12' => 'December'
 );
 
+$LANG_CALENDARV2_SINGLE = array (
+    'event_title' => 'Event Title:',
+    'when' => 'When:',
+    'where' => 'Where:',
+    'description' => 'Description:',
+    'lang_modify' => 'Modify',
+    'lang_delete' => 'Delete'
+);
+
 $LANG_CALENDARV2_EVENT = array (
     'back' => '[ Go back to Calendar ]'
 ); 

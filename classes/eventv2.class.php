@@ -33,6 +33,7 @@
 // the new calendar plugin. Developed During GSoC 2010
 
 class Event {
+    var $_eid;
     var $_creation_date;
     var $_event_title;
     var $_event_start;
@@ -54,6 +55,7 @@ class Event {
     function Event() {
         $this->_valid = true;
     }
+
 
     /**
     *
@@ -157,6 +159,62 @@ class Event {
         $elements = "'$this->_event_title' ," . "'$this->_event_description' ," . "'$this->_event_start'," . "'$this->_event_end'," . "'$this->_event_location'," . "'$this->_allday'";
         DB_save($_TABLES['c2events'], $fields, $elements);
     }
+
+    /**
+    *
+    *
+    * Modifies the information of an event, based on his eid.
+    *
+    */    
+
+    function modify_event($eid) 
+    {
+    }
+
+    /**
+    *
+    * Fils and event with information from database based on an eid.
+    *
+    * Modifies the information of an event, based on his eid.
+    *
+    */    
+
+    function get_event($eid) 
+    {
+        global $_TABLES;
+        //Eid comes from $_POST so it must be verified
+        if (is_numeric($eid)) {
+            $sql = "select * from {$_TABLES['c2events']} where eid = {$eid}";
+            $result = DB_query($sql);
+            $event = DB_fetchArray($result);
+            $this->_event_title = $event['title'];
+            $this->_event_start = $event['datestart'];     
+            $this->_event_end = $event['dateend'];
+            $this->_location = $event['location'];
+            $this->_description = $event['description'];
+            $this->_allday = $event['allday'];
+            $this->_valid = true; 
+        }
+    }
+
+    /**
+    *
+    * Returns a string with all the information needed for an event
+    * 
+    *
+    */     
+
+    function get_details()
+    {
+        $A['title'] = $this->_event_title;
+        $A['datestart'] = $this->_event_start;
+        $A['dateend'] = $this->_event_end;
+        $A['location'] = $this->_location;
+        $A['description'] = $this->_description;
+        $A['allday'] = $this->_allday;
+        return $A;
+    }
+        
 }
 
 ?>

@@ -43,13 +43,33 @@ if (! in_array('calendarv2', $_PLUGINS)) {
     exit;
 }
 
+require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php'; 
+
 $A = $_GET;
-// Check if we need to display a single event.
-if (isset($A['eid'])) {
-    $page = calendarv2_single_event($eid);
+$B = $_POST;
+// Check if mofication of an event or deletion is asked by a $_POST variable
+if (empty($_POST)) {
+    // Check if we need to display a single event.
+    if (isset($A['eid'])) {
+        $event = new Event();
+        $event->get_event($A['eid']);
+        $page = calendarv2_single_event($event);
+    }
+    else {
+        if (is_array ($A)) {
+            $page = calendarv2_day_events($_GET);
+        }
+    }
 }
-if (is_array ($A)) {
-    $page = calendarv2_day_events($_GET);
+else {
+    if (isset($B['modify'])) {
+        $event = new Event();
+        $event->get_event($eid);
+        $page = calendarv2_modify_event($event);
+        }
+    if (isset($B['delete'])) {
+        $page = calendarv2_delete_event($B['eid']);
+    }
 }
 
 

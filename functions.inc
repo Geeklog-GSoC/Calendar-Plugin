@@ -600,6 +600,57 @@ function calendarv2_minimal_display($matrix, $A, &$events)
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 }
+
+/**
+* Creates a page with a single event 
+*
+* @param    array  $details     an event object
+*
+* @return   string      proper page made from template
+*
+*/  
+
+function calendarv2_single_event($event)
+{
+    $details = $event->get_details();
+    global $CAV2_CONF, $LANG_CALENDARV2_SINGLE;
+    // start creating the page based on event details
+    $page = new Template(calendarv2_templatePath());
+    $page->set_file(array ('page' => 'single_event.thtml')); 
+    $page->set_var('site_url', $CAV2_CONF['site_url']);
+    $lang = $LANG_CALENDARV2_SINGLE;
+    foreach ($lang as $key => $value) {
+        $page->set_var($key, $value);
+    }
+    $page->set_var('event_title_value' , $details['title']);
+    $page->set_var('when_content' , date('h:i A', $details['datestart']) . ' - ' . date('h:i A', $details['dateend']));
+    $page->set_var('where_content' , $details['location']);
+    $page->set_var('description_content' , $details['description']);
+    $page->set_var('hidden_eid' , $details['eid']);
+    $retval .= $page->finish($page->parse('output', 'page'));
+    return $retval;
+}
+
+function calendarv2_get_time($eid)
+{
+    global $_TABLES;
+    $sql = "select datestart, dateend from {$_TABLES['c2events']} where eid = {$eid}";
+    $result = DB_query($sql);
+    $A = DB_fetchArray($result);
+    $A['day'] = date('d', $A['datestart']);
+    $A['month'] = date('m', $A['datestart']);
+    $A['year'] = date('Y', $A['datestart']);
+    return $A;
+}
+    
+
+
+function calendarv2_modify_event ($event)
+{
+    $details = $event->get_details();    
+    $result = calendarv2_form_display($A);
+    return $result;
+}
         
 
 
