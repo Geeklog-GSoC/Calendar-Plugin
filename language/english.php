@@ -82,7 +82,8 @@ $LANG_CALENDARV2_FORM = array (
     'lang_which_day' => 'Which day',
     'lang_date_recurring' => 'Recuring ends',
     'lang_date_never' => 'Never',
-    'lang_every' => 'Every'
+    'lang_every' => 'Every',
+    'lang_modify_msg' => 'Modify Event'
 );
 
 $LANG_CALENDARV2_MONTH = array (
@@ -106,7 +107,8 @@ $LANG_CALENDARV2_SINGLE = array (
     'where' => 'Where:',
     'description' => 'Description:',
     'lang_modify' => 'Modify',
-    'lang_delete' => 'Delete'
+    'lang_delete' => 'Delete',
+    'go_back' => 'Go back'
 );
 
 $LANG_CALENDARV2_EVENT = array (

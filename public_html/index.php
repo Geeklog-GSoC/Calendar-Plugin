@@ -46,15 +46,16 @@ if (! in_array('calendarv2', $_PLUGINS)) {
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
 $A = $_GET;
+$display = '';
 
 $calendar = new Calendarv2 ();
 $event = new Event();
 if (isset($_POST['submit'])) {
     $event->load_event_from_array($_POST);
     $event->save_to_database();
+    $display .= COM_showMessageText("You have succesfully added an event", "Alert");
 }
 $matrix = $calendar->c2_generateMatrix($A['month'] , $A['year']);
-$display = '';
 
 
 // MAIN

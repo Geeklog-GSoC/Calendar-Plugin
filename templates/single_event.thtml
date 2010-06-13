@@ -1,4 +1,5 @@
-<link href="{site_url}/style.css" rel="stylesheet" type="text/css"/> 
+<link href="{site_url}/style.css" rel="stylesheet" type="text/css"/>
+{go_back_link} 
 <dl>
 	<dt> {event_title} </dt> 
 	<dd> {event_title_value} </dd>

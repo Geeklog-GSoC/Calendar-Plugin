@@ -403,22 +403,13 @@ function calendarv2_form_display($A)
 {
     
     global $_CONF, $LANG_CALENDARV2_FORM;
-    if(isset($A['year'])) {
-        $year = $A['year'];
-    }
-    if(isset($A['month'])) {
-        $month = $A['month'];
-    }
-    if(isset($A['day'])) {
-        $day = $A['day'];
-    }
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'form.thtml'));
     $lang = $LANG_CALENDARV2_FORM;
     foreach ($lang as $key => $value) {
-        $page->set_var($key, $value);
+            $page->set_var($key, $value);
     }
-    if(empty($day)) {
+    if(empty($A)) {
         $date = date('m/d/Y');
         $start_minute = date('h:i A');
         $day_from_month = date('d');
@@ -431,11 +422,13 @@ function calendarv2_form_display($A)
         $page->set_var('default_end_time', $start_minute);
     }
     else {
-        $date = date('m/d/Y' , mktime(0, 0, 0, intval($month), intval($day), intval($year)));
+        $date = date('m/d/Y' , mktime(0, 0, 0, intval($A['month']), intval($A['day']), intval($A['year'])));
         $page->set_var('default_start_date' , $date);
         $page->set_var('default_end_date' , $date);
-        $page->set_var('default_start_time', '12:00 AM');
-        $page->set_var('default_end_time', '12:15 AM');
+        $date = date('h:i A', mktime($A['hour'], $A['minute'], 0, 0, 0, 0));
+        $page->set_var('default_start_time', $date);
+        $date = date('h:i A', mktime($A['hour'], $A['minute'] + 15, 0, 0, 0, 0));
+        $page->set_var('default_end_time', $date);
     }
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval; 
@@ -476,11 +469,13 @@ function calendarv2_day_events($A)
     $page->set_var('go_back_link' , $prev);
     if($events != NULL) {
         foreach($events as $key => $event) {
-                $event_link = $_CAV2_CONF['site_url'] . '/event.php?eid=' . $event['eid']; 
-                $event_start = date('h:i A', $event['datestart']);
-                $event_end =date('h:i A', $event['dateend']);
-                $new_event = COM_createLink($event_start . ' - ' . $event_end . $event['title'] . ' ', $event_link);
-                $page->set_var(date('G',  $event['datestart']) + 1 . '_event', $new_event);
+                if ($event) {
+                    $event_link = $_CAV2_CONF['site_url'] . '/event.php?eid=' . $event['eid']; 
+                    $event_start = date('h:i A', $event['datestart']);
+                    $event_end =date('h:i A', $event['dateend']);
+                    $new_event = COM_createLink($event_start . ' - ' . $event_end .' '. $event['title'], $event_link);
+                    $page->set_var(date('G',  $event['datestart']) + 1 . '_event', $new_event);
+                }
         }
     }
     $retval .= $page->finish($page->parse('output', 'page'));
@@ -504,7 +499,7 @@ function calendarv2_get_events($day, $month, $year)
     $sql = "select * from {$_TABLES['c2events']} where datestart >= {$start_date} AND dateend < {$end_date}";
     $result = DB_query($sql);
     $i = 0;
-    while($events[$i++] = DB_fetchArray($result)){};
+    while ($events[$i++] = DB_fetchArray($result)){};
     if ($events[0] == NULL)
         return NULL;
     return $events;
@@ -612,6 +607,7 @@ function calendarv2_minimal_display($matrix, $A, &$events)
 
 function calendarv2_single_event($event)
 {
+    global $_CAV2_CONF;
     $details = $event->get_details();
     global $CAV2_CONF, $LANG_CALENDARV2_SINGLE;
     // start creating the page based on event details
@@ -623,33 +619,51 @@ function calendarv2_single_event($event)
         $page->set_var($key, $value);
     }
     $page->set_var('event_title_value' , $details['title']);
-    $page->set_var('when_content' , date('h:i A', $details['datestart']) . ' - ' . date('h:i A', $details['dateend']));
+    $page->set_var('when_content' , date('h:i A', $details['datestart']) . ' - ' . date('h:i A', $details['dateend']) . ' ');
     $page->set_var('where_content' , $details['location']);
     $page->set_var('description_content' , $details['description']);
     $page->set_var('hidden_eid' , $details['eid']);
+    list($day, $month, $year) = explode ('/' , date('d/m/Y' , $details['datestart']));
+    $link = COM_createLink($lang['go_back'], $_CAV2_CONF['site_url'] . "/event.php?day=$day&month=$month&year=$year");
+    $page->set_var('go_back_link' , $link); 
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 }
 
-function calendarv2_get_time($eid)
-{
-    global $_TABLES;
-    $sql = "select datestart, dateend from {$_TABLES['c2events']} where eid = {$eid}";
-    $result = DB_query($sql);
-    $A = DB_fetchArray($result);
-    $A['day'] = date('d', $A['datestart']);
-    $A['month'] = date('m', $A['datestart']);
-    $A['year'] = date('Y', $A['datestart']);
-    return $A;
-}
-    
+/**
+* Gets details about the current event then generates a page from 
+* a template
+*
+* @param    array  $details     an event object
+*
+* @return   string      proper page made from template
+*
+*/
 
-
-function calendarv2_modify_event ($event)
+function calendarv2_modify_event($event)
 {
-    $details = $event->get_details();    
-    $result = calendarv2_form_display($A);
-    return $result;
+    global $LANG_CALENDARV2_FORM;
+    $lang = $LANG_CALENDARV2_FORM;
+    $details = $event->get_details();
+    $details['start_date'] = date('m/d/Y', $details['datestart']);
+    $details['start_time'] = date('h:i A', $details['datestart']);
+    $details['end_date'] = date('m/d/Y', $details['dateend']);
+    $details['end_time'] = date('h:i A', $details['dateend']);
+    $page = new Template(calendarv2_templatePath());
+    $page->set_file(array ('page' => 'modify_instance.thtml'));
+    foreach ($lang as $key => $value) {
+            $page->set_var($key, $value);
+    }  
+    $page->set_var('event_title', $details['title']);
+    $page->set_var('event_description', $details['description']);
+    $page->set_var('event_location', $details['location']);
+    $page->set_var('default_start_date' , $details['start_date']);
+    $page->set_var('default_end_date' , $details['end_date']);
+    $page->set_var('default_start_time' , $details['start_time']);
+    $page->set_var('default_end_time' , $details['end_time']);
+    $page->set_var('modify_eid' , $details['eid']);
+    $retval .= $page->finish($page->parse('output', 'page')); 
+    return $retval;
 }
         
 

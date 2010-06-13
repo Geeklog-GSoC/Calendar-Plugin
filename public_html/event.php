@@ -62,13 +62,20 @@ if (empty($_POST)) {
     }
 }
 else {
+    $event = new Event();
     if (isset($B['modify'])) {
-        $event = new Event();
-        $event->get_event($eid);
+        $event->get_event($B['eid']);
+        // Creates a template for an single instance modification
         $page = calendarv2_modify_event($event);
         }
     if (isset($B['delete'])) {
-        $page = calendarv2_delete_event($B['eid']);
+        $event->delete($B['eid']);
+        $page .= COM_refresh("index.php");
+        $page .= COM_showMessageText('You have succesfully deleted an event', 'Alert');
+    }
+    if (isset($B['modify_eid'])) {
+        $event->modify($B);
+        $page = calendarv2_single_event($event);
     }
 }
 

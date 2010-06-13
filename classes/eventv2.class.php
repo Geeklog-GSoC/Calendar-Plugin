@@ -130,7 +130,6 @@ class Event {
             $this->_valid = false;
         }
 
-        
         //TODO depending on recurring_type get recurring events info
         $recurring_type = COM_applyFilter($A['recurring_type'], true);
         $this->_event_description = addslashes($A['event_description']);
@@ -159,16 +158,68 @@ class Event {
         $elements = "'$this->_event_title' ," . "'$this->_event_description' ," . "'$this->_event_start'," . "'$this->_event_end'," . "'$this->_event_location'," . "'$this->_allday'";
         DB_save($_TABLES['c2events'], $fields, $elements);
     }
+    /**
+    *
+    * removes an element from database
+    *
+    * Saves information to database from an event object
+    *
+    */   
+    
+    function remove_from_database($eid)
+    {
+        global $_TABLES;
+        $sql = "delete from {$_TABLES['c2events']} where eid = {$eid}";
+        DB_query($sql);
+    }
+    
+    /**
+    *
+    * update database
+    *
+    * Updates information to database from an event object
+    *
+    */   
+    
+    function update_to_database($eid)
+    {
+        global $_TABLES;
+        if ($this->_valid == false)
+            return false;
+        $fields = "title = '$this->_event_title' ," . "description = '$this->_event_description',";
+        $fields .= "datestart = '$this->_event_start',";
+        $fields .= "dateend = '$this->_event_end',";
+        $fields .= "location = '$this->_event_location',";
+        $fields .= "allday = '$this->_allday'";
+        $sql = "update {$_TABLES['c2events']} set {$fields} where eid = {$eid}";
+        DB_query($sql);
+    }
 
     /**
     *
     *
     * Modifies the information of an event, based on his eid.
+    * And saves the new event in the database
     *
     */    
 
-    function modify_event($eid) 
+    function modify($P) 
     {
+        $this->load_event_from_array($P);
+        $this->update_to_database($P['modify_eid']);
+    }
+    
+    /**
+    *
+    * Deletes an event based on his EID
+    * 
+    * 
+    *
+    */    
+
+    function delete($eid) 
+    {
+        $this->remove_from_database($eid);
     }
 
     /**
@@ -193,6 +244,7 @@ class Event {
             $this->_location = $event['location'];
             $this->_description = $event['description'];
             $this->_allday = $event['allday'];
+            $this->_eid = $eid;
             $this->_valid = true; 
         }
     }
@@ -212,6 +264,7 @@ class Event {
         $A['location'] = $this->_location;
         $A['description'] = $this->_description;
         $A['allday'] = $this->_allday;
+        $A['eid'] = $this->_eid;
         return $A;
     }
         
