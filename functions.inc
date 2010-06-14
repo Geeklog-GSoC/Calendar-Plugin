@@ -409,27 +409,16 @@ function calendarv2_form_display($A)
     foreach ($lang as $key => $value) {
             $page->set_var($key, $value);
     }
-    if(empty($A)) {
-        $date = date('m/d/Y');
-        $start_minute = date('h:i A');
-        $day_from_month = date('d');
-        $day_from_year = date('m/d/Y');
-        $page->set_var('month_recurring_day' , intval($day_from_month));
-        $page->set_var('year_recurring_day' , $day_from_year);
-        $page->set_var('default_start_date', $date);
-        $page->set_var('default_end_date' , $date);
-        $page->set_var('default_start_time', $start_minute);
-        $page->set_var('default_end_time', $start_minute);
-    }
-    else {
-        $date = date('m/d/Y' , mktime(0, 0, 0, intval($A['month']), intval($A['day']), intval($A['year'])));
-        $page->set_var('default_start_date' , $date);
-        $page->set_var('default_end_date' , $date);
-        $date = date('h:i A', mktime($A['hour'], $A['minute'], 0, 0, 0, 0));
-        $page->set_var('default_start_time', $date);
-        $date = date('h:i A', mktime($A['hour'], $A['minute'] + 15, 0, 0, 0, 0));
-        $page->set_var('default_end_time', $date);
-    }
+    $date = new DateTime();
+    if(!empty($A)) {
+        $date->setDate(intval($A['year']), intval($A['month']), 1);
+    }    
+    $page->set_var('month_recurring_day' , $date->format('d'));
+    $page->set_var('year_recurring_day' , $date->format('m/d/Y'));
+    $page->set_var('default_start_date', $date->format('m/d/Y'));
+    $page->set_var('default_end_date' , $date->format('m/d/Y'));
+    $page->set_var('default_start_time', $date->format('h:i A'));
+    $page->set_var('default_end_time', $date->format('h:i A')); 
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval; 
      
@@ -446,22 +435,14 @@ function calendarv2_form_display($A)
 function calendarv2_day_events($A)
 {
     global $_CAV2_CONF, $LANG_CALENDARV2_EVENT;
-    if (isset($A['day'])) {
-        $day = $A['day'];
-        $year = $A['year'];
-        $month = $A['month'];
-    }
-    else {
-        $now = time();
-        $day = date('d', $now);
-        $month = date('m', $now);
-        $year = date('Y', $now);
-    };
-    $events = calendarv2_get_events($A['day'], $A['month'], $A['year']);
+    $date = new DateTime();
+    $date->setDate($A['year'] , $A['month'], $A['day']);
+    $events = calendarv2_get_events($date);
     $page = new Template(calendarv2_templatePath()); 
     $page->set_file(array ('page' => 'dayevent.thtml'));
     $page->set_var('site_url', $_CAV2_CONF['site_url']); 
     for ($i = 1; $i <= 24; $i++) {
+        // No DateTime object needed for this display trick
         $page->set_var($i . '_hour' , date('h:i A' , mktime($i-1 , 0 ,0 ,0, 0 )));
     }
     $go_back_link = $_CAV2_CONF['site_url'] . '/index.php';
@@ -470,11 +451,13 @@ function calendarv2_day_events($A)
     if($events != NULL) {
         foreach($events as $key => $event) {
                 if ($event) {
-                    $event_link = $_CAV2_CONF['site_url'] . '/event.php?eid=' . $event['eid']; 
-                    $event_start = date('h:i A', $event['datestart']);
-                    $event_end =date('h:i A', $event['dateend']);
-                    $new_event = COM_createLink($event_start . ' - ' . $event_end .' '. $event['title'], $event_link);
-                    $page->set_var(date('G',  $event['datestart']) + 1 . '_event', $new_event);
+                    $event_link = $_CAV2_CONF['site_url'] . '/event.php?eid=' . $event['eid'];
+                    $date_start = new DateTime();
+                    $date_ends = new DateTime();
+                    $date_start->setTimestamp($event['datestart']);
+                    $date_ends->setTimestamp($event['dateend']); 
+                    $new_event = COM_createLink($date_start->format('h:i A') . ' - ' . $date_ends->format('h:i A') .' '. $event['title'], $event_link);
+                    $page->set_var($date_start->format('G') + 1 . '_event', $new_event);
                 }
         }
     }
@@ -490,19 +473,18 @@ function calendarv2_day_events($A)
  *
  */   
 
-function calendarv2_get_events($day, $month, $year) 
+function calendarv2_get_events(DateTime $date) 
 {     
     global $_TABLES;
-    $start_date = mktime(0 , 0 , 0, $month , $day , $year);
-    $day += 1;
-    $end_date = mktime(0 , 0, 0, $month, $day, $year);
-    $sql = "select * from {$_TABLES['c2events']} where datestart >= {$start_date} AND dateend < {$end_date}";
+    $end_date = clone($date);
+    $end_date->modify("+1 day");
+    $sql = "select * from {$_TABLES['c2events']} where datestart >= {$date->getTimestamp()} AND dateend < {$end_date->getTimestamp()}";
     $result = DB_query($sql);
     $i = 0;
     while ($events[$i++] = DB_fetchArray($result)){};
     if ($events[0] == NULL)
         return NULL;
-    return $events;
+    return $events; 
 }
 
 
@@ -520,24 +502,11 @@ function calendarv2_get_events($day, $month, $year)
 function calendarv2_minimal_display($matrix, $A, &$events)
 {
     
+    $date = new DateTime();
+    $generate = new DateTime();
     global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH;
-    if (isset($A['year'])) {
-        $year = $A['year'];
-    }
-    else {
-        $year = date('Y', time());
-    }
-    if (isset($A['month'])) {
-        $month = $A['month'];
-    }
-    else {
-        $month = date('m', time());
-    }
-    if (isset($A['day'])) {
-        $day = $A['day'];
-    }
-    else {
-        $day = date('d' , time());
+    if (isset($A)) {
+        $generate->setDate($A['year'], $A['month'], 1);
     }
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'month_view.thtml',
@@ -545,39 +514,39 @@ function calendarv2_minimal_display($matrix, $A, &$events)
                             'each_element2'=> 'each_element2.thtml'));
     $link = $_CAV2_CONF['site_url'] . '/event.php?';
     $link2 = $_CAV2_CONF['site_url'] . '/index.php?';
-    $prev_month = $month - 1;
+    $prev_month = $generate->format('m') - 1;
     if ($prev_month == 0) {
         $prev_year = -1;
         $prev_month = 12;
     }
-    $prev_year += $year;
+    $prev_year += $generate->format('Y');
     $prev = COM_createLink('<<', $link2 . 'year=' . $prev_year .'&'. 'month=' . $prev_month);
     $page->set_var('prev', $prev);
     
-    $next_month = $month + 1;
+    $next_month = $generate->format('m') + 1;
     if ($next_month == 13) {
         $next_month = 1;
         $next_year =  1;
     }
-    $next_year += $year;
+    $next_year += $generate->format('Y');
     $next = COM_createLink('>>', $link2 . 'year=' . $next_year . '&' . 'month=' . $next_month);
     $page->set_var('next', $next);
     
-    $month = intval($month);
-    $month_name = $LANG_CALENDARV2_MONTH[$month];
+    $month_name = $LANG_CALENDARV2_MONTH[intval($generate->format("m"))];
     $page->set_var('month', $month_name);
-    $page->set_var('year' , $year);
+    $page->set_var('year' , $generate->format('Y'));
     $i = 0;
     for ($i = 1; $i <= 6; $i++) {
         for ($j = 0; $j < 7; $j++) {
             if(!empty($matrix[$i][$j])) {
                 $page->set_var('strong' ,'');
                 $page->set_var('end_strong', ''); 
-                $day_link = COM_createLink($matrix[$i][$j], $link . 'day=' . $matrix[$i][$j] . '&year=' . $year . '&month=' . $month);
+                $day_link = COM_createLink($matrix[$i][$j], $link . 'day=' . $matrix[$i][$j] . '&year=' . $generate->format('Y') . '&month=' . $generate->format('m'));
                 $page->set_var('value', $day_link);
                 // I used $something to get only the values that are not NULL and to avoid
                 // double query
-                if (($something = calendarv2_get_events($matrix[$i][$j], $month, $year)) !== NULL) {
+                $date->setDate($generate->format("Y"), $generate->format("m"), $matrix[$i][$j]);
+                if (($something = calendarv2_get_events($date)) !== NULL) {
                     $events[$matrix[$i][$j]] = $something; 
                     $page->set_var('strong' ,'<strong>');
                     $page->set_var('end_strong', '</strong>');
@@ -645,6 +614,10 @@ function calendarv2_modify_event($event)
     global $LANG_CALENDARV2_FORM;
     $lang = $LANG_CALENDARV2_FORM;
     $details = $event->get_details();
+    $date_end  = new DateTime();
+    $date_start = new DateTime();
+    $date_start->setTimestamp($details['datestart']);
+    $date_end->setTimestamp($details['dateend']);
     $details['start_date'] = date('m/d/Y', $details['datestart']);
     $details['start_time'] = date('h:i A', $details['datestart']);
     $details['end_date'] = date('m/d/Y', $details['dateend']);
@@ -657,15 +630,12 @@ function calendarv2_modify_event($event)
     $page->set_var('event_title', $details['title']);
     $page->set_var('event_description', $details['description']);
     $page->set_var('event_location', $details['location']);
-    $page->set_var('default_start_date' , $details['start_date']);
-    $page->set_var('default_end_date' , $details['end_date']);
-    $page->set_var('default_start_time' , $details['start_time']);
-    $page->set_var('default_end_time' , $details['end_time']);
+    $page->set_var('default_start_date' , $date_start->format('m/d/Y'));
+    $page->set_var('default_end_date' , $date_end->format('m/d/Y'));
+    $page->set_var('default_start_time' , $date_start->format('h:i A'));
+    $page->set_var('default_end_time' , $date_end->format('h:i A'));
     $page->set_var('modify_eid' , $details['eid']);
     $retval .= $page->finish($page->parse('output', 'page')); 
     return $retval;
 }
-        
-
-
 ?>

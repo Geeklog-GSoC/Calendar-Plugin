@@ -45,7 +45,7 @@ class Calendarv2 {
     *
     */
 
-    function Calendarv2() {
+    public function __construct() {
         $this->_creation_date = getdate(time());
     }
 
@@ -56,7 +56,7 @@ class Calendarv2 {
     * @param    int     $year   the year number
     * @return   array   
     */ 
-    function c2_generateMatrix($month, $year) {
+     public function c2_generateMatrix($month, $year) {
         $start_date = mktime(0,0,0, $month, 1, $year);
         $days_in_month = date('t', $start_date);
         $first_day = date('w', $start_date);

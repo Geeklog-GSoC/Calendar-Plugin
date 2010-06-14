@@ -33,16 +33,16 @@
 // the new calendar plugin. Developed During GSoC 2010
 
 class Event {
-    var $_eid;
-    var $_creation_date;
-    var $_event_title;
-    var $_event_start;
-    var $_event_end;
-    var $_recurring;
-    var $_location;
-    var $_description;
-    var $_allday;
-    var $_valid;
+    private $_eid;
+    private $_creation_date;
+    private $_event_title;
+    private $_event_start;
+    private $_event_end;
+    private $_recurring;
+    private $_location;
+    private $_description;
+    private $_allday;
+    private $_valid;
 
     /**
     *
@@ -52,8 +52,9 @@ class Event {
     *
     */ 
 
-    function Event() {
+    public function __construct() {
         $this->_valid = true;
+        $this->_creation_date = time();
     }
 
 
@@ -66,7 +67,7 @@ class Event {
     * returned in GMT format for database storage.
     *
     */
-    function check_date($date_to_check) {
+    private function check_date($date_to_check) {
         preg_match('/[0-9]{2}\/[0-9]{2}\/[0-9]{4}/' , $date_to_check, $matches);
         if (empty($matches)) {
             return false;
@@ -84,7 +85,7 @@ class Event {
     *
     */
 
-    function check_time($time_to_check) {
+    private function check_time($time_to_check) {
         preg_match('/[0-9]{2}:[0-9]{2} (PM|AM)/' , $time_to_check, $matches);
         if (empty($matches)) {
             return false;
@@ -107,7 +108,7 @@ class Event {
     * to the database
     *
     */  
-    function load_event_from_array($A) {
+    public function load_event_from_array($A) {
         $this->_event_title = addslashes($A['event_title']);
         $date = $this->check_date($A['start_date']);
         if ($date) {
@@ -149,7 +150,7 @@ class Event {
     *
     */   
     
-    function save_to_database()
+    public function save_to_database()
     {
         global $_TABLES;
         if ($this->_valid == false)
@@ -166,7 +167,7 @@ class Event {
     *
     */   
     
-    function remove_from_database($eid)
+    public function remove_from_database($eid)
     {
         global $_TABLES;
         $sql = "delete from {$_TABLES['c2events']} where eid = {$eid}";
@@ -181,7 +182,7 @@ class Event {
     *
     */   
     
-    function update_to_database($eid)
+    public function update_to_database($eid)
     {
         global $_TABLES;
         if ($this->_valid == false)
@@ -203,7 +204,7 @@ class Event {
     *
     */    
 
-    function modify($P) 
+    public function modify($P) 
     {
         $this->load_event_from_array($P);
         $this->update_to_database($P['modify_eid']);
@@ -217,7 +218,7 @@ class Event {
     *
     */    
 
-    function delete($eid) 
+    public function delete($eid) 
     {
         $this->remove_from_database($eid);
     }
@@ -230,7 +231,7 @@ class Event {
     *
     */    
 
-    function get_event($eid) 
+    public function get_event($eid) 
     {
         global $_TABLES;
         //Eid comes from $_POST so it must be verified
@@ -256,7 +257,7 @@ class Event {
     *
     */     
 
-    function get_details()
+    public function get_details()
     {
         $A['title'] = $this->_event_title;
         $A['datestart'] = $this->_event_start;
@@ -268,6 +269,15 @@ class Event {
         return $A;
     }
         
+}                               
+
+
+class Aevents {
+    private $events;         
+    public function __construct() {
+    }
+    public function getElements(DateTime $date_start, DateTime $date_end) {
+    }
 }
 
 ?>
