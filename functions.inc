@@ -324,7 +324,7 @@ function plugin_autouninstall_calendarv2()
         /* give the full name of the group, as in the db */
         'groups' => array('calendarv2 Admin'),
         /* give the full name of the feature, as in the db */
-        'features' => array('calendarv2.admin'),
+        'features' => array('calendarv2.admin, calendarv2.moderate, calendarv2.submit'),
         /* give the full name of the block, including 'phpblock_', etc */
         'php_blocks' => array(),
         /* give all vars with their name */
@@ -437,7 +437,7 @@ function calendarv2_day_events($A)
     global $_CAV2_CONF, $LANG_CALENDARV2_EVENT;
     $date = new DateTime();
     $date->setDate($A['year'] , $A['month'], $A['day']);
-    $events = calendarv2_get_events($date);
+    $events = calendarv2_get_day_events($date);
     $page = new Template(calendarv2_templatePath()); 
     $page->set_file(array ('page' => 'dayevent.thtml'));
     $page->set_var('site_url', $_CAV2_CONF['site_url']); 
@@ -473,18 +473,15 @@ function calendarv2_day_events($A)
  *
  */   
 
-function calendarv2_get_events(DateTime $date) 
+function calendarv2_get_day_events(DateTime $date) 
 {     
-    global $_TABLES;
+    global $_TABLES;    
+    $a = new Aevents;
     $end_date = clone($date);
     $end_date->modify("+1 day");
-    $sql = "select * from {$_TABLES['c2events']} where datestart >= {$date->getTimestamp()} AND dateend < {$end_date->getTimestamp()}";
-    $result = DB_query($sql);
-    $i = 0;
-    while ($events[$i++] = DB_fetchArray($result)){};
-    if ($events[0] == NULL)
-        return NULL;
-    return $events; 
+    $a->getElements($date, $end_date);
+    $eve = $a->getElementsArray();
+    return $eve; 
 }
 
 
@@ -505,7 +502,7 @@ function calendarv2_minimal_display($matrix, $A, &$events)
     $date = new DateTime();
     $generate = new DateTime();
     global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH;
-    if (isset($A)) {
+    if (isset($A['month']) && isset($A['year'])) {
         $generate->setDate($A['year'], $A['month'], 1);
     }
     $page = new Template(calendarv2_templatePath());
@@ -546,7 +543,7 @@ function calendarv2_minimal_display($matrix, $A, &$events)
                 // I used $something to get only the values that are not NULL and to avoid
                 // double query
                 $date->setDate($generate->format("Y"), $generate->format("m"), $matrix[$i][$j]);
-                if (($something = calendarv2_get_events($date)) !== NULL) {
+                if (($something = calendarv2_get_day_events($date)) !== NULL) {
                     $events[$matrix[$i][$j]] = $something; 
                     $page->set_var('strong' ,'<strong>');
                     $page->set_var('end_strong', '</strong>');
@@ -638,4 +635,26 @@ function calendarv2_modify_event($event)
     $retval .= $page->finish($page->parse('output', 'page')); 
     return $retval;
 }
+
+ /**
+* Gets an array with all the calendars an user has 
+*
+* @param    int  $uid   USER id
+*
+* @return   array   calendar id's
+*
+*/
+
+function calendarv2_get_calendars ($uid)
+{
+    global $_TABLES;
+    $sql = "select cid from {$_TABLES['calendarv2']} where owner_id = {$uid}";
+    $result = DB_query($sql);
+    $i = 0;
+    while($calendars[$i++] = DB_fetchArray($result)) {}
+    return $calendars;
+}
+
+
+ 
 ?>

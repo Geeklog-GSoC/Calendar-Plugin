@@ -34,6 +34,9 @@
 
 class Event {
     private $_eid;
+    private $_owner;
+    private $calendar_id;
+    private $_perm;
     private $_creation_date;
     private $_event_title;
     private $_event_start;
@@ -109,7 +112,14 @@ class Event {
     *
     */  
     public function load_event_from_array($A) {
+        global $_USER;
         $this->_event_title = addslashes($A['event_title']);
+        if (COM_isAnonUser()) {
+            $this->_owner = 1;
+        }
+        else {
+            $this->_owner = $_USER['uid'];
+        }
         $date = $this->check_date($A['start_date']);
         if ($date) {
             $day = $date['day'];
@@ -141,6 +151,24 @@ class Event {
         else { 
             $this->_allday = 1;
         }
+    }
+    /**
+    *
+    * load_event_from_DB
+    *
+    * Takes a DB query and adds info to the class elements
+    *
+    */  
+    
+    public function load_event_from_DB($A) {
+        $this->_eid = $A['eid'];
+        $this->_event_title = $A['title'];
+        $this->_event_start = $A['datestart'];
+        $this->_event_end = $A['dateend'];
+        $this->_recurring = $A['recurring'];
+        $this->_location = $A['location'];
+        $this->_description = $A['description'];
+        $this->_allday = $A['allday']; 
     } 
     /**
     *
@@ -155,8 +183,9 @@ class Event {
         global $_TABLES;
         if ($this->_valid == false)
             return false;
-        $fields = 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday';
-        $elements = "'$this->_event_title' ," . "'$this->_event_description' ," . "'$this->_event_start'," . "'$this->_event_end'," . "'$this->_event_location'," . "'$this->_allday'";
+        $fields = 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'owner_id';
+        $elements = "'$this->_event_title' ," . "'$this->_event_description' ,"  
+                    . "'$this->_event_start'," . "'$this->_event_end'," . "'$this->_event_location'," . "'$this->_allday'," . "'$this->_owner'";
         DB_save($_TABLES['c2events'], $fields, $elements);
     }
     /**
@@ -273,10 +302,51 @@ class Event {
 
 
 class Aevents {
-    private $events;         
+    private $_events;
+    private $_length;         
     public function __construct() {
     }
+    
+    /**
+    *
+    * populates an array of events. It querys the base betwwen 2 times
+    * 
+    *
+    */
+ 
     public function getElements(DateTime $date_start, DateTime $date_end) {
+        global $_TABLES;
+        $sql = "select * from {$_TABLES['c2events']} where {$date_start->getTimestamp()}";
+        $sql .= "<= datestart AND dateend < {$date_end->getTimestamp()}";
+        $result = DB_query($sql);
+        $i = 0;
+        while($event = DB_fetchArray($result)) {
+            $this->_events[$i] = new Event();
+            if($event['eid'] != NULL) {
+                $this->_events[$i]->load_event_from_DB($event);
+                $i++;
+            }
+        }
+        $this->_length = $i;
+    }
+    
+    public function getLength() {
+        return $this->_length;
+    }
+    
+    /**
+    *
+    * gets an string array with all the events from the events array
+    * 
+    *
+    */
+    
+    public function getElementsArray() {
+        for ($i = 0; $i < $this->_length; $i++) {
+            $events[$i] = $this->_events[$i]->get_details();
+        }
+        
+        return $events;
     }
 }
 

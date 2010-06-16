@@ -33,6 +33,7 @@
 $_SQL[] = "
 CREATE TABLE {$_TABLES['calendarv2']} (
   cid varchar(40) NOT NULL default '',
+  title varchar(40) default NULL,
   owner_id mediumint(8) unsigned NOT NULL default '1',
   group_id mediumint(8) unsigned NOT NULL default '1',
   perm_owner tinyint(1) unsigned NOT NULL default '3',
@@ -47,6 +48,7 @@ $_SQL[] = "
 CREATE TABLE {$_TABLES['c2events']} (
   eid int(10) unsigned  NOT NULL auto_increment,
   pid int(10) unsigned NOT NULL default '0',
+  cid int(10) unsigned NOT NULL default '0',
   title varchar(128) default NULL,
   description text,
   datestart int(10) unsigned default NULL,
@@ -62,5 +64,8 @@ CREATE TABLE {$_TABLES['c2events']} (
   PRIMARY KEY  (eid)
 ) ENGINE=MyISAM
 "; 
+
+$_SQL[] = "
+INSERT INTO {$_TABLES['calendarv2']} (cid, title) VALUES (1, 'Main');";
 
 ?>
