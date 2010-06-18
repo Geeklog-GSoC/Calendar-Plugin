@@ -1,0 +1,6 @@
+<select name = "calendar_cid"> 
+		<option value = {cid0}> {calendar_title0} </option>
+		<option value = {cid1}> {calendar_title1} </option>
+		<option value = {cid2}> {calendar_title2} </option>
+</select>
+{create_new_link}
