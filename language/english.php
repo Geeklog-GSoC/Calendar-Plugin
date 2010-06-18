@@ -83,7 +83,8 @@ $LANG_CALENDARV2_FORM = array (
     'lang_date_recurring' => 'Recuring ends',
     'lang_date_never' => 'Never',
     'lang_every' => 'Every',
-    'lang_modify_msg' => 'Modify Event'
+    'lang_modify_msg' => 'Modify Event',
+    'lang_calendars' => 'Calendars'
 );
 
 $LANG_CALENDARV2_MONTH = array (
@@ -112,7 +113,9 @@ $LANG_CALENDARV2_SINGLE = array (
 );
 
 $LANG_CALENDARV2_EVENT = array (
-    'back' => '[ Go back to Calendar ]'
+    'back' => '[ Go back to Calendar ]',
+    'lang_create_new' => 'Create new',
+    'calendar_name' => 'Calendar Name'
 ); 
 
 $LANG_confignames['calendarv2'] = array(

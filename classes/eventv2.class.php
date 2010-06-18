@@ -35,7 +35,7 @@
 class Event {
     private $_eid;
     private $_owner;
-    private $calendar_id;
+    private $_calendar_id;
     private $_perm;
     private $_creation_date;
     private $_event_title;
@@ -55,53 +55,10 @@ class Event {
     *
     */ 
 
-    public function __construct() {
-        $this->_valid = true;
+    public function __construct(){
         $this->_creation_date = time();
     }
 
-
-    /**
-    *
-    * check_date
-    *
-    * checks if a date is in the required format and returns values for month, day and year.
-    * This function will have to be modified when user settings kick. Time must be 
-    * returned in GMT format for database storage.
-    *
-    */
-    private function check_date($date_to_check) {
-        preg_match('/[0-9]{2}\/[0-9]{2}\/[0-9]{4}/' , $date_to_check, $matches);
-        if (empty($matches)) {
-            return false;
-        }
-        list($day, $month, $year) = explode('/' , $matches[0]);
-        $date = array('day' => intval($day), 'month' => intval($month), 'year' => intval($year));
-        return $date;
-    } 
-    
-    /**
-    *
-    * check_time
-    *
-    * Same as check date only checks the starting time.
-    *
-    */
-
-    private function check_time($time_to_check) {
-        preg_match('/[0-9]{2}:[0-9]{2} (PM|AM)/' , $time_to_check, $matches);
-        if (empty($matches)) {
-            return false;
-        }
-        list($hour, $garbage) = explode(':' , $matches[0]);
-        list($minutes, $amorpm) = explode(' ', $garbage);
- 
-        //Nice trick to transform 12 hour date format in 24 hour date format
-        list($hour,$minutes) = explode(':' , (date("H:i", strtotime("$hour:". "$minutes". "$amorpm"))));
-            
-        $time = array('hour' => $hour, 'minutes' => $minutes);
-        return $time;
-    }  
     /**
     *
     * load_event_from_array
@@ -120,31 +77,29 @@ class Event {
         else {
             $this->_owner = $_USER['uid'];
         }
-        $date = $this->check_date($A['start_date']);
-        if ($date) {
-            $day = $date['day'];
-            $month = $date['month'];
-            $year = $date['year'];
-        }
+        $start_date = DateTime::createFromFormat('m/d/Y', $A['start_date']);
+        $day = $start_date->format('d');
+        $month = $start_date->format('m');
+        $year = $start_date->format('Y');
  
-        $start_time = $this->check_time($A['start_time']);
-        $this->_event_start = mktime($start_time['hour'], $start_time['minutes'], NULL, $day , $month, $year);
-        $date = $this->check_date($A['end_date']);
-        if ($date) {
-            $day = $date['day'];
-            $month = $date['month'];
-            $year = $date['year'];
-        }
-        $end_time = $this->check_time($A['end_time']); 
-        $this->_event_end = mktime($end_time['hour'], $end_time['minutes'], NULL, $day , $month, $year);
+        $start_time = DateTime::createFromFormat('h:i A', $A['start_time']);
+        $this->_event_start = mktime($start_time->format('H '), $start_time->format('i'), NULL, $month , $day, $year);
+        $end_date = DateTime::createFromFormat('m/d/Y', $A['end_date']);
+        $day = $end_date->format('d');
+        $month = $end_date->format('m');
+        $year = $end_date->format('Y'); 
+        
+        $end_time = DateTime::createFromFormat('h:i A', $A['end_time']);
+        $this->_event_end = mktime($end_time->format('h'), $end_time->format('i'), NULL, $month , $day, $year);
         if ($this->_event_start > $this->_event_end) {
             $this->_valid = false;
         }
 
         //TODO depending on recurring_type get recurring events info
         $recurring_type = COM_applyFilter($A['recurring_type'], true);
-        $this->_event_description = addslashes($A['event_description']);
-        $this->_event_location = addslashes($A['event_location']);
+        $this->_description = addslashes($A['event_description']);
+        $this->_location = addslashes($A['event_location']);
+        $this->_calendar_id = intval($A['calendar_cid']);
         if ($A['all_day'] == 'on') {
             $this->_allday = 1;
         }
@@ -169,6 +124,7 @@ class Event {
         $this->_location = $A['location'];
         $this->_description = $A['description'];
         $this->_allday = $A['allday']; 
+        $this->_calendar_id =$A['cid'];
     } 
     /**
     *
@@ -181,11 +137,11 @@ class Event {
     public function save_to_database()
     {
         global $_TABLES;
-        if ($this->_valid == false)
-            return false;
-        $fields = 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'owner_id';
-        $elements = "'$this->_event_title' ," . "'$this->_event_description' ,"  
-                    . "'$this->_event_start'," . "'$this->_event_end'," . "'$this->_event_location'," . "'$this->_allday'," . "'$this->_owner'";
+        $fields = 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'owner_id,' . 'cid';
+        $elements = "'$this->_event_title' ," . "'$this->_description' ,"  
+                    . "'$this->_event_start'," . "'$this->_event_end'," 
+                    . "'$this->_location'," . "'$this->_allday'," . "'$this->_owner',"
+                    . "'$this->_calendar_id'";
         DB_save($_TABLES['c2events'], $fields, $elements);
     }
     /**
@@ -214,12 +170,10 @@ class Event {
     public function update_to_database($eid)
     {
         global $_TABLES;
-        if ($this->_valid == false)
-            return false;
-        $fields = "title = '$this->_event_title' ," . "description = '$this->_event_description',";
+        $fields = "title = '$this->_event_title' ," . "description = '$this->_description',";
         $fields .= "datestart = '$this->_event_start',";
         $fields .= "dateend = '$this->_event_end',";
-        $fields .= "location = '$this->_event_location',";
+        $fields .= "location = '$this->_location',";
         $fields .= "allday = '$this->_allday'";
         $sql = "update {$_TABLES['c2events']} set {$fields} where eid = {$eid}";
         DB_query($sql);
@@ -236,6 +190,7 @@ class Event {
     public function modify($P) 
     {
         $this->load_event_from_array($P);
+        $this->_eid = intval($P['modify_eid']);
         $this->update_to_database($P['modify_eid']);
     }
     
@@ -268,6 +223,7 @@ class Event {
             $sql = "select * from {$_TABLES['c2events']} where eid = {$eid}";
             $result = DB_query($sql);
             $event = DB_fetchArray($result);
+            $this->_calendar_id = $event['cid']; 
             $this->_event_title = $event['title'];
             $this->_event_start = $event['datestart'];     
             $this->_event_end = $event['dateend'];
@@ -275,6 +231,7 @@ class Event {
             $this->_description = $event['description'];
             $this->_allday = $event['allday'];
             $this->_eid = $eid;
+            $this->_calendar_id = $event['cid'];
             $this->_valid = true; 
         }
     }
@@ -295,6 +252,7 @@ class Event {
         $A['description'] = $this->_description;
         $A['allday'] = $this->_allday;
         $A['eid'] = $this->_eid;
+        $A['cid'] = $this->_calendar_id;
         return $A;
     }
         
@@ -309,15 +267,15 @@ class Aevents {
     
     /**
     *
-    * populates an array of events. It querys the base betwwen 2 times
+    * populates an array of events. It querys the base betwen 2 times
     * 
     *
     */
  
-    public function getElements(DateTime $date_start, DateTime $date_end) {
+    public function getElements(DateTime $date_start, DateTime $date_end, $cid) {
         global $_TABLES;
         $sql = "select * from {$_TABLES['c2events']} where {$date_start->getTimestamp()}";
-        $sql .= "<= datestart AND dateend < {$date_end->getTimestamp()}";
+        $sql .= "<= datestart AND dateend < {$date_end->getTimestamp()} AND cid = '$cid'";
         $result = DB_query($sql);
         $i = 0;
         while($event = DB_fetchArray($result)) {

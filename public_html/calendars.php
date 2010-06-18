@@ -46,12 +46,15 @@ if (! in_array('calendarv2', $_PLUGINS)) {
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
 
 
-$calendars = array('1' => 'Site wide Calendar');
 if (!COM_isAnonUser()) {
-    $calendars .= calendarv2_get_calendars($_USER['uid']);
+    $calendars = calendarv2_get_calendars($_USER['uid']);
 }
 
- 
+$page .= calendarv2_display_calendars_new();
+if (isset($_POST['new_calendar_name'])) {
+    calendarv2_create_calendar($_POST['new_calendar_name']);
+}
+    
 
 
 // MAIN

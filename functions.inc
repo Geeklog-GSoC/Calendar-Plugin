@@ -374,7 +374,7 @@ function calendarv2_templatePath ($path = '')
 *
 */  
 
-function calendarv2_display($matrix, $A)
+function calendarv2_display($matrix, $A, $calendars, $cid)
 {
     
     global $_CONF, $_CAV2_CONF;
@@ -383,9 +383,9 @@ function calendarv2_display($matrix, $A)
     $page->set_var('site_url', $_CAV2_CONF['site_url']);
     $page->set_var('calendar', "test_text");
     $page->set_var('display_today_events', 'today events');
-    $form = calendarv2_form_display($A);
+    $form = calendarv2_form_display($A, $calendars);
     $page->set_var('event_form', $form);
-    $minimal = calendarv2_minimal_display($matrix, $A, $events);
+    $minimal = calendarv2_minimal_display($matrix, $A, $cid);
     $page->set_var('minimal' , $minimal);
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
@@ -399,18 +399,19 @@ function calendarv2_display($matrix, $A)
 *
 */  
 
-function calendarv2_form_display($A)
+function calendarv2_form_display($A, $calendars)
 {
     
     global $_CONF, $LANG_CALENDARV2_FORM;
     $page = new Template(calendarv2_templatePath());
-    $page->set_file(array ('page' => 'form.thtml'));
+    $page->set_file(array ('page' => 'form.thtml',
+                            'calendar' => 'calendars.thtml'));
     $lang = $LANG_CALENDARV2_FORM;
     foreach ($lang as $key => $value) {
             $page->set_var($key, $value);
     }
     $date = new DateTime();
-    if(!empty($A)) {
+    if((!empty($A['month'])) && !(empty($A['year']))) {
         $date->setDate(intval($A['year']), intval($A['month']), 1);
     }    
     $page->set_var('month_recurring_day' , $date->format('d'));
@@ -418,7 +419,8 @@ function calendarv2_form_display($A)
     $page->set_var('default_start_date', $date->format('m/d/Y'));
     $page->set_var('default_end_date' , $date->format('m/d/Y'));
     $page->set_var('default_start_time', $date->format('h:i A'));
-    $page->set_var('default_end_time', $date->format('h:i A')); 
+    $page->set_var('default_end_time', $date->format('h:i A'));
+    $page->set_var('calendar', calendarv2_display_calendars($calendars));
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval; 
      
@@ -432,12 +434,13 @@ function calendarv2_form_display($A)
  * @return  string  display from template
  */   
 
-function calendarv2_day_events($A)
+function calendarv2_day_events($A, $cid)
 {
     global $_CAV2_CONF, $LANG_CALENDARV2_EVENT;
     $date = new DateTime();
     $date->setDate($A['year'] , $A['month'], $A['day']);
-    $events = calendarv2_get_day_events($date);
+    $date->setTime(0 , 0, 0);
+    $events = calendarv2_get_day_events($date, $cid);
     $page = new Template(calendarv2_templatePath()); 
     $page->set_file(array ('page' => 'dayevent.thtml'));
     $page->set_var('site_url', $_CAV2_CONF['site_url']); 
@@ -473,13 +476,13 @@ function calendarv2_day_events($A)
  *
  */   
 
-function calendarv2_get_day_events(DateTime $date) 
+function calendarv2_get_day_events(DateTime $date, $cid) 
 {     
     global $_TABLES;    
     $a = new Aevents;
     $end_date = clone($date);
     $end_date->modify("+1 day");
-    $a->getElements($date, $end_date);
+    $a->getElements($date, $end_date, $cid);
     $eve = $a->getElementsArray();
     return $eve; 
 }
@@ -496,7 +499,7 @@ function calendarv2_get_day_events(DateTime $date)
 *
 */ 
 
-function calendarv2_minimal_display($matrix, $A, &$events)
+function calendarv2_minimal_display($matrix, $A, $cid)
 {
     
     $date = new DateTime();
@@ -509,7 +512,7 @@ function calendarv2_minimal_display($matrix, $A, &$events)
     $page->set_file(array ('page' => 'month_view.thtml',
                             'each_element' => 'each_element.thtml',
                             'each_element2'=> 'each_element2.thtml'));
-    $link = $_CAV2_CONF['site_url'] . '/event.php?';
+    $link = $_CAV2_CONF['site_url'] . "/event.php?cid={$cid}&";
     $link2 = $_CAV2_CONF['site_url'] . '/index.php?';
     $prev_month = $generate->format('m') - 1;
     if ($prev_month == 0) {
@@ -543,8 +546,9 @@ function calendarv2_minimal_display($matrix, $A, &$events)
                 // I used $something to get only the values that are not NULL and to avoid
                 // double query
                 $date->setDate($generate->format("Y"), $generate->format("m"), $matrix[$i][$j]);
-                if (($something = calendarv2_get_day_events($date)) !== NULL) {
-                    $events[$matrix[$i][$j]] = $something; 
+                $date->setTime(0, 0 , 0);
+                if (($something = calendarv2_get_day_events($date, $cid)) !== NULL) {
+                    $events[$matrix[$i][$j]] = $something;
                     $page->set_var('strong' ,'<strong>');
                     $page->set_var('end_strong', '</strong>');
                 }
@@ -590,7 +594,7 @@ function calendarv2_single_event($event)
     $page->set_var('description_content' , $details['description']);
     $page->set_var('hidden_eid' , $details['eid']);
     list($day, $month, $year) = explode ('/' , date('d/m/Y' , $details['datestart']));
-    $link = COM_createLink($lang['go_back'], $_CAV2_CONF['site_url'] . "/event.php?day=$day&month=$month&year=$year");
+    $link = COM_createLink($lang['go_back'], $_CAV2_CONF['site_url'] . "/event.php?cid={$details['cid']}&day=$day&month=$month&year=$year");
     $page->set_var('go_back_link' , $link); 
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
@@ -615,10 +619,6 @@ function calendarv2_modify_event($event)
     $date_start = new DateTime();
     $date_start->setTimestamp($details['datestart']);
     $date_end->setTimestamp($details['dateend']);
-    $details['start_date'] = date('m/d/Y', $details['datestart']);
-    $details['start_time'] = date('h:i A', $details['datestart']);
-    $details['end_date'] = date('m/d/Y', $details['dateend']);
-    $details['end_time'] = date('h:i A', $details['dateend']);
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'modify_instance.thtml'));
     foreach ($lang as $key => $value) {
@@ -646,14 +646,71 @@ function calendarv2_modify_event($event)
 */
 
 function calendarv2_get_calendars ($uid)
-{
+{   
+    //All users have acces to main event calendar
     global $_TABLES;
-    $sql = "select cid from {$_TABLES['calendarv2']} where owner_id = {$uid}";
-    $result = DB_query($sql);
     $i = 0;
-    while($calendars[$i++] = DB_fetchArray($result)) {}
+    $sql = "select cid, title from {$_TABLES['calendarv2']} where owner_id = {$uid} OR cid = 1";
+    $result = DB_query($sql);
+    $num_rows = DB_numRows($result);
+    while($num_rows) {
+        $calendars[$i] = DB_fetchArray($result);
+        $i++;
+        $num_rows--;
+    }
     return $calendars;
 }
+
+function calendarv2_display_calendars($calendars)
+{   
+    global $_CAV2_CONF, $LANG_CALENDARV2_EVENT;
+    $page = new Template(calendarv2_templatePath());
+    $page->set_file(array ('page' => 'calendars.thtml'));
+    foreach($calendars as $key => $calendar) {
+        $page->set_var('calendar_title' . $key , $calendar['title']);
+        $page->set_var('cid' . $key , $calendar['cid']);
+    } 
+    $link = $_CAV2_CONF['site_url'] . '/calendars.php';
+    $link = COM_createLink($LANG_CALENDARV2_EVENT['lang_create_new'] , $link);
+    $page->set_var('create_new_link' , $link);
+    $retval .= $page->finish($page->parse('output', 'page'));
+    return $retval;
+}
+
+function calendarv2_display_calendars_new()
+{
+    global $LANG_CALENDARV2_EVENT;
+    $page = new Template(calendarv2_templatePath());
+    $page->set_file(array ('page' => 'create_calendars.thtml'));
+    $page->set_var('lang_calendar_name', $LANG_CALENDARV2_EVENT['calendar_name']);
+    $retval .= $page->finish($page->parse('output', 'page'));
+    return $retval;
+} 
+
+function calendarv2_create_calendar($name) 
+{
+    global $_TABLES, $_USER;
+    $name = addslashes($name);
+    $sql = "insert into {$_TABLES['calendarv2']} (owner_id, title) values ('{$_USER['uid']}', '{$name}')";
+    DB_query($sql);
+}  
+
+function calendarv2_display_calendar_links($calendars)
+{
+    global $_CAV2_CONF;
+    $page = new Template(calendarv2_templatePath());
+    $page->set_file(array ('page' => 'calendar_links.thtml'));
+    $link = $_CAV2_CONF['site_url'] . '/index.php?';
+    foreach($calendars as $key => $calendar) {
+        $link_body .= COM_createLink($calendar['title'], $link . 'cid=' . $calendar['cid']);
+        $link_body .= '<br>'; 
+    } 
+    $page->set_var('link', $link_body);
+    $retval .= $page->finish($page->parse('output', 'page'));
+    return $retval;
+}
+    
+
 
 
  

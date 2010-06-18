@@ -47,6 +47,7 @@ require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
 
 $A = $_GET;
 $B = $_POST;
+$cid = $_GET['cid'];
 // Check if mofication of an event or deletion is asked by a $_POST variable
 if (empty($_POST)) {
     // Check if we need to display a single event.
@@ -57,7 +58,7 @@ if (empty($_POST)) {
     }
     else {
         if (is_array ($A)) {
-            $page = calendarv2_day_events($_GET);
+            $page = calendarv2_day_events($_GET, $cid);
         }
     }
 }
@@ -65,7 +66,7 @@ else {
     $event = new Event();
     if (isset($B['modify'])) {
         $event->get_event($B['eid']);
-        // Creates a template for an single instance modification
+        // Creates a template for a single instance modification
         $page = calendarv2_modify_event($event);
         }
     if (isset($B['delete'])) {

@@ -73,6 +73,8 @@
 			<dt><label for = "event_location"> {lang_event_location}: </label> </dt>
 			<dd> <input id = "event_location" type = "text" value = "{event_location}" size = "46" name = "event_location"/> </dd> 
 			<dt> <label for = "event_description"> {lang_event_description}: </label> </dt>
-			<dd> <textarea id = "event_description" name = "event_description">{event_description}</textarea> </dd> 
+			<dd> <textarea id = "event_description" name = "event_description">{event_description}</textarea> </dd>
+			<dt> <label for = "Calendar"> {lang_calendars}: </label> </dt> 
+			<dd> {calendar} <dd>
 			<dd> <input type="submit" value="{lang_add}" name = "submit"/> </dd>
 </form>

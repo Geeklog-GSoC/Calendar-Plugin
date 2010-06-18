@@ -47,14 +47,26 @@ require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
 $A = $_GET;
 $display = '';
+if (isset($A['cid'])) {
+    $cid = $A['cid'];
+}
+else {
+    $cid = 1;
+}
+
+if (!COM_isAnonUser()) {
+    $calendars = calendarv2_get_calendars($_USER['uid']);
+}
 $calendar = new Calendarv2 ();
 $event = new Event();
 if (isset($_POST['submit'])) {
     $event->load_event_from_array($_POST);
     $event->save_to_database();
-    $display .= COM_showMessageText("You have succesfully added an event", "Alert");
+    $page .= COM_showMessageText("You have succesfully added an event", "Alert");
 }
+
 $matrix = $calendar->c2_generateMatrix($A['month'] , $A['year']);
+$page .= calendarv2_display_calendar_links($calendars);
 
 
 // MAIN
@@ -62,7 +74,8 @@ $display .= COM_siteHeader('menu', $LANG_CALENDARV2_1['plugin_name']);
 $display .= COM_startBlock($LANG_CALENDARV2_1['plugin_name']);
 $display .= '<p>Welcome to the ' . $LANG_CALENDARV2_1['plugin_name'] . ' plugin, '
          . $_USER['username'] . '!</p>';
-$display .= calendarv2_display($matrix, $A);
+$display .= $page;
+$display .= calendarv2_display($matrix, $A, $calendars, $cid);
 $display .= COM_endBlock();
 $display .= COM_siteFooter();
 

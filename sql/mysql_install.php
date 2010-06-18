@@ -32,7 +32,7 @@
 
 $_SQL[] = "
 CREATE TABLE {$_TABLES['calendarv2']} (
-  cid varchar(40) NOT NULL default '',
+  cid int(10) NOT NULL auto_increment,
   title varchar(40) default NULL,
   owner_id mediumint(8) unsigned NOT NULL default '1',
   group_id mediumint(8) unsigned NOT NULL default '1',
@@ -48,7 +48,7 @@ $_SQL[] = "
 CREATE TABLE {$_TABLES['c2events']} (
   eid int(10) unsigned  NOT NULL auto_increment,
   pid int(10) unsigned NOT NULL default '0',
-  cid int(10) unsigned NOT NULL default '0',
+  cid int(10) unsigned NOT NULL default '1',
   title varchar(128) default NULL,
   description text,
   datestart int(10) unsigned default NULL,
@@ -66,6 +66,6 @@ CREATE TABLE {$_TABLES['c2events']} (
 "; 
 
 $_SQL[] = "
-INSERT INTO {$_TABLES['calendarv2']} (cid, title) VALUES (1, 'Main');";
+INSERT INTO {$_TABLES['calendarv2']} (owner_id, title) VALUES (2, 'Site Wide');";
 
 ?>
