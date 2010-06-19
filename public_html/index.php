@@ -54,9 +54,11 @@ else {
     $cid = 1;
 }
 
-if (!COM_isAnonUser()) {
-    $calendars = calendarv2_get_calendars($_USER['uid']);
+if (COM_isAnonUser()) {
+    $_USER['uid'] = 1;
 }
+
+$calendars = calendarv2_get_calendars($_USER['uid']);
 $calendar = new Calendarv2 ();
 $event = new Event();
 if (isset($_POST['submit'])) {

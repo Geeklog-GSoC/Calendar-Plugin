@@ -260,8 +260,7 @@ class Event {
 
 
 class Aevents {
-    private $_events;
-    private $_length;         
+    private $_events = array();
     public function __construct() {
     }
     
@@ -279,7 +278,7 @@ class Aevents {
         $result = DB_query($sql);
         $i = 0;
         while($event = DB_fetchArray($result)) {
-            $this->_events[$i] = new Event();
+            $this->_events[] = new Event();
             if($event['eid'] != NULL) {
                 $this->_events[$i]->load_event_from_DB($event);
                 $i++;
@@ -288,8 +287,8 @@ class Aevents {
         $this->_length = $i;
     }
     
-    public function getLength() {
-        return $this->_length;
+    public function getNumEvents() {
+        return count($this->_events);
     }
     
     /**
@@ -300,7 +299,7 @@ class Aevents {
     */
     
     public function getElementsArray() {
-        for ($i = 0; $i < $this->_length; $i++) {
+        for ($i = 0; $i < $this->getNumEvents(); $i++) {
             $events[$i] = $this->_events[$i]->get_details();
         }
         

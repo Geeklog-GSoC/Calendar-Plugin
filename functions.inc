@@ -667,9 +667,9 @@ function calendarv2_display_calendars($calendars)
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'calendars.thtml'));
     foreach($calendars as $key => $calendar) {
-        $page->set_var('calendar_title' . $key , $calendar['title']);
-        $page->set_var('cid' . $key , $calendar['cid']);
-    } 
+        $options .= "<option value = {$calendar['cid']}> {$calendar['title']} </option>";
+    }
+    $page->set_var('options', $options); 
     $link = $_CAV2_CONF['site_url'] . '/calendars.php';
     $link = COM_createLink($LANG_CALENDARV2_EVENT['lang_create_new'] , $link);
     $page->set_var('create_new_link' , $link);
