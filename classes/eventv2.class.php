@@ -46,6 +46,7 @@ class Event {
     private $_description;
     private $_allday;
     private $_valid;
+    private $_moderation;
 
     /**
     *
@@ -56,7 +57,6 @@ class Event {
     */ 
 
     public function __construct(){
-        $this->_creation_date = time();
     }
 
     /**
@@ -71,11 +71,13 @@ class Event {
     public function load_event_from_array($A) {
         global $_USER;
         $this->_event_title = addslashes($A['event_title']);
-        if (COM_isAnonUser()) {
-            $this->_owner = 1;
-        }
-        else {
-            $this->_owner = $_USER['uid'];
+        if (!isset($this->_owner)) {
+            if (COM_isAnonUser()) {
+                $this->_owner = 1;
+            }
+            else {
+                $this->_owner = $_USER['uid'];
+            }
         }
         $start_date = DateTime::createFromFormat('m/d/Y', $A['start_date']);
         $day = $start_date->format('d');
@@ -125,6 +127,7 @@ class Event {
         $this->_description = $A['description'];
         $this->_allday = $A['allday']; 
         $this->_calendar_id =$A['cid'];
+        $this->_owner = $A['owner_id'];
     } 
     /**
     *
@@ -142,8 +145,27 @@ class Event {
                     . "'$this->_event_start'," . "'$this->_event_end'," 
                     . "'$this->_location'," . "'$this->_allday'," . "'$this->_owner',"
                     . "'$this->_calendar_id'";
-        DB_save($_TABLES['c2events'], $fields, $elements);
+        // Check to see if the events is directly saved into the database or mark for admin aproval.
+        if (!isset($this->moderation)) {
+            DB_save($_TABLES['c2events'], $fields, $elements);
+        }
+        else {
+            DB_save($_TABLES['cv2submission'], $fields, $elements);
+        }
     }
+ 
+    /**
+    *
+    * sets the moderation flag for an event
+    *
+    *
+    */
+    
+    public function setModeration($bool)
+    {
+        $this->_moderation = $bool;
+    }
+
     /**
     *
     * removes an element from database
@@ -259,18 +281,37 @@ class Event {
 }                               
 
 
-class Aevents {
+class Aevents implements arrayaccess {
     private $_events = array();
     public function __construct() {
     }
+
+    public function offsetSet($offset, $value) {
+        if ($value instanceof Aevents) {
+            if ($offset == "") {
+                $this->_events[] = $value;
+            }
+            else {
+                $this->_events[$offset] = $value;
+            }
+        }
+    }
+    
+    public function offsetExists($offset) {
+        return isset($this->_events[$offset]);
+    }
+    
+    public function offsetGet($offset) {
+        return $this->_events[$offset];
+    }
+    
+    public function offsetUnset($offset) {
+        unset($this->_events[$offset]);
+    }
     
     /**
-    *
     * populates an array of events. It querys the base betwen 2 times
-    * 
-    *
     */
- 
     public function getElements(DateTime $date_start, DateTime $date_end, $cid) {
         global $_TABLES;
         $sql = "select * from {$_TABLES['c2events']} where {$date_start->getTimestamp()}";

@@ -47,6 +47,7 @@ function plugin_autoinstall_calendarv2($pi_name)
     $pi_name         = 'calendarv2';
     $pi_display_name = 'calendarv2';
     $pi_admin        = $pi_display_name . ' Admin';
+    $pi_moderator    = $pi_display_name . 'Moderator';
 
     $info = array(
         'pi_name'         => $pi_name,
@@ -58,7 +59,8 @@ function plugin_autoinstall_calendarv2($pi_name)
 
     $groups = array(
         $pi_admin => 'Users in this group can administer the '
-                     . $pi_display_name . ' plugin'
+                     . $pi_display_name . ' plugin',
+        $pi_moderator => 'Users in this group can moderate site wide events'
     );
 
     $features = array(
@@ -72,7 +74,8 @@ function plugin_autoinstall_calendarv2($pi_name)
 
     $tables = array(
         'calendarv2',
-        'c2events'
+        'c2events',
+        'cv2submission'
     );
 
     $inst_parms = array(

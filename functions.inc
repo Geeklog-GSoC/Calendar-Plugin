@@ -59,6 +59,7 @@ if (file_exists($langfile)) {
  */
 $_TABLES['calendarv2'] = $_DB_table_prefix . 'calendarv2';
 $_TABLES['c2events'] = $_DB_table_prefix . 'c2events';
+$_TABLES['cv2submission'] = $_DB_table_prefix . 'cv2submission';
 
 /**
 * Load the config settings
@@ -320,9 +321,9 @@ function plugin_autouninstall_calendarv2()
 {
     $out = array (
         /* give the name of the tables, without $_TABLES[] */
-        'tables' => array('calendarv2', 'c2events'),
+        'tables' => array('calendarv2', 'c2events', 'cv2submission'),
         /* give the full name of the group, as in the db */
-        'groups' => array('calendarv2 Admin'),
+        'groups' => array('calendarv2 Admin', 'calendarv2Moderator'),
         /* give the full name of the feature, as in the db */
         'features' => array('calendarv2.admin, calendarv2.moderate, calendarv2.submit'),
         /* give the full name of the block, including 'phpblock_', etc */
@@ -659,7 +660,17 @@ function calendarv2_get_calendars ($uid)
         $num_rows--;
     }
     return $calendars;
-}
+}   
+
+/**
+* Creates a page from template with a <select> that has all calendars
+* suplied by the calendars variable
+*
+* @param    array   a list of calendars (cid and title)
+*
+* @return   string  html
+*
+*/ 
 
 function calendarv2_display_calendars($calendars)
 {   
@@ -675,7 +686,16 @@ function calendarv2_display_calendars($calendars)
     $page->set_var('create_new_link' , $link);
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
-}
+} 
+
+/**
+*
+* return the page that allows creating of mutliple calendars
+*
+*
+* @return   string  html
+*
+*/  
 
 function calendarv2_display_calendars_new()
 {
@@ -687,13 +707,29 @@ function calendarv2_display_calendars_new()
     return $retval;
 } 
 
+/**
+*
+* Adds the new created calendars to the database
+*
+*/   
+
 function calendarv2_create_calendar($name) 
 {
     global $_TABLES, $_USER;
     $name = addslashes($name);
     $sql = "insert into {$_TABLES['calendarv2']} (owner_id, title) values ('{$_USER['uid']}', '{$name}')";
     DB_query($sql);
-}  
+}
+
+ /**
+*
+* return a list of links for the calendars.
+*
+*
+* @return   string  html
+*
+*/   
+
 
 function calendarv2_display_calendar_links($calendars)
 {
@@ -709,9 +745,65 @@ function calendarv2_display_calendar_links($calendars)
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 }
+
+// Site Wide Event Submission functions, Part of the moderation capability
+
+function plugin_ismoderator_calendarv2()
+{
+    global $_USER, $_TABLES;
+    return (SEC_hasRights('calendarv2.admin'));
+}
+
+function plugin_submissioncount_calendarv2()
+{
+    global $_TABLES;
+    return DB_count($_TABLES['cv2submission']);
+}
+
+function plugin_savesubmission_calendarv2($event)
+{
+    $event->setModeration(true);
+    $event->save_to_database();
+}
+
+function plugin_moderationvalues_lists()
+{
+    global $_TABLES;
+    return array('eid' , $_TABLES['c2events'], 'eid, datestart, dateend, description, title, location', $_TABLES['cv2submission']);
+}
+
+function plugin_itemlist_calendarv2()
+{
+    global $_TABLES;
+    if (plugin_ismoderator_calendarv2()) {
+        $plugin = new Plugin();
+        $plugin->submissionlabel = 'Calendarv2 Submissions';
+        $plugin->submissionssql = "select * from {$_TABLES['cv2submission']}";
+        $plugin->addSubmissionHeading('EID');
+        $plugin->addSubmissionHeading('title');
+        $plugin->addSubmissionHeading('description');
+        
+        return $plugin;
+    }
+}
+
+function plugin_submit_calendarv2()
+{
+    global $CONF, $LANG12;
+    /*$template = new Template(calendarv2_templatePath());
+    $template->set_file(array('form' => 'submit_form.thtml'));
+    $template->set_var('site_url', $_CONF['site_url']);
+    $template->set_var('lang_name', 'List Name');
+    $template->set_var('ml_name', $A['ml_name']);
+    $template->set_var('lang_descr', 'Description');
+    $template->set_var('ml_descr', $A['ml_descr']);
+    $template->set_var('ml_id', $ml_id);
+    $template->set_var('lang_preview', $LANG12[32]);
+    $template->set_var('lang_save', $LANG12[8]);
+
+    return $template->parse('output', 'form'); */
+}
     
-
-
 
  
 ?>

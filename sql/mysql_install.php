@@ -66,6 +66,27 @@ CREATE TABLE {$_TABLES['c2events']} (
 "; 
 
 $_SQL[] = "
+CREATE TABLE {$_TABLES['cv2submission']} (
+  eid int(10) unsigned  NOT NULL default '1',
+  pid int(10) unsigned NOT NULL default '0',
+  cid int(10) unsigned NOT NULL default '1',
+  title varchar(128) default NULL,
+  description text,
+  datestart int(10) unsigned default NULL,
+  dateend int(10) unsigned default NULL,
+  owner_id mediumint(8) unsigned NOT NULL default '1',
+  group_id mediumint(8) unsigned NOT NULL default '1',
+  perm_owner tinyint(1) unsigned NOT NULL default '3',
+  perm_group tinyint(1) unsigned NOT NULL default '3',
+  perm_members tinyint(1) unsigned NOT NULL default '2',
+  perm_anon tinyint(1) unsigned NOT NULL default '2',
+  location varchar(40) default NULL,
+  allday tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (eid)
+) ENGINE=MyISAM
+";
+
+$_SQL[] = "
 INSERT INTO {$_TABLES['calendarv2']} (owner_id, title) VALUES (2, 'Site Wide');";
 
 ?>
