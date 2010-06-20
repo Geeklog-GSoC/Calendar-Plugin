@@ -58,13 +58,23 @@ if (COM_isAnonUser()) {
     $_USER['uid'] = 1;
 }
 
+
 $calendars = calendarv2_get_calendars($_USER['uid']);
 $calendar = new Calendarv2 ();
 $event = new Event();
 if (isset($_POST['submit'])) {
     $event->load_event_from_array($_POST);
-    $event->save_to_database();
-    $page .= COM_showMessageText("You have succesfully added an event", "Alert");
+    if (!SEC_hasRights('calendarv2.admin')) {
+        $moderate = true;
+    }
+    else {
+        $moderate = false;
+    }
+    plugin_savesubmission_calendarv2($event, $moderate);
+    if ($moderate == false)
+        $page .= COM_showMessageText("You have succesfully added an event", "Alert");
+    else
+        $page .= COM_showMessageText("Your event has been submitted and expects moderation");
 }
 
 $matrix = $calendar->c2_generateMatrix($A['month'] , $A['year']);

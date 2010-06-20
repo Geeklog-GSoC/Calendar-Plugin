@@ -128,7 +128,13 @@ class Event {
         $this->_allday = $A['allday']; 
         $this->_calendar_id =$A['cid'];
         $this->_owner = $A['owner_id'];
+    }
+    
+    public function setEid($eid)
+    {
+        $this->_eid = $eid;
     } 
+
     /**
     *
     * save to database
@@ -140,13 +146,13 @@ class Event {
     public function save_to_database()
     {
         global $_TABLES;
-        $fields = 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'owner_id,' . 'cid';
-        $elements = "'$this->_event_title' ," . "'$this->_description' ,"  
+        $fields = 'eid,' . 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'owner_id,' . 'cid';
+        $elements = "'$this->_eid' ," . "'$this->_event_title' ," . "'$this->_description' ,"  
                     . "'$this->_event_start'," . "'$this->_event_end'," 
                     . "'$this->_location'," . "'$this->_allday'," . "'$this->_owner',"
                     . "'$this->_calendar_id'";
         // Check to see if the events is directly saved into the database or mark for admin aproval.
-        if (!isset($this->moderation)) {
+        if ($this->_moderation == false) {
             DB_save($_TABLES['c2events'], $fields, $elements);
         }
         else {
@@ -212,8 +218,41 @@ class Event {
     public function modify($P) 
     {
         $this->load_event_from_array($P);
-        $this->_eid = intval($P['modify_eid']);
+        $this->_eid = $P['modify_eid'];
         $this->update_to_database($P['modify_eid']);
+    }
+
+    /**
+    *
+    *
+    * Modifies the information of an event, based on his eid.
+    * And saves the new event in the database
+    *
+    */     
+    public function modify_moderation($P)
+    {
+        $this->load_event_from_array($P);
+        $this->_eid = $P['modify_eid'];
+        $this->update_to_database_moderation($P['modify_eid']);
+    }
+    
+    /**
+    *
+    * update database
+    *
+    * Updates information to database from an event object
+    *
+    */    
+
+    public function update_to_database_moderation($eid) {
+        global $_TABLES;
+        $fields = "title = '$this->_event_title' ," . "description = '$this->_description',";
+        $fields .= "datestart = '$this->_event_start',";
+        $fields .= "dateend = '$this->_event_end',";
+        $fields .= "location = '$this->_location',";
+        $fields .= "allday = '$this->_allday'";
+        $sql = "update {$_TABLES['cv2submission']} set {$fields} where eid = {$eid}";
+        DB_query($sql); 
     }
     
     /**
@@ -233,7 +272,6 @@ class Event {
     *
     * Fils and event with information from database based on an eid.
     *
-    * Modifies the information of an event, based on his eid.
     *
     */    
 
@@ -241,22 +279,49 @@ class Event {
     {
         global $_TABLES;
         //Eid comes from $_POST so it must be verified
-        if (is_numeric($eid)) {
-            $sql = "select * from {$_TABLES['c2events']} where eid = {$eid}";
-            $result = DB_query($sql);
-            $event = DB_fetchArray($result);
-            $this->_calendar_id = $event['cid']; 
-            $this->_event_title = $event['title'];
-            $this->_event_start = $event['datestart'];     
-            $this->_event_end = $event['dateend'];
-            $this->_location = $event['location'];
-            $this->_description = $event['description'];
-            $this->_allday = $event['allday'];
-            $this->_eid = $eid;
-            $this->_calendar_id = $event['cid'];
-            $this->_valid = true; 
-        }
+        $eid = addslashes($eid);
+        $sql = "select * from {$_TABLES['c2events']} where eid = {$eid}";
+        $result = DB_query($sql);
+        $event = DB_fetchArray($result);
+        $this->_calendar_id = $event['cid']; 
+        $this->_event_title = $event['title'];
+        $this->_event_start = $event['datestart'];     
+        $this->_event_end = $event['dateend'];
+        $this->_location = $event['location'];
+        $this->_description = $event['description'];
+        $this->_allday = $event['allday'];
+        $this->_eid = $eid;
+        $this->_calendar_id = $event['cid'];
+        $this->_valid = true; 
     }
+
+    /**
+    *
+    * Fils and moderation event with information from database based on an eid.
+    *
+    *
+    */     
+    
+    public function get_moderation_event($eid)
+    {    
+        global $_TABLES;
+        //Eid comes from $_POST so it must be verified
+        $eid = addslashes($eid);
+        $sql = "select * from {$_TABLES['cv2submission']} where eid = {$eid}";
+        $result = DB_query($sql);
+        $event = DB_fetchArray($result);
+        $this->_calendar_id = $event['cid']; 
+        $this->_event_title = $event['title'];
+        $this->_event_start = $event['datestart'];     
+        $this->_event_end = $event['dateend'];
+        $this->_location = $event['location'];
+        $this->_description = $event['description'];
+        $this->_allday = $event['allday'];
+        $this->_eid = $eid;
+        $this->_calendar_id = $event['cid'];
+        $this->_valid = true;
+    }  
+            
 
     /**
     *

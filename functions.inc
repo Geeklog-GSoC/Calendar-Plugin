@@ -613,7 +613,7 @@ function calendarv2_single_event($event)
 
 function calendarv2_modify_event($event)
 {
-    global $LANG_CALENDARV2_FORM;
+    global $LANG_CALENDARV2_FORM, $CAV2_CONF;
     $lang = $LANG_CALENDARV2_FORM;
     $details = $event->get_details();
     $date_end  = new DateTime();
@@ -625,6 +625,7 @@ function calendarv2_modify_event($event)
     foreach ($lang as $key => $value) {
             $page->set_var($key, $value);
     }  
+    $page->set_var('action' , 'event.php');
     $page->set_var('event_title', $details['title']);
     $page->set_var('event_description', $details['description']);
     $page->set_var('event_location', $details['location']);
@@ -760,13 +761,15 @@ function plugin_submissioncount_calendarv2()
     return DB_count($_TABLES['cv2submission']);
 }
 
-function plugin_savesubmission_calendarv2($event)
-{
-    $event->setModeration(true);
+function plugin_savesubmission_calendarv2($event, $moderate)
+{           
+    $eid = COM_makeSid();
+    $event->setEid($eid);
+    $event->setModeration($moderate);
     $event->save_to_database();
 }
 
-function plugin_moderationvalues_lists()
+function plugin_moderationvalues_calendarv2()
 {
     global $_TABLES;
     return array('eid' , $_TABLES['c2events'], 'eid, datestart, dateend, description, title, location', $_TABLES['cv2submission']);
@@ -774,36 +777,18 @@ function plugin_moderationvalues_lists()
 
 function plugin_itemlist_calendarv2()
 {
-    global $_TABLES;
+    global $_TABLES, $LANG_CALENDARV2_MODERATION;
+    $lang = $LANG_CALENDARV2_MODERATION;
     if (plugin_ismoderator_calendarv2()) {
         $plugin = new Plugin();
-        $plugin->submissionlabel = 'Calendarv2 Submissions';
-        $plugin->submissionssql = "select * from {$_TABLES['cv2submission']}";
-        $plugin->addSubmissionHeading('EID');
-        $plugin->addSubmissionHeading('title');
-        $plugin->addSubmissionHeading('description');
-        
+        $plugin->submissionlabel = $lang['submissionlabel'];
+        $plugin->getsubmissionssql = "select eid, location, description from {$_TABLES['cv2submission']}";
+        $plugin->addSubmissionHeading($lang[2]);
+        $plugin->addSubmissionHeading($lang[3]);
         return $plugin;
     }
 }
 
-function plugin_submit_calendarv2()
-{
-    global $CONF, $LANG12;
-    /*$template = new Template(calendarv2_templatePath());
-    $template->set_file(array('form' => 'submit_form.thtml'));
-    $template->set_var('site_url', $_CONF['site_url']);
-    $template->set_var('lang_name', 'List Name');
-    $template->set_var('ml_name', $A['ml_name']);
-    $template->set_var('lang_descr', 'Description');
-    $template->set_var('ml_descr', $A['ml_descr']);
-    $template->set_var('ml_id', $ml_id);
-    $template->set_var('lang_preview', $LANG12[32]);
-    $template->set_var('lang_save', $LANG12[8]);
-
-    return $template->parse('output', 'form'); */
-}
-    
 
  
 ?>

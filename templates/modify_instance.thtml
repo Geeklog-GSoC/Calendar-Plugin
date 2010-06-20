@@ -1,5 +1,5 @@
 <p id = "form_message"> {lang_modify_msg} </p>
-<form id = "submit_form" method = "post" action = "event.php">
+<form id = "submit_form" method = "post" action = "{action}">
 			<dl><dt>
 			<label for = "event_title"> {lang_event_title}: </label> </dt>
 			<dd><input id = "event_title" type = "text" value = "{event_title}" size = "46" name = "event_title"/></dd>

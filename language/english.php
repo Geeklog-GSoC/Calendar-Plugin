@@ -112,6 +112,14 @@ $LANG_CALENDARV2_SINGLE = array (
     'go_back' => 'Go back'
 );
 
+$LANG_CALENDARV2_MODERATION = array (
+    'submissionlabel' => 'Calendarv2 Moderation',
+    '1' => 'Event Id',
+    '2' => 'Title',
+    '3' => 'Description',
+    '4' => 'Location'
+);
+
 $LANG_CALENDARV2_EVENT = array (
     'back' => '[ Go back to Calendar ]',
     'lang_create_new' => 'Create new',

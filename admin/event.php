@@ -4,9 +4,9 @@
 // +---------------------------------------------------------------------------+
 // | calendarv2 Plugin 0.1                                                     |
 // +---------------------------------------------------------------------------+
-// | index.php                                                                 |
+// | event.php                                                                 |
 // |                                                                           |
-// | Plugin administration page                                                |
+// | Public plugin page                                                        |
 // +---------------------------------------------------------------------------+
 // | Copyright (C) 2010 by the following authors:                              |
 // |                                                                           |
@@ -36,32 +36,20 @@
 */
 
 require_once '../../../lib-common.php';
-require_once '../../auth.inc.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
 
-$display = '';
-$A = $_GET;
-
-// Ensure user even has the rights to access this page
-if (! SEC_hasRights('calendarv2.admin')) {
-    $display .= COM_siteHeader('menu', $MESSAGE[30])
-             . COM_showMessageText($MESSAGE[29], $MESSAGE[30])
-             . COM_siteFooter();
-
-    // Log attempt to access.log
-    COM_accessLog("User {$_USER['username']} tried to illegally access the calendarv2 plugin administration screen.");
-
-    echo $display;
+// take user back to the homepage if the plugin is not active
+if (! in_array('calendarv2', $_PLUGINS)) {
+    echo COM_refresh($_CONF['site_url'] . '/index.php');
     exit;
 }
 
-
-if ($A['mode'] == 'editsubmission') {
-    $event = new Event();
-    $event->get_moderation_event($A['id']);
-    $page = calendarv2_modify_event($event);
-    
-}
+$A = $_POST;
+$event = new Event();
+if (isset($A['modify_eid'])) {
+    $event->modify_moderation($A);
+    $page = calendarv2_single_event($event);
+} 
 
 
 // MAIN
@@ -73,6 +61,6 @@ $display .= $page;
 $display .= COM_endBlock();
 $display .= COM_siteFooter();
 
-echo $display;
+COM_output($display);
 
-?>
+?>  
