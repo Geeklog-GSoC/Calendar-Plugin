@@ -370,6 +370,7 @@ function calendarv2_templatePath ($path = '')
 * @param    array  $matrix   matrix of the month
 * @param    int  $month   current Month to be displayed
 * @param    int  $year   current Year to be displayed
+* @param    cid         current calendar to be displayed
 *
 * @return   string      proper page made from template
 *
@@ -452,17 +453,17 @@ function calendarv2_day_events($A, $cid)
     $go_back_link = $_CAV2_CONF['site_url'] . '/index.php';
     $prev = COM_createLink($LANG_CALENDARV2_EVENT['back'] , $go_back_link);
     $page->set_var('go_back_link' , $prev);
-    if($events != NULL) {
+    if($events->getNumEvents() > 0) {
         foreach($events as $key => $event) {
                 if ($event) {
-                    $event_link = $_CAV2_CONF['site_url'] . '/event.php?eid=' . $event['eid'];
+                    $event_link = $_CAV2_CONF['site_url'] . '/event.php?eid=' . $event->getEid();
                     $date_start = new DateTime();
                     $date_ends = new DateTime();
-                    $date_start->setTimestamp($event['datestart']);
-                    $date_ends->setTimestamp($event['dateend']); 
-                    $new_event = COM_createLink($date_start->format('h:i A') . ' - ' . $date_ends->format('h:i A') .' '. $event['title'], $event_link);
+                    $date_start->setTimestamp($event->getDatestart());
+                    $date_ends->setTimestamp($event->getDateend()); 
+                    $new_event = COM_createLink($date_start->format('h:i A') . ' - ' . $date_ends->format('h:i A') .' '. $event->getTitle(), $event_link);
                     $page->set_var($date_start->format('G') + 1 . '_event', $new_event);
-                }
+                } 
         }
     }
     $retval .= $page->finish($page->parse('output', 'page'));
@@ -484,8 +485,7 @@ function calendarv2_get_day_events(DateTime $date, $cid)
     $end_date = clone($date);
     $end_date->modify("+1 day");
     $a->getElements($date, $end_date, $cid);
-    $eve = $a->getElementsArray();
-    return $eve; 
+    return $a; 
 }
 
 
@@ -544,12 +544,11 @@ function calendarv2_minimal_display($matrix, $A, $cid)
                 $page->set_var('end_strong', ''); 
                 $day_link = COM_createLink($matrix[$i][$j], $link . 'day=' . $matrix[$i][$j] . '&year=' . $generate->format('Y') . '&month=' . $generate->format('m'));
                 $page->set_var('value', $day_link);
-                // I used $something to get only the values that are not NULL and to avoid
-                // double query
                 $date->setDate($generate->format("Y"), $generate->format("m"), $matrix[$i][$j]);
                 $date->setTime(0, 0 , 0);
-                if (($something = calendarv2_get_day_events($date, $cid)) !== NULL) {
-                    $events[$matrix[$i][$j]] = $something;
+                $something = calendarv2_get_day_events($date, $cid);
+                $num =  $something->getNumEvents();
+                if($num != 0) {
                     $page->set_var('strong' ,'<strong>');
                     $page->set_var('end_strong', '</strong>');
                 }

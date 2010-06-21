@@ -59,6 +59,23 @@ class Event {
     public function __construct(){
     }
 
+    // Implementation of some getters
+    public function getEid() {
+        return $this->_eid;
+    }
+    
+    public function getDatestart() {
+        return $this->_event_start;
+    }
+    
+    public function getDateend() {
+        return $this->_event_end;
+    }
+        
+    public function getTitle() {
+        return $this->_event_title;
+    }
+
     /**
     *
     * load_event_from_array
@@ -346,11 +363,35 @@ class Event {
 }                               
 
 
-class Aevents implements arrayaccess {
+class Aevents implements arrayaccess, iterator {
     private $_events = array();
+    private $_position;
+
+    // Implement iterator abastract methods
     public function __construct() {
+        $this->_position = 0;
+    }
+    public function rewind() {
+        $this->_position = 0;
     }
 
+    public function current() {
+        return $this->_events[$this->_position];
+    }
+    
+    public function key() {
+        return $this->_position;
+    }
+
+    public function next() {
+        ++$this->_position;
+    }
+    
+    public function valid() {
+        return isset($this->_events[$this->_position]);
+    }
+
+    //Implement array acces abastract methods.
     public function offsetSet($offset, $value) {
         if ($value instanceof Aevents) {
             if ($offset == "") {
@@ -390,26 +431,10 @@ class Aevents implements arrayaccess {
                 $i++;
             }
         }
-        $this->_length = $i;
     }
     
     public function getNumEvents() {
         return count($this->_events);
-    }
-    
-    /**
-    *
-    * gets an string array with all the events from the events array
-    * 
-    *
-    */
-    
-    public function getElementsArray() {
-        for ($i = 0; $i < $this->getNumEvents(); $i++) {
-            $events[$i] = $this->_events[$i]->get_details();
-        }
-        
-        return $events;
     }
 }
 
