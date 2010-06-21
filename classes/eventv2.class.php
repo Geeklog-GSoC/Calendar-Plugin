@@ -416,7 +416,7 @@ class Aevents implements arrayaccess, iterator {
     }
     
     /**
-    * populates an array of events. It querys the base betwen 2 times
+    * populates an array of events. It querys the datebase betwen 2 moments of time
     */
     public function getElements(DateTime $date_start, DateTime $date_end, $cid) {
         global $_TABLES;
@@ -430,6 +430,19 @@ class Aevents implements arrayaccess, iterator {
                 $this->_events[$i]->load_event_from_DB($event);
                 $i++;
             }
+        }
+    }
+    
+    /**
+    * adds an event to the array of events
+    */ 
+    public function addEvent($event) {
+        if (isset($this->_events)) {
+            $this->_events[$this->getNumEvents()] = $event;
+        }
+        else {
+            $this->_events[] = new Event();
+            $this->_events[0] = $event;
         }
     }
     

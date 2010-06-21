@@ -678,7 +678,7 @@ function calendarv2_display_calendars($calendars)
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'calendars.thtml'));
     foreach($calendars as $key => $calendar) {
-        $options .= "<option value = {$calendar['cid']}> {$calendar['title']} </option>";
+        $options .= "<option value = {$calendar->getCid()}> {$calendar->getTitle()} </option>";
     }
     $page->set_var('options', $options); 
     $link = $_CAV2_CONF['site_url'] . '/calendars.php';
@@ -738,7 +738,7 @@ function calendarv2_display_calendar_links($calendars)
     $page->set_file(array ('page' => 'calendar_links.thtml'));
     $link = $_CAV2_CONF['site_url'] . '/index.php?';
     foreach($calendars as $key => $calendar) {
-        $link_body .= COM_createLink($calendar['title'], $link . 'cid=' . $calendar['cid']);
+        $link_body .= COM_createLink($calendar->getTitle(), $link . 'cid=' . $calendar->getCid());
         $link_body .= '<br>'; 
     } 
     $page->set_var('link', $link_body);

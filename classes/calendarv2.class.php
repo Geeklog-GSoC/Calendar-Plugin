@@ -33,9 +33,10 @@
 // the new calendar plugin. Developed During GSoC 2010
 
 class Calendarv2 {
-    var $_creation_date;
-    var $day_number = 0;
-    var $matrix = array();
+    private $_creation_date;
+    private $_events = array();
+    private $_cid;
+    private $_title;
  
     /**
     *
@@ -47,6 +48,19 @@ class Calendarv2 {
 
     public function __construct() {
         $this->_creation_date = getdate(time());
+        $this->_events = new Aevents;
+    }
+    
+    public function setCid($cid) {
+        $this->_cid = $cid;
+    }
+
+    public function getCid() {
+        return $this->_cid;
+    }
+
+    public function getTitle() {
+        return $this->_title;
     }
 
     /**
@@ -56,7 +70,7 @@ class Calendarv2 {
     * @param    int     $year   the year number
     * @return   array   
     */ 
-     public function c2_generateMatrix($month, $year) {
+     public function generateMatrix($month, $year) {
         $start_date = mktime(0,0,0, $month, 1, $year);
         $days_in_month = date('t', $start_date);
         $first_day = date('w', $start_date);
@@ -72,6 +86,92 @@ class Calendarv2 {
         }
         return $matrix;
     }
+        
+    public function setEvents(Aevents $events) {
+        $this->_events = $events;
+    }
+    
+    public function addEvent(Event $event) {
+        $this->_events->addEvent($event);
+    }
+    
+    public function getEventsSpan(DateTime $datestart, DateTime $dateend) {
+        $this->_events->getElements($datestart, $dateend, $this->_cid);
+    }
+    
+    public function loadFromArray($A) {
+        $this->_title = $A['title'];
+        $this->_cid = $A['cid'];
+    }
+    
+}
+
+class Acalendarv2 implements arrayaccess, iterator {
+    private $_position;
+    private $_calendars = array(); 
+    // Implement iterator abastract methods
+    public function __construct() {
+        $this->_position = 0;
+        $this->_calendars[] = new Calendarv2();
+    }
+    public function rewind() {
+        $this->_position = 0;
+    }
+
+    public function current() {
+        return $this->_calendars[$this->_position];
+    }
+    
+    public function key() {
+        return $this->_position;
+    }
+
+    public function next() {
+        ++$this->_position;
+    }
+    
+    public function valid() {
+        return isset($this->_calendars[$this->_position]);
+    }
+
+    //Implement array acces abastract methods.
+    public function offsetSet($offset, $value) {
+        if ($value instanceof Aevents) {
+            if ($offset == "") {
+                $this->_calendars[] = $value;
+            }
+            else {
+                $this->_calendars[$offset] = $value;
+            }
+        }
+    }
+    
+    public function offsetExists($offset) {
+        return isset($this->_calendars[$offset]);
+    }
+    
+    public function offsetGet($offset) {
+        return $this->_calendars[$offset];
+    }
+    
+    public function offsetUnset($offset) {
+        unset($this->_calendars[$offset]);
+    }
+    
+    // Gets the calendars a user has
+    public function getCalendars($uid) {
+        global $_TABLES;
+        $i = 0;
+        $sql = "select cid, title from {$_TABLES['calendarv2']} where owner_id = {$uid} OR cid = 1";
+        $result = DB_query($sql);
+        $num_rows = DB_numRows($result);
+        $i = 0;
+        while($num_rows) {
+            $this->_calendars[$i]->loadFromArray(DB_fetchArray($result));
+            $i++;
+            $num_rows--;
+        }
+    } 
 }
 
 ?>
