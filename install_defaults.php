@@ -35,7 +35,7 @@
 
 global $_CAV2_CONF, $_CONF;
 $_CAV2_CONF = array();
-$_CAV2_CONF['folder'] = 'calendarv2/';
+$_CAV2_CONF['folder'] = 'calendarv2';
 
 function plugin_initconfig_calendarv2()
 {
