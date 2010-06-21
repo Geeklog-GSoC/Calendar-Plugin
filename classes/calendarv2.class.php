@@ -99,6 +99,15 @@ class Calendarv2 {
         $this->_events->getElements($datestart, $dateend, $this->_cid);
     }
     
+    public function getTodayEvents(Datetime $date) {
+        $a = new Aevents();
+        $day_end = clone($date);
+        $day_end->modify('+1 day');
+        $a->getElements($date, $day_end, $this->_cid);
+        return $a;
+    }
+        
+    
     public function loadFromArray($A) {
         $this->_title = $A['title'];
         $this->_cid = $A['cid'];

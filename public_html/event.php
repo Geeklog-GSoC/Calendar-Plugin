@@ -43,11 +43,14 @@ if (! in_array('calendarv2', $_PLUGINS)) {
     exit;
 }
 
-require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php'; 
+require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
+require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';
 
 $A = $_GET;
 $B = $_POST;
 $cid = $_GET['cid'];
+$calendar = new Calendarv2();
+$calendar->setCid($cid);
 // Check if mofication of an event or deletion is asked by a $_POST variable
 if (empty($_POST)) {
     // Check if we need to display a single event.
@@ -57,8 +60,8 @@ if (empty($_POST)) {
         $page = calendarv2_single_event($event);
     }
     else {
-        if (is_array ($A)) {
-            $page = calendarv2_day_events($_GET, $cid);
+        if (is_array($A)) {
+            $page = calendarv2_day_events($_GET, $calendar);
         }
     }
 }

@@ -367,7 +367,6 @@ function calendarv2_templatePath ($path = '')
  /**
 * Creates the main page from the template
 *
-* @param    array  $matrix   matrix of the month
 * @param    int  $month   current Month to be displayed
 * @param    int  $year   current Year to be displayed
 * @param    cid         current calendar to be displayed
@@ -376,7 +375,7 @@ function calendarv2_templatePath ($path = '')
 *
 */  
 
-function calendarv2_display($matrix, $A, $calendars, $cid)
+function calendarv2_display($A, $calendars, $calendar)
 {
     
     global $_CONF, $_CAV2_CONF;
@@ -387,7 +386,7 @@ function calendarv2_display($matrix, $A, $calendars, $cid)
     $page->set_var('display_today_events', 'today events');
     $form = calendarv2_form_display($A, $calendars);
     $page->set_var('event_form', $form);
-    $minimal = calendarv2_minimal_display($matrix, $A, $cid);
+    $minimal = calendarv2_minimal_display($A, $calendar);
     $page->set_var('minimal' , $minimal);
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
@@ -433,16 +432,18 @@ function calendarv2_form_display($A, $calendars)
  * are events there are displayed at a certain hour.
  * 
  * @param   array   Post Variables
+ * @param   object  Calendar to seach in
  * @return  string  display from template
  */   
 
-function calendarv2_day_events($A, $cid)
+function calendarv2_day_events($A, $calendar)
 {
     global $_CAV2_CONF, $LANG_CALENDARV2_EVENT;
     $date = new DateTime();
     $date->setDate($A['year'] , $A['month'], $A['day']);
     $date->setTime(0 , 0, 0);
-    $events = calendarv2_get_day_events($date, $cid);
+    //var_dump($calendar->getCid());
+    $events = $calendar->getTodayEvents($date);
     $page = new Template(calendarv2_templatePath()); 
     $page->set_file(array ('page' => 'dayevent.thtml'));
     $page->set_var('site_url', $_CAV2_CONF['site_url']); 
@@ -470,41 +471,25 @@ function calendarv2_day_events($A, $cid)
     return $retval; 
 }
     
-         
-/**
- *
- * returns a list of events from a certain month and year
- *
- *
- */   
-
-function calendarv2_get_day_events(DateTime $date, $cid) 
-{     
-    global $_TABLES;    
-    $a = new Aevents;
-    $end_date = clone($date);
-    $end_date->modify("+1 day");
-    $a->getElements($date, $end_date, $cid);
-    return $a; 
-}
-
 
 /**
 * Creates the calendar from the template
 *
-* @param    array  $matrix   matrix of the month
-* @param    int  $month   current Month to be displayed
-* @param    int  $year   current Year to be displayed
 *
 * @return   string      proper page made from template
 *
 */ 
 
-function calendarv2_minimal_display($matrix, $A, $cid)
+function calendarv2_minimal_display($A, $calendar)
 {
     
     $date = new DateTime();
     $generate = new DateTime();
+    if (!isset($A['month']) && (!isset($A['year']))) {
+        $A['month'] = $date->format('m');
+        $A['year'] = $date->format('Y');
+    }
+    $matrix = $calendar->generateMatrix($A['month'], $A['year']);
     global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH;
     if (isset($A['month']) && isset($A['year'])) {
         $generate->setDate($A['year'], $A['month'], 1);
@@ -513,7 +498,7 @@ function calendarv2_minimal_display($matrix, $A, $cid)
     $page->set_file(array ('page' => 'month_view.thtml',
                             'each_element' => 'each_element.thtml',
                             'each_element2'=> 'each_element2.thtml'));
-    $link = $_CAV2_CONF['site_url'] . "/event.php?cid={$cid}&";
+    $link = $_CAV2_CONF['site_url'] . "/event.php?cid={$calendar->getCid()}&";
     $link2 = $_CAV2_CONF['site_url'] . '/index.php?';
     $prev_month = $generate->format('m') - 1;
     if ($prev_month == 0) {
@@ -546,7 +531,7 @@ function calendarv2_minimal_display($matrix, $A, $cid)
                 $page->set_var('value', $day_link);
                 $date->setDate($generate->format("Y"), $generate->format("m"), $matrix[$i][$j]);
                 $date->setTime(0, 0 , 0);
-                $something = calendarv2_get_day_events($date, $cid);
+                $something = $calendar->getTodayEvents($date);
                 $num =  $something->getNumEvents();
                 if($num != 0) {
                     $page->set_var('strong' ,'<strong>');
@@ -637,36 +622,11 @@ function calendarv2_modify_event($event)
     return $retval;
 }
 
- /**
-* Gets an array with all the calendars an user has 
-*
-* @param    int  $uid   USER id
-*
-* @return   array   calendar id's
-*
-*/
-
-function calendarv2_get_calendars ($uid)
-{   
-    //All users have acces to main event calendar
-    global $_TABLES;
-    $i = 0;
-    $sql = "select cid, title from {$_TABLES['calendarv2']} where owner_id = {$uid} OR cid = 1";
-    $result = DB_query($sql);
-    $num_rows = DB_numRows($result);
-    while($num_rows) {
-        $calendars[$i] = DB_fetchArray($result);
-        $i++;
-        $num_rows--;
-    }
-    return $calendars;
-}   
-
 /**
 * Creates a page from template with a <select> that has all calendars
 * suplied by the calendars variable
 *
-* @param    array   a list of calendars (cid and title)
+* @param    array   a list of calendars 
 *
 * @return   string  html
 *

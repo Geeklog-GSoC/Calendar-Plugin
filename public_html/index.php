@@ -77,11 +77,9 @@ if (isset($_POST['submit'])) {
         $page .= COM_showMessageText("You have succesfully added an event", "Alert");
     else
         $page .= COM_showMessageText("Your event has been submitted and expects moderation");
-    $calendar->addEvent($event);
 }
 
 
-$matrix = $calendar->generateMatrix($A['month'] , $A['year']);
 $page .= calendarv2_display_calendar_links($calendars);
 
 
@@ -91,7 +89,7 @@ $display .= COM_startBlock($LANG_CALENDARV2_1['plugin_name']);
 $display .= '<p>Welcome to the ' . $LANG_CALENDARV2_1['plugin_name'] . ' plugin, '
          . $_USER['username'] . '!</p>';
 $display .= $page;
-$display .= calendarv2_display($matrix, $A, $calendars, $cid);
+$display .= calendarv2_display($A, $calendars, $calendar);
 $display .= COM_endBlock();
 $display .= COM_siteFooter();
 
