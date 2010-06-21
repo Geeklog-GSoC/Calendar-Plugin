@@ -420,8 +420,8 @@ class Aevents implements arrayaccess, iterator {
     */
     public function getElements(DateTime $date_start, DateTime $date_end, $cid) {
         global $_TABLES;
-        $sql = "select * from {$_TABLES['c2events']} where {$date_start->getTimestamp()}";
-        $sql .= "<= datestart AND dateend < {$date_end->getTimestamp()} AND cid = '$cid'";
+        $sql = "select * from {$_TABLES['c2events']} where {$date_start->format('U')}";
+        $sql .= "<= datestart AND dateend < {$date_end->format('U')} AND cid = '$cid'";
         $result = DB_query($sql);
         $i = 0;
         while($event = DB_fetchArray($result)) {
