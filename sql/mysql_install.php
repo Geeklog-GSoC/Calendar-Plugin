@@ -89,4 +89,34 @@ CREATE TABLE {$_TABLES['cv2submission']} (
 $_SQL[] = "
 INSERT INTO {$_TABLES['calendarv2']} (owner_id, title) VALUES (2, 'Site Wide');";
 
+$_SQL[] = "
+CREATE TABLE {$_TABLES['recurring_events']} (
+    reid varchar(20) NOT NULL default '',
+    datestart int(10) unsigned NOT NULL default '0',
+    dateend int(10) unsigned NOT NULL default '0', 
+    last_event int(10) unsigned default NULL, 
+    title varchar(128) default NULL,
+    description text,
+    location varchar(40) default NULL,
+    allday tinyint(1) NOT NULL default '0') ENGINE=MyISAM
+";
+
+$_SQL[] = "
+CREATE TABLE {$_TABLES['recurring_specification']} (
+    preid varchar(20) NOT NULL default '',
+    MID int(10) unsigned default '0',
+    exception tinyint(1) unsigned NOT NULL default '0',
+    day_period tinyint(2) unsigned default NULL,
+    week_period tinyint(2) unsigned default NULL, 
+    month_period tinyint(2) unsigned default NULL,
+    year_period tinyint(2) unsigned default NULL, 
+    which_day tinyint(2) unsigned default NULL,
+    which_weekday tinyint(1) unsigned default NULL,
+    which_week tinyint(1) unsigned default NULL, 
+    which_month tinyint(2) unsigned default NULL
+) ENGINE=MyISAM
+"; 
+      
+     
+
 ?>

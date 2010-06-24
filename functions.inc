@@ -60,6 +60,8 @@ if (file_exists($langfile)) {
 $_TABLES['calendarv2'] = $_DB_table_prefix . 'calendarv2';
 $_TABLES['c2events'] = $_DB_table_prefix . 'c2events';
 $_TABLES['cv2submission'] = $_DB_table_prefix . 'cv2submission';
+$_TABLES['recurring_events'] = $_DB_table_prefix . 'recurring_events';
+$_TABLES['recurring_specification'] = $_DB_table_prefix . 'recurring_specification';
 
 /**
 * Load the config settings
@@ -321,7 +323,7 @@ function plugin_autouninstall_calendarv2()
 {
     $out = array (
         /* give the name of the tables, without $_TABLES[] */
-        'tables' => array('calendarv2', 'c2events', 'cv2submission'),
+        'tables' => array('calendarv2', 'c2events', 'cv2submission', 'recurring_events', 'recurring_specification'),
         /* give the full name of the group, as in the db */
         'groups' => array('calendarv2 Admin', 'calendarv2Moderator'),
         /* give the full name of the feature, as in the db */

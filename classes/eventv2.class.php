@@ -45,7 +45,6 @@ class Event {
     private $_location;
     private $_description;
     private $_allday;
-    private $_valid;
     private $_moderation;
 
     /**
@@ -110,9 +109,6 @@ class Event {
         
         $end_time = DateTime::createFromFormat('h:i A', $A['end_time']);
         $this->_event_end = mktime($end_time->format('h'), $end_time->format('i'), NULL, $month , $day, $year);
-        if ($this->_event_start > $this->_event_end) {
-            $this->_valid = false;
-        }
 
         //TODO depending on recurring_type get recurring events info
         $recurring_type = COM_applyFilter($A['recurring_type'], true);
@@ -309,7 +305,6 @@ class Event {
         $this->_allday = $event['allday'];
         $this->_eid = $eid;
         $this->_calendar_id = $event['cid'];
-        $this->_valid = true; 
     }
 
     /**
@@ -336,7 +331,6 @@ class Event {
         $this->_allday = $event['allday'];
         $this->_eid = $eid;
         $this->_calendar_id = $event['cid'];
-        $this->_valid = true;
     }  
             
 
@@ -448,6 +442,13 @@ class Aevents implements arrayaccess, iterator {
     
     public function getNumEvents() {
         return count($this->_events);
+    }
+}
+
+
+class Revent extends Event {
+    function __construct($A) {
+        var_dump($A);
     }
 }
 

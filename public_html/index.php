@@ -65,18 +65,24 @@ $event = new Event();
 $calendars = new Acalendarv2();
 $calendars->getCalendars($_USER['uid']);
 if (isset($_POST['submit'])) {
-    $event->load_event_from_array($_POST);
-    if (!SEC_hasRights('calendarv2.admin')) {
-        $moderate = true;
+    if ($_POST['recurring_type'] == 1) {
+        $event->load_event_from_array($_POST);
+        if (!SEC_hasRights('calendarv2.admin')) {
+            $moderate = true;
+        }
+        else {
+            $moderate = false;
+        }
+        plugin_savesubmission_calendarv2($event, $moderate);
+        if ($moderate == false)
+            $page .= COM_showMessageText("You have succesfully added an event", "Alert");
+        else
+            $page .= COM_showMessageText("Your event has been submitted and expects moderation");
     }
+    // The event is recurring, needs special handling.
     else {
-        $moderate = false;
+        $revent = new Revent($_POST);
     }
-    plugin_savesubmission_calendarv2($event, $moderate);
-    if ($moderate == false)
-        $page .= COM_showMessageText("You have succesfully added an event", "Alert");
-    else
-        $page .= COM_showMessageText("Your event has been submitted and expects moderation");
 }
 
 

@@ -75,7 +75,9 @@ function plugin_autoinstall_calendarv2($pi_name)
     $tables = array(
         'calendarv2',
         'c2events',
-        'cv2submission'
+        'cv2submission',
+        'recurring_events',
+        'recurring_specification'
     );
 
     $inst_parms = array(
