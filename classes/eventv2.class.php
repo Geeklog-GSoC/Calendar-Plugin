@@ -33,19 +33,19 @@
 // the new calendar plugin. Developed During GSoC 2010
 
 class Event {
-    private $_eid;
-    private $_owner;
-    private $_calendar_id;
-    private $_perm;
-    private $_creation_date;
-    private $_event_title;
-    private $_event_start;
-    private $_event_end;
-    private $_recurring;
-    private $_location;
-    private $_description;
-    private $_allday;
-    private $_moderation;
+    protected $_eid;
+    protected $_owner;
+    protected $_calendar_id;
+    protected $_perm;
+    protected $_creation_date;
+    protected $_event_title;
+    protected $_event_start;
+    protected $_event_end;
+    protected $_recurring;
+    protected $_location;
+    protected $_description;
+    protected $_allday;
+    protected $_moderation;
 
     /**
     *
@@ -112,7 +112,7 @@ class Event {
 
         //TODO depending on recurring_type get recurring events info
         $recurring_type = COM_applyFilter($A['recurring_type'], true);
-        $this->_description = addslashes($A['event_description']);
+        $this->_description = $A['event_description'];
         $this->_location = addslashes($A['event_location']);
         $this->_calendar_id = intval($A['calendar_cid']);
         if ($A['all_day'] == 'on') {
@@ -447,8 +447,52 @@ class Aevents implements arrayaccess, iterator {
 
 
 class Revent extends Event {
-    function __construct($A) {
-        var_dump($A);
+    private $_recurring_ends;
+    private $_ends_never;
+    private $_year;
+    private $_week = array();
+    private $_month;
+    public function __construct($A) {
+        $this->_recurring_ends = $A['recurring_ends'];
+        $this->_ends_never = $A['recurring_ends_never'];
+        // every day recurrence
+        $recurring_type = intval($A['recurring_type']);
+        switch ($recurring_type) {
+            case 2:
+                $this->parse_every_day($A);
+                break;
+            case 3:
+                $this->parse_every_week($A);
+                break; 
+            case 4:
+                $this->parse_every_month($A);
+                break;
+            case 5:
+                $this->parse_every_year($A);
+                break;
+            default:
+                throw new Exception('Something is wrong with the recurring type value');
+        }
+    }
+    private function parse_every_day($A) {
+        $recurring_rule = $A['recurring_every_day'];
+        $this->load_event_from_array($A);
+    }
+        
+    private function parse_every_week($A) {
+        for ($i = 1; $i <= 7; $i++) {
+            if ($A["day_recurring_$i"] == 'on') {
+                $this->_week[$i] = true;
+            }
+        }
+    }
+    
+    private function parse_every_month($A) {
+        $this->_month = $A['recurring_month'];
+    }
+    
+    private function parse_every_year($A) {
+        $this->_year = $A['recurring_year'];
     }
 }
 
