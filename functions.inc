@@ -765,7 +765,7 @@ function calendarv2_create_events(DateTime $last_event_generated = NULL) {
     while ($array = DB_fetchArray($result)) {
         $end_generating = $last_event_generated;
         $start_generating = new DateTime('@' . $array['datestart']);
-        if ($array['recurring_ends'] == 0) {
+        if ($array['recurring_ends'] == 1) {
             $end_generating->modify("+1 year");  
         }
         else {
@@ -779,7 +779,7 @@ function calendarv2_create_events(DateTime $last_event_generated = NULL) {
             if ($array['exception'] == 0) {
                 $recurrence_start = new DateTime('@' . $array['datestart']);
                 $recurrence_end = new DateTime('@' . $array['dateend']);
-                if ($array2['day_period'] != NULL) {
+                if (!is_null($array2['day_period'])) {
                     while ($start_generating < $end_generating) {
                         $event = new Event();
                         $recurrence_start->modify('+' . $array2['day_period'] . ' days');
@@ -791,6 +791,32 @@ function calendarv2_create_events(DateTime $last_event_generated = NULL) {
                         $events->addEvent($event);
                         $start_generating->modify('+' . $array2['day_period'] . ' days');
                     }
+                }
+                if (!is_null($array2['month_period'])) {
+                    while ($start_generating < $end_generating) { 
+                        $event = new Event();
+                        $recurrence_start->modify('+' . $array2['month_period'] . ' months');
+                        $recurrence_end->modify('+' . $array2['month_period'] . ' months'); 
+                        $array['datestart'] = $recurrence_start->format('U');
+                        $array['dateend'] = $recurrence_end->format('U');
+                        $event->load_event_from_DB_array($array);
+                        $event->setEid(COM_makeSid() . $i++);
+                        $events->addEvent($event);
+                        $start_generating->modify('+' . $array2['month_period'] . ' months');
+                    } 
+                }
+                if (!is_null($array2['year_period'])) {
+                    while ($start_generating < $end_generating) {
+                        $event = new Event();   
+                        $recurrence_start->modify('+' . $array2['year_period'] . ' years');
+                        $recurrence_end->modify('+' . $array2['year_period'] . ' years'); 
+                        $array['datestart'] = $recurrence_start->format('U');
+                        $array['dateend'] = $recurrence_end->format('U');
+                        $event->load_event_from_DB_array($array);
+                        $event->setEid(COM_makeSid() . $i++);
+                        $events->addEvent($event);
+                        $start_generating->modify('+' . $array2['year_period'] . ' years');
+                    } 
                 }
             }
         }

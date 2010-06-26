@@ -33,14 +33,24 @@
 // the new calendar plugin. Developed During GSoC 2010
 
 class Event {
-    protected $_eid;
+    
+    // Geeklog permission items
     protected $_owner;
+    protected $_group;
+    protected $_group_id;
+    protected $_perm_owner;
+    protected $_perm_group;
+    protected $_perm_members;
+    protected $_perm_anon;
+
+    // Event details
+    protected $_eid;
     protected $_calendar_id;
     protected $_perm;
     protected $_creation_date;
-    protected $_event_title;
-    protected $_event_start;
-    protected $_event_end;
+    protected $_title;
+    protected $_start;
+    protected $_end;
     protected $_recurring;
     protected $_location;
     protected $_description;
@@ -64,15 +74,21 @@ class Event {
     }
     
     public function getDatestart() {
-        return $this->_event_start;
+        return $this->_start->format('U');
     }
     
     public function getDateend() {
-        return $this->_event_end;
+        return $this->_end->format('U');
     }
         
     public function getTitle() {
-        return $this->_event_title;
+        return $this->_title;
+    }
+
+    // And some setters
+    public function setEid($eid)
+    {
+        $this->_eid = $eid;
     }
 
     /**
@@ -86,7 +102,8 @@ class Event {
     */  
     public function load_event_from_array($A) {
         global $_USER;
-        $this->_event_title = $A['event_title'];
+        $this->_title = $A['event_title'];
+        
         if (!isset($this->_owner)) {
             if (COM_isAnonUser()) {
                 $this->_owner = 1;
@@ -95,28 +112,35 @@ class Event {
                 $this->_owner = $_USER['uid'];
             }
         }
-        $start_date = DateTime::createFromFormat('m/d/Y', $A['start_date']);
-        $day = $start_date->format('d');
-        $month = $start_date->format('m');
-        $year = $start_date->format('Y');
- 
-        $start_time = DateTime::createFromFormat('h:i A', $A['start_time']);
-        $this->_event_start = mktime($start_time->format('H '), $start_time->format('i'), NULL, $month , $day, $year);
-        $end_date = DateTime::createFromFormat('m/d/Y', $A['end_date']);
-        $day = $end_date->format('d');
-        $month = $end_date->format('m');
-        $year = $end_date->format('Y'); 
-        
-        $end_time = DateTime::createFromFormat('h:i A', $A['end_time']);
-        $this->_event_end = mktime($end_time->format('h'), $end_time->format('i'), NULL, $month , $day, $year);
+
+        $start = $A['start_date'] . $A['start_time'];
+        try { 
+            $this->_start = new DateTime($start);
+        } catch (Exception $e) {
+            throw new Exception('DateTime failed' , $e);
+        }
+
+        $end = $A['end_date'] . $A['end_time'];
+        try {
+            $this->_end = new DateTime($end);
+        } catch (Exception $e) {
+            throw new Exception('DateTime failed' , $e);
+        }
+
         $this->_description = $A['event_description'];
         $this->_location = $A['event_location'];
         $this->_calendar_id = intval($A['calendar_cid']);
+        $this->_allday = 0;                                
         if ($A['all_day'] == 'on') {
             $this->_allday = 1;
         }
-        else { 
-            $this->_allday = 1;
+
+        // Deal breakers
+        if (empty($this->_title)) {
+            throw new Exception("Event must have a title");
+        }
+        if (empty($this->_calendar_id)) {
+            throw new Exception("Event must have a calendar or else is useless");
         }
     }
     /**
@@ -128,11 +152,11 @@ class Event {
     */  
     
     public function load_event_from_DB_array($A) {
-        $this->_event_title = $A['title'];
-        $this->_event_start = $A['datestart'];
-        $this->_event_end = $A['dateend'];
-        $this->_location = $A['location'];
-        $this->_description = $A['description'];
+        $this->_title = stripslashes($A['title']);
+        $this->_start = new DateTime('@' . $A['datestart']);
+        $this->_end =  new DateTime('@' . $A['dateend']); 
+        $this->_location = stripslashes($A['location']);
+        $this->_description = stripslashes($A['description']);
         $this->_allday = $A['allday'];  
         $this->_eid = $A['eid'];
         $this->_recurring = $A['recurring'];
@@ -140,10 +164,7 @@ class Event {
         $this->_owner = $A['owner_id'];
     }
     
-    public function setEid($eid)
-    {
-        $this->_eid = $eid;
-    } 
+     
 
     /**
     *
@@ -156,19 +177,24 @@ class Event {
     public function save_to_database()
     {
         global $_TABLES;
-        $fields = 'eid,' . 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'owner_id,' . 'cid';
-        $elements = "'$this->_eid' ," . "'$this->_event_title' ," . "'$this->_description' ,"  
-                    . "'$this->_event_start'," . "'$this->_event_end'," 
-                    . "'$this->_location'," . "'$this->_allday'," . "'$this->_owner',"
+        $fields = 'eid,' . 'title,' . 'description,'. 'datestart,'. 
+                  'dateend,'. 'location,'. 'allday,' . 'owner_id,' . 'cid';
+        $sanitized = $this->getSanitized();      
+        $elements = "'{$sanitized['eid']}' ," . "'{$sanitized['title']}' ," . "'{$sanitized['description']}' ,"  
+                    . "'{$sanitized['start']}'," . "'{$sanitized['end']}'," 
+                    . "'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_owner',"
                     . "'$this->_calendar_id'";
-        // Check to see if the events is directly saved into the database or mark for admin aproval.
+
+        // Check to see if the events is directly saved into the database 
+        // or mark for admin aproval.
         if ($this->_moderation == false) {
             DB_save($_TABLES['c2events'], $fields, $elements);
         }
         else {
             DB_save($_TABLES['cv2submission'], $fields, $elements);
-        }
-    }
+        } 
+        
+   }
  
     /**
     *
@@ -205,15 +231,17 @@ class Event {
     *
     */   
     
-    public function update_to_database($eid)
+    public function update_to_database($eid, $table)
     {
         global $_TABLES;
-        $fields = "title = '$this->_event_title' ," . "description = '$this->_description',";
-        $fields .= "datestart = '$this->_event_start',";
-        $fields .= "dateend = '$this->_event_end',";
-        $fields .= "location = '$this->_location',";
+        
+        $sanitized = $this->getSanitized();
+        $fields = "title = '{$sanitized['title']}' ," . "description = '{$sanitized['description']}',";
+        $fields .= "datestart = '{$sanitized['start']}',";
+        $fields .= "dateend = '{$sanitized['end']}',";
+        $fields .= "location = '{$sanitized['location']}',";
         $fields .= "allday = '$this->_allday'";
-        $sql = "update {$_TABLES['c2events']} set {$fields} where eid = {$eid}";
+        $sql = "update {$_TABLES[$table]} set {$fields} where eid = {$sanitized['eid']}";
         DB_query($sql);
     }
 
@@ -229,7 +257,7 @@ class Event {
     {
         $this->load_event_from_array($P);
         $this->_eid = $P['modify_eid'];
-        $this->update_to_database($P['modify_eid']);
+        $this->update_to_database($P['modify_eid'], 'c2events');
     }
 
     /**
@@ -243,33 +271,12 @@ class Event {
     {
         $this->load_event_from_array($P);
         $this->_eid = $P['modify_eid'];
-        $this->update_to_database_moderation($P['modify_eid']);
-    }
-    
-    /**
-    *
-    * update database
-    *
-    * Updates information to database from an event object
-    *
-    */    
-
-    public function update_to_database_moderation($eid) {
-        global $_TABLES;
-        $fields = "title = '$this->_event_title' ," . "description = '$this->_description',";
-        $fields .= "datestart = '$this->_event_start',";
-        $fields .= "dateend = '$this->_event_end',";
-        $fields .= "location = '$this->_location',";
-        $fields .= "allday = '$this->_allday'";
-        $sql = "update {$_TABLES['cv2submission']} set {$fields} where eid = {$eid}";
-        DB_query($sql); 
+        $this->update_to_database($P['modify_eid'], 'cv2submission');
     }
     
     /**
     *
     * Deletes an event based on his EID
-    * 
-    * 
     *
     */    
 
@@ -282,7 +289,6 @@ class Event {
     *
     * Fils and event with information from database based on an eid.
     *
-    *
     */    
 
     public function get_event($eid) 
@@ -294,9 +300,9 @@ class Event {
         $result = DB_query($sql);
         $event = DB_fetchArray($result);
         $this->_calendar_id = $event['cid']; 
-        $this->_event_title = $event['title'];
-        $this->_event_start = $event['datestart'];     
-        $this->_event_end = $event['dateend'];
+        $this->_title = $event['title'];
+        $this->_start = new DateTime('@' . $event['datestart']);     
+        $this->_end =  new DateTime('@' . $event['dateend']);
         $this->_location = $event['location'];
         $this->_description = $event['description'];
         $this->_allday = $event['allday'];
@@ -307,7 +313,6 @@ class Event {
     /**
     *
     * Fils and moderation event with information from database based on an eid.
-    *
     *
     */     
     
@@ -320,9 +325,9 @@ class Event {
         $result = DB_query($sql);
         $event = DB_fetchArray($result);
         $this->_calendar_id = $event['cid']; 
-        $this->_event_title = $event['title'];
-        $this->_event_start = $event['datestart'];     
-        $this->_event_end = $event['dateend'];
+        $this->_title = $event['title'];
+        $this->_start = new DateTime('@' . $event['datestart']);     
+        $this->_end = new DateTime('@' . $event['dateend']);
         $this->_location = $event['location'];
         $this->_description = $event['description'];
         $this->_allday = $event['allday'];
@@ -334,21 +339,34 @@ class Event {
     /**
     *
     * Returns a string with all the information needed for an event
-    * 
     *
     */     
 
     public function get_details()
     {
-        $A['title'] = $this->_event_title;
-        $A['datestart'] = $this->_event_start;
-        $A['dateend'] = $this->_event_end;
+        $A['title'] = $this->_title;
+        $A['datestart'] = $this->_start->format('U');
+        $A['dateend'] = $this->_end->format('U');
         $A['location'] = $this->_location;
         $A['description'] = $this->_description;
         $A['allday'] = $this->_allday;
         $A['eid'] = $this->_eid;
         $A['cid'] = $this->_calendar_id;
         return $A;
+    }
+
+    // Sanitizes the data
+    private function getSanitized()
+    {
+        $elements = array();
+        // The data that needs to be sanitized
+        $elements['eid'] = addslashes($this->_eid);
+        $elements['title'] = addslashes($this->_title);
+        $elements['description'] = addslashes($this->_description);
+        $elements['location'] = addslashes($this->_location);
+        $elements['start'] = $this->_start->format("U");
+        $elements['end'] = $this->_end->format("U");
+        return $elements; 
     }
         
 }                               
@@ -443,6 +461,7 @@ class Revent extends Event {
     private $_year;
     private $_week = array();
     private $_month;
+    private $_reid;
     public function __construct($A) {
         $this->_ends_never = $A['recurring_ends_never'];
         if ($this->_ends_never == 'on') {
@@ -472,20 +491,26 @@ class Revent extends Event {
                 throw new Exception('Something is wrong with the recurring type value');
         }
     }
+
+    private  function save_recurring_events($A) {
+        global $_TABLES;
+        //Sanitize
+        $start = $this->_start->format('U');
+        $end = $this->_end->format('U');
+        $this->load_event_from_array($A);
+        $fields = 'reid,' . 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'recurring_ends';
+        $values = "'$this->_reid'," . "'$this->_title'," . "'$this->_description'," . 
+                    "'$start' ," . "'$end'," ."'$this->_location'," . "'$this->_allday'," . "'$this->_recurring_ends'";
+        DB_save($_TABLES['recurring_events'], $fields, $values); 
+    }
+
     private function parse_every_day($A) {
         global $_TABLES;
         $day = $A['recurring_every_day'];
-        $this->load_event_from_array($A);
-        $reid = COM_makeSid();
-        
-
-        $fields = 'reid,' . 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'recurring_ends';
-        $values = "'$reid'," . "'$this->_event_title'," . "'$this->_description'," . 
-                    "'$this->_event_start' ," . "'$this->_event_end'," ."'$this->_location'," . "'$this->_allday'," . "'$this->_recurring_ends'";
-        DB_save($_TABLES['recurring_events'], $fields, $values);
-
+        $this->_reid = COM_makeSid();
+        $this->save_recurring_events($A);
         $fields = 'preid,' . 'day_period';
-        $values = "'$reid'," . "'$day'"; 
+        $values = "'$this->_reid'," . "'$day'"; 
         DB_save($_TABLES['recurring_specification'], $fields, $values);
     }
         
@@ -498,11 +523,23 @@ class Revent extends Event {
     }
     
     private function parse_every_month($A) {
+        global $_TABLES;
         $this->_month = $A['recurring_month'];
+        $this->_reid = COM_makeSid();
+        $this->save_recurring_events($A);
+        $fields = 'preid, month_period';
+        $values = "'$this->_reid'," . "'1'";
+        DB_save($_TABLES['recurring_specification'], $fields, $values);
     }
     
     private function parse_every_year($A) {
+        global $_TABLES;
         $this->_year = $A['recurring_year'];
+        $this->_reid = COM_makeSid();
+        $this->save_recurring_events($A);
+        $fields = 'preid, year_period';
+        $values = "'$this->_reid'," . "'1'";
+        DB_save($_TABLES['recurring_specification'], $fields, $values);
     }
 
 }

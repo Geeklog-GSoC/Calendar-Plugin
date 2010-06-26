@@ -53,12 +53,8 @@
 					
 				</div>	
 				<div id = "monthly_recurring">
-					{lang_every_month} {lang_on}: 
-					<input id = "every_month" value = "{month_recurring_day}" name = "recurring_month" /> 
 				</div> 
 				<div id = "yearly_recurring">	
-					{lang_every_year} {lang_on}
-					<input id = "every_year" value = "{year_recurring_day}" name = "recurring_year"/> 
 				</div>
 				{lang_date_recurring}:
 				<input id = "recurring_ends" name = "recurring_ends"> <br>
