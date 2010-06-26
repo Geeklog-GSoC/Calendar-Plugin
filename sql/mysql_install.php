@@ -92,8 +92,10 @@ INSERT INTO {$_TABLES['calendarv2']} (owner_id, title) VALUES (2, 'Site Wide');"
 $_SQL[] = "
 CREATE TABLE {$_TABLES['recurring_events']} (
     reid varchar(20) NOT NULL default '',
+    cid int(10) unsigned NOT NULL default '1',
     datestart int(10) unsigned NOT NULL default '0',
-    dateend int(10) unsigned NOT NULL default '0', 
+    dateend int(10) unsigned NOT NULL default '0',
+    recurring_ends int(10) unsigned NOT NULL default '0', 
     last_event int(10) unsigned default NULL, 
     title varchar(128) default NULL,
     description text,

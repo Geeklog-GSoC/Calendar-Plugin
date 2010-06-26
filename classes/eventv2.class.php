@@ -86,7 +86,7 @@ class Event {
     */  
     public function load_event_from_array($A) {
         global $_USER;
-        $this->_event_title = addslashes($A['event_title']);
+        $this->_event_title = $A['event_title'];
         if (!isset($this->_owner)) {
             if (COM_isAnonUser()) {
                 $this->_owner = 1;
@@ -109,11 +109,8 @@ class Event {
         
         $end_time = DateTime::createFromFormat('h:i A', $A['end_time']);
         $this->_event_end = mktime($end_time->format('h'), $end_time->format('i'), NULL, $month , $day, $year);
-
-        //TODO depending on recurring_type get recurring events info
-        $recurring_type = COM_applyFilter($A['recurring_type'], true);
         $this->_description = $A['event_description'];
-        $this->_location = addslashes($A['event_location']);
+        $this->_location = $A['event_location'];
         $this->_calendar_id = intval($A['calendar_cid']);
         if ($A['all_day'] == 'on') {
             $this->_allday = 1;
@@ -130,15 +127,15 @@ class Event {
     *
     */  
     
-    public function load_event_from_DB($A) {
-        $this->_eid = $A['eid'];
+    public function load_event_from_DB_array($A) {
         $this->_event_title = $A['title'];
         $this->_event_start = $A['datestart'];
         $this->_event_end = $A['dateend'];
-        $this->_recurring = $A['recurring'];
         $this->_location = $A['location'];
         $this->_description = $A['description'];
-        $this->_allday = $A['allday']; 
+        $this->_allday = $A['allday'];  
+        $this->_eid = $A['eid'];
+        $this->_recurring = $A['recurring'];
         $this->_calendar_id =$A['cid'];
         $this->_owner = $A['owner_id'];
     }
@@ -421,7 +418,7 @@ class Aevents implements arrayaccess, iterator {
         while($event = DB_fetchArray($result)) {
             $this->_events[] = new Event();
             if($event['eid'] != NULL) {
-                $this->_events[$i]->load_event_from_DB($event);
+                $this->_events[$i]->load_event_from_DB_array($event, 'c2events');
                 $i++;
             }
         }
@@ -431,13 +428,7 @@ class Aevents implements arrayaccess, iterator {
     * adds an event to the array of events
     */ 
     public function addEvent($event) {
-        if (isset($this->_events)) {
             $this->_events[$this->getNumEvents()] = $event;
-        }
-        else {
-            $this->_events[] = new Event();
-            $this->_events[0] = $event;
-        }
     }
     
     public function getNumEvents() {
@@ -453,8 +444,19 @@ class Revent extends Event {
     private $_week = array();
     private $_month;
     public function __construct($A) {
-        $this->_recurring_ends = $A['recurring_ends'];
         $this->_ends_never = $A['recurring_ends_never'];
+        if (!isset($this->_ends_never)) {
+            $this->_recurring_ends = $A['recurring_ends'];
+            if ($this->_recurring_ends != 'on') {
+                throw new Exception("Something is wrong with ending the events. They must never end or they must end");
+            }
+            else {
+                $this->_recurring_ends = 1;
+            }
+        }
+        else {
+            $this->_recurring_ends = DateTime::createFromFormat('m/d/Y', $A['recurring_ends']);
+        }
         // every day recurrence
         $recurring_type = intval($A['recurring_type']);
         switch ($recurring_type) {
@@ -475,8 +477,20 @@ class Revent extends Event {
         }
     }
     private function parse_every_day($A) {
-        $recurring_rule = $A['recurring_every_day'];
+        global $_TABLES;
+        $day = $A['recurring_every_day'];
         $this->load_event_from_array($A);
+        $reid = COM_makeSid();
+        
+
+        $fields = 'reid,' . 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'recurring_ends';
+        $values = "'$reid'," . "'$this->_event_title'," . "'$this->_description'," . 
+                    "'$this->_event_start' ," . "'$this->_event_end'," ."'$this->_location'," . "'$this->_allday'," . "'$this->_recurring_ends'";
+        DB_save($_TABLES['recurring_events'], $fields, $values);
+
+        $fields = 'preid,' . 'day_period';
+        $values = "'$reid'," . "'$day'"; 
+        DB_save($_TABLES['recurring_specification'], $fields, $values);
     }
         
     private function parse_every_week($A) {
@@ -494,6 +508,7 @@ class Revent extends Event {
     private function parse_every_year($A) {
         $this->_year = $A['recurring_year'];
     }
+
 }
 
 ?>

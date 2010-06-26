@@ -416,7 +416,11 @@ function calendarv2_form_display($A, $calendars)
     $date = new DateTime();
     if((!empty($A['month'])) && !(empty($A['year']))) {
         $date->setDate(intval($A['year']), intval($A['month']), 1);
-    }    
+    }
+    // Generate Recurring Eevents in the database if it's the case (2 years have passed)
+    calendarv2_create_events($date);
+    // Ening an important section
+        
     $page->set_var('month_recurring_day' , $date->format('d'));
     $page->set_var('year_recurring_day' , $date->format('m/d/Y'));
     $page->set_var('default_start_date', $date->format('m/d/Y'));
@@ -749,6 +753,58 @@ function plugin_itemlist_calendarv2()
         return $plugin;
     }
 }
+
+
+// Searches in the recurring_events table and does dirty work.
+function calendarv2_create_events(DateTime $last_event_generated = NULL) {
+    global $_TABLES;
+    // Here will have to be added exceptions hashtable
+    $events = new Aevents();
+    $sql = "select * from {$_TABLES['recurring_events']} where last_event is NULL OR last_event < {$last_event_generated->format('U')}";
+    $result = DB_query($sql);
+    
+    while ($array = DB_fetchArray($result)) {
+        $end_generating = $last_event_generated;
+        $end_generating->modify("+1 year");  
+        if ($array['recurring_ends'] == 0) {
+            $start_generating = new DateTime('@' . $array['datestart']);
+        }
+        $sql = "select * from {$_TABLES['recurring_specification']} where preid = {$array['reid']}";
+        $result2 = DB_query($sql);
+        while ($array2 = DB_fetchArray($result2))
+        {   
+            $i = 0;
+            if ($array['exception'] == 0) {
+                $recurrence_start = new DateTime('@' . $array['datestart']);
+                $recurrence_end = new DateTime('@' . $array['dateend']);
+                if ($array2['day_period'] != NULL) {
+                    while ($start_generating < $end_generating) {
+                        $event = new Event();
+                        $recurrence_start->modify('+' . $array2['day_period'] . ' days');
+                        $recurrence_end->modify('+' . $array2['day_period'] . ' days');
+                        $array['datestart'] = $recurrence_start->format('U');
+                        $array['dateend'] = $recurrence_end->format('U');
+                        $event->load_event_from_DB_array($array);
+                        $event->setEid(COM_makeSid() . $i++);
+                        $events->addEvent($event);
+                        $start_generating->modify('+' . $array2['day_period'] . ' days');
+                    }
+                }
+            }
+        }
+        // After generating 1 year of recurring events, we must update our event in the
+        // recurring events table so that in can spawn again, another year.
+        $end = new DateTime('@'. $array['dateend']);
+        $start = new DateTime('@' . $array['datestart']);   
+        $sql = "update {$_TABLES['recurring_events']} set last_event = {$end_generating->format('U')}," . 
+                "datestart = {$start->format('U')}, dateend = {$end->format('U')} where reid = {$array['reid']}";
+        DB_query($sql);  
+    }
+    foreach($events as $key => $event) {
+        $event->save_to_database();
+    }
+    
+}   
 
 
  
