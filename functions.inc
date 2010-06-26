@@ -762,13 +762,15 @@ function calendarv2_create_events(DateTime $last_event_generated = NULL) {
     $events = new Aevents();
     $sql = "select * from {$_TABLES['recurring_events']} where last_event is NULL OR last_event < {$last_event_generated->format('U')}";
     $result = DB_query($sql);
-    
     while ($array = DB_fetchArray($result)) {
         $end_generating = $last_event_generated;
-        $end_generating->modify("+1 year");  
+        $start_generating = new DateTime('@' . $array['datestart']);
         if ($array['recurring_ends'] == 0) {
-            $start_generating = new DateTime('@' . $array['datestart']);
+            $end_generating->modify("+1 year");  
         }
+        else {
+            $end_generating = new DateTime('@' . $array['recurring_ends']);
+        } 
         $sql = "select * from {$_TABLES['recurring_specification']} where preid = {$array['reid']}";
         $result2 = DB_query($sql);
         while ($array2 = DB_fetchArray($result2))

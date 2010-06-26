@@ -445,17 +445,13 @@ class Revent extends Event {
     private $_month;
     public function __construct($A) {
         $this->_ends_never = $A['recurring_ends_never'];
-        if (!isset($this->_ends_never)) {
+        if ($this->_ends_never == 'on') {
             $this->_recurring_ends = $A['recurring_ends'];
-            if ($this->_recurring_ends != 'on') {
-                throw new Exception("Something is wrong with ending the events. They must never end or they must end");
-            }
-            else {
-                $this->_recurring_ends = 1;
-            }
+            $this->_recurring_ends = 1;
         }
         else {
             $this->_recurring_ends = DateTime::createFromFormat('m/d/Y', $A['recurring_ends']);
+            $this->_recurring_ends = $this->_recurring_ends->format('U');
         }
         // every day recurrence
         $recurring_type = intval($A['recurring_type']);
