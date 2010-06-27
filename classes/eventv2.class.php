@@ -139,9 +139,7 @@ class Event {
         if (empty($this->_title)) {
             throw new Exception("Event must have a title");
         }
-        if (empty($this->_calendar_id)) {
-            throw new Exception("Event must have a calendar or else is useless");
-        }
+        
     }
     /**
     *
@@ -257,6 +255,7 @@ class Event {
     {
         $this->load_event_from_array($P);
         $this->_eid = $P['modify_eid'];
+        $this->_calendar_id = $P['modify_cid'];
         $this->update_to_database($P['modify_eid'], 'c2events');
     }
 
@@ -271,6 +270,7 @@ class Event {
     {
         $this->load_event_from_array($P);
         $this->_eid = $P['modify_eid'];
+        $this->_calendar_id = $P['modify_cid'];
         $this->update_to_database($P['modify_eid'], 'cv2submission');
     }
     
@@ -291,12 +291,12 @@ class Event {
     *
     */    
 
-    public function get_event($eid) 
+    public function get_event($eid, $table) 
     {
         global $_TABLES;
         //Eid comes from $_POST so it must be verified
         $eid = addslashes($eid);
-        $sql = "select * from {$_TABLES['c2events']} where eid = {$eid}";
+        $sql = "select * from {$_TABLES[$table]} where eid = {$eid}";
         $result = DB_query($sql);
         $event = DB_fetchArray($result);
         $this->_calendar_id = $event['cid']; 
@@ -309,32 +309,6 @@ class Event {
         $this->_eid = $eid;
         $this->_calendar_id = $event['cid'];
     }
-
-    /**
-    *
-    * Fils and moderation event with information from database based on an eid.
-    *
-    */     
-    
-    public function get_moderation_event($eid)
-    {    
-        global $_TABLES;
-        //Eid comes from $_POST so it must be verified
-        $eid = addslashes($eid);
-        $sql = "select * from {$_TABLES['cv2submission']} where eid = {$eid}";
-        $result = DB_query($sql);
-        $event = DB_fetchArray($result);
-        $this->_calendar_id = $event['cid']; 
-        $this->_title = $event['title'];
-        $this->_start = new DateTime('@' . $event['datestart']);     
-        $this->_end = new DateTime('@' . $event['dateend']);
-        $this->_location = $event['location'];
-        $this->_description = $event['description'];
-        $this->_allday = $event['allday'];
-        $this->_eid = $eid;
-        $this->_calendar_id = $event['cid'];
-    }  
-            
 
     /**
     *
@@ -356,7 +330,7 @@ class Event {
     }
 
     // Sanitizes the data
-    private function getSanitized()
+    protected function getSanitized()
     {
         $elements = array();
         // The data that needs to be sanitized
@@ -495,12 +469,11 @@ class Revent extends Event {
     private  function save_recurring_events($A) {
         global $_TABLES;
         //Sanitize
-        $start = $this->_start->format('U');
-        $end = $this->_end->format('U');
         $this->load_event_from_array($A);
+        $sanitized = $this->getSanitized();
         $fields = 'reid,' . 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'recurring_ends';
-        $values = "'$this->_reid'," . "'$this->_title'," . "'$this->_description'," . 
-                    "'$start' ," . "'$end'," ."'$this->_location'," . "'$this->_allday'," . "'$this->_recurring_ends'";
+        $values = "'$this->_reid'," . "'{$sanitized['title']}'," . "'{$sanitized['description']}'," . 
+                    "'{$sanitized['start']}' ," . "'{$sanitized['end']}'," ."'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_recurring_ends'";
         DB_save($_TABLES['recurring_events'], $fields, $values); 
     }
 

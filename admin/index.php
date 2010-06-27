@@ -58,7 +58,7 @@ if (! SEC_hasRights('calendarv2.admin')) {
 
 if ($A['mode'] == 'editsubmission') {
     $event = new Event();
-    $event->get_moderation_event($A['id']);
+    $event->get_event($A['id'], 'cv2submission');
     $page = calendarv2_modify_event($event);
     
 }

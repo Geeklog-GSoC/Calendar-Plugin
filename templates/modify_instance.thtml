@@ -20,5 +20,6 @@
 			<dt> <label for = "event_description"> {lang_event_description}: </label> </dt>
 			<dd> <textarea id = "event_description" name = "event_description">{event_description}</textarea> </dd>
 			<input type = "hidden" name = 'modify_eid' value = {modify_eid}>
+			<input type = "hidden" name = 'modify_cid' value = {modify_cid}>
 			<dd> <input type="submit" value="{lang_add}" name = "submit"/> </dd>
 </form> 

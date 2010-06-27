@@ -56,7 +56,7 @@ if (empty($_POST)) {
     // Check if we need to display a single event.
     if (isset($A['eid'])) {
         $event = new Event();
-        $event->get_event($A['eid']);
+        $event->get_event($A['eid'], 'c2events');
         $page = calendarv2_single_event($event);
     }
     else {
@@ -68,7 +68,7 @@ if (empty($_POST)) {
 else {
     $event = new Event();
     if (isset($B['modify'])) {
-        $event->get_event($B['eid']);
+        $event->get_event($B['eid'], 'c2events');
         // Creates a template for a single instance modification
         $page = calendarv2_modify_event($event);
         }

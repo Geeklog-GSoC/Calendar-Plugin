@@ -624,6 +624,7 @@ function calendarv2_modify_event($event)
     $page->set_var('default_start_time' , $date_start->format('h:i A'));
     $page->set_var('default_end_time' , $date_end->format('h:i A'));
     $page->set_var('modify_eid' , $details['eid']);
+    $page->set_var('modify_cid' , $details['cid']);
     $retval .= $page->finish($page->parse('output', 'page')); 
     return $retval;
 }
@@ -754,9 +755,29 @@ function plugin_itemlist_calendarv2()
     }
 }
 
+function calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule) 
+{
+    $recurrence_start = new DateTime('@' . $array['datestart']);
+    $recurrence_end = new DateTime('@' . $array['dateend']);
+    $events = new Aevents(); 
+    while ($start_generating < $end_generating) {
+        $event = new Event();
+        $recurrence_start->modify($rule);
+        $recurrence_end->modify($rule);
+        $array['datestart'] = $recurrence_start->format('U');
+        $array['dateend'] = $recurrence_end->format('U');
+        $event->load_event_from_DB_array($array);
+        $event->setEid(COM_makeSid() . $i++);
+        $events->addEvent($event);
+        $start_generating->modify($rule);
+    }
+    return $events; 
+}
+
 
 // Searches in the recurring_events table and does dirty work.
-function calendarv2_create_events(DateTime $last_event_generated = NULL) {
+function calendarv2_create_events(DateTime $last_event_generated = NULL) 
+{
     global $_TABLES;
     // Here will have to be added exceptions hashtable
     $events = new Aevents();
@@ -779,45 +800,20 @@ function calendarv2_create_events(DateTime $last_event_generated = NULL) {
             if ($array['exception'] == 0) {
                 $recurrence_start = new DateTime('@' . $array['datestart']);
                 $recurrence_end = new DateTime('@' . $array['dateend']);
+                // There are many, many types of recurrences that can / must be handled here.
+                // They should be grouped so that there are not many code duplications
+                                                                                          
+                // This part handles the fixed size recurrences. Daily, Monthly and Yearly.
                 if (!is_null($array2['day_period'])) {
-                    while ($start_generating < $end_generating) {
-                        $event = new Event();
-                        $recurrence_start->modify('+' . $array2['day_period'] . ' days');
-                        $recurrence_end->modify('+' . $array2['day_period'] . ' days');
-                        $array['datestart'] = $recurrence_start->format('U');
-                        $array['dateend'] = $recurrence_end->format('U');
-                        $event->load_event_from_DB_array($array);
-                        $event->setEid(COM_makeSid() . $i++);
-                        $events->addEvent($event);
-                        $start_generating->modify('+' . $array2['day_period'] . ' days');
-                    }
+                    $rule = ('+' . $array2['day_period'] . ' days');
                 }
                 if (!is_null($array2['month_period'])) {
-                    while ($start_generating < $end_generating) { 
-                        $event = new Event();
-                        $recurrence_start->modify('+' . $array2['month_period'] . ' months');
-                        $recurrence_end->modify('+' . $array2['month_period'] . ' months'); 
-                        $array['datestart'] = $recurrence_start->format('U');
-                        $array['dateend'] = $recurrence_end->format('U');
-                        $event->load_event_from_DB_array($array);
-                        $event->setEid(COM_makeSid() . $i++);
-                        $events->addEvent($event);
-                        $start_generating->modify('+' . $array2['month_period'] . ' months');
-                    } 
+                    $rule = ('+' .$array2['month_period'] . ' months');
                 }
                 if (!is_null($array2['year_period'])) {
-                    while ($start_generating < $end_generating) {
-                        $event = new Event();   
-                        $recurrence_start->modify('+' . $array2['year_period'] . ' years');
-                        $recurrence_end->modify('+' . $array2['year_period'] . ' years'); 
-                        $array['datestart'] = $recurrence_start->format('U');
-                        $array['dateend'] = $recurrence_end->format('U');
-                        $event->load_event_from_DB_array($array);
-                        $event->setEid(COM_makeSid() . $i++);
-                        $events->addEvent($event);
-                        $start_generating->modify('+' . $array2['year_period'] . ' years');
-                    } 
+                    $rule = ('+' .$array2['year_period'] . ' years');
                 }
+                $events = calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule);
             }
         }
         // After generating 1 year of recurring events, we must update our event in the
