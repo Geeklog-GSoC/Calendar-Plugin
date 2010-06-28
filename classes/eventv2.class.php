@@ -488,9 +488,13 @@ class Revent extends Event {
     }
         
     private function parse_every_week($A) {
-        for ($i = 1; $i <= 7; $i++) {
+        $this->_reid = COM_makeSid();
+        $this->save_recurring_events($A); 
+        for ($i = 0; $i < 7; $i++) {
             if ($A["day_recurring_$i"] == 'on') {
-                $this->_week[$i] = true;
+                $fields = 'preid,' . 'week_day';
+                $values = "'$this->_reid'," . "'$i'";
+                DB_save($_TABLES['recurring_specification'], $fields, $values);
             }
         }
     }

@@ -464,10 +464,8 @@ function calendarv2_day_events($A, $calendar)
         foreach($events as $key => $event) {
                 if ($event) {
                     $event_link = $_CAV2_CONF['site_url'] . '/event.php?eid=' . $event->getEid();
-                    $date_start = new DateTime();
-                    $date_ends = new DateTime();
-                    $date_start->setTimestamp($event->getDatestart());
-                    $date_ends->setTimestamp($event->getDateend()); 
+                    $date_start = new DateTime('@' . $event->getDatestart());
+                    $date_ends = new DateTime('@' . $event->getDateend());
                     $new_event = COM_createLink($date_start->format('h:i A') . ' - ' . $date_ends->format('h:i A') .' '. $event->getTitle(), $event_link);
                     $page->set_var($date_start->format('G') + 1 . '_event', $new_event);
                 } 
@@ -606,10 +604,8 @@ function calendarv2_modify_event($event)
     global $LANG_CALENDARV2_FORM, $CAV2_CONF;
     $lang = $LANG_CALENDARV2_FORM;
     $details = $event->get_details();
-    $date_end  = new DateTime();
-    $date_start = new DateTime();
-    $date_start->setTimestamp($details['datestart']);
-    $date_end->setTimestamp($details['dateend']);
+    $date_end  = new DateTime('@' . $details['datestart']);
+    $date_start = new DateTime('@' . $details['dateend']);
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'modify_instance.thtml'));
     foreach ($lang as $key => $value) {
@@ -814,12 +810,27 @@ function calendarv2_create_events(DateTime $last_event_generated = NULL)
                     $rule = ('+' .$array2['year_period'] . ' years');
                 }
                 $events = calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule);
+                /* if (!is_null($array2['week_day'])) {
+                    $date_start = new DateTime('@'. $array['datestart']);
+                    $date_end = new DateTime('@'. $array['dateend']);
+                    $rule = ('+7 days');
+                    if ($date_start->format('w') == $array2['week_day']) {
+                        calendarv2_fixed_recurrence($start_generating, $end_generating, $array, $rule);
+                    }
+                    else {
+                        $date_start->modify($array2['week_day'] - $date_start->format('w'));
+                        $date_end->modify( $array2['week_day'] - $date_end->format('w'));
+                        $array['datestart'] = $date_start->format('U');
+                        $array['dateend'] = $date_end->format('U');
+                        calendarv2_fixed_recurrence($start_generating, $end_generating, $array, $rule);
+                    }
+                } */
             }
         }
         // After generating 1 year of recurring events, we must update our event in the
         // recurring events table so that in can spawn again, another year.
         $end = new DateTime('@'. $array['dateend']);
-        $start = new DateTime('@' . $array['datestart']);   
+        $start = new DateTime('@' . $array['datestart']);
         $sql = "update {$_TABLES['recurring_events']} set last_event = {$end_generating->format('U')}," . 
                 "datestart = {$start->format('U')}, dateend = {$end->format('U')} where reid = {$array['reid']}";
         DB_query($sql);  
