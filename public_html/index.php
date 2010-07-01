@@ -45,6 +45,8 @@ if (! in_array('calendarv2', $_PLUGINS)) {
 
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
+require_once $_CONF['path'] . 'plugins/calendarv2/classes/reventv2.class.php';
+require_once $_CONF['path'] . 'plugins/calendarv2/classes/aeventsv2.class.php';
 $A = $_GET;
 
 if ($A['display'] == 'new') {
@@ -69,28 +71,32 @@ if (COM_isAnonUser()) {
 
 $calendar = new Calendarv2();
 $calendar->setCid($cid);
-$event = new Event();
 $calendars = new Acalendarv2();
 $calendars->getCalendars($_USER['uid']);
 if (isset($_POST['submit'])) {
-    if ($_POST['recurring_type'] == 1) {
-        $event->load_event_from_array($_POST);
-        if (!SEC_hasRights('calendarv2.admin')) {
-            $moderate = true;
+    if ($cid = 1) {
+        if ($_POST['recurring_type'] == 1) {
+            $event = new Event();
+            $event->load_event_from_array($_POST);
         }
         else {
-            $moderate = false;
+            $event = new Revent($_POST);
         }
-        plugin_savesubmission_calendarv2($event, $moderate);
-        if ($moderate == false)
+        if (SEC_hasRights('calendarv2.admin')) {
+            plugin_savesubmission_calendarv2($event, false);
             $page .= COM_showMessageText("You have succesfully added an event", "Alert");
-        else
+        }
+        else {
+            plugin_savesubmission_calendarv2($event, true);
             $page .= COM_showMessageText("Your event has been submitted and expects moderation");
+        }
     }
-    // The event is recurring, needs special handling.
     else {
-        $revent = new Revent($_POST);
+        //TODO Check if the user has rights to write in the calendar if so allow him to write else display an 
+        // error message
+        plugin_savesubmission_calendarv2($event, true);
     }
+        
 }
 
 

@@ -24,19 +24,19 @@
 				<div id = "recurring_container">
 				<div id = "week_day"> <div> {lang_which_day}: </div>
 					{lang_monday} 
-					<input id = "monday" type = "checkbox" name = "day_recurring_1">
+					<input id = "monday" type = "checkbox" name = "day_recurring_0"><br>
 					{lang_tuesday}
-					<input id = "tuesday" type = "checkbox" name = "day_recurring_2">
+					<input id = "tuesday" type = "checkbox" name = "day_recurring_1"><br>
 					{lang_wednesday}
-					<input id = "wednesday" type = "checkbox" name = "day_recurring_3">
+					<input id = "wednesday" type = "checkbox" name = "day_recurring_2"><br>
 					{lang_friday}
-					<input id = "thursday" type = "checkbox" name = "day_recurring_4">
+					<input id = "thursday" type = "checkbox" name = "day_recurring_3"><br>
 					{lang_thursday}
-					<input id = "friday" type = "checkbox" name = "day_recurring_5">
+					<input id = "friday" type = "checkbox" name = "day_recurring_4"><br>
 					{lang_saturday}
-					<input id = "saturday" type = "checkbox" name = "day_recurring_6"> 
+					<input id = "saturday" type = "checkbox" name = "day_recurring_5"><br> 
 					{lang_sunday}
-					<input id = "sunday" type = "checkbox" name = "day_recurring_7">  <br>
+					<input id = "sunday" type = "checkbox" name = "day_recurring_6">  <br>
 				</div>
 				<div id = "day_recurring">
 					{lang_every}:

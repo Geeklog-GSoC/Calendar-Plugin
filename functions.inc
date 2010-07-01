@@ -726,9 +726,12 @@ function plugin_submissioncount_calendarv2()
 }
 
 function plugin_savesubmission_calendarv2($event, $moderate)
-{           
-    $eid = COM_makeSid();
-    $event->setEid($eid);
+{   
+    $object_type = get_class($event);
+    if ($object_type = 'Event') {        
+        $eid = COM_makeSid();
+        $event->setEid($eid);
+    }
     $event->setModeration($moderate);
     $event->save_to_database();
 }

@@ -44,7 +44,9 @@ if (! in_array('calendarv2', $_PLUGINS)) {
 }
 
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
-require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';
+require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php'; 
+require_once $_CONF['path'] . 'plugins/calendarv2/classes/reventv2.class.php';
+require_once $_CONF['path'] . 'plugins/calendarv2/classes/aeventsv2.class.php'; 
 
 $A = $_GET;
 $B = $_POST;
