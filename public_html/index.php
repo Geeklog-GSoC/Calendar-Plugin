@@ -46,6 +46,14 @@ if (! in_array('calendarv2', $_PLUGINS)) {
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
 $A = $_GET;
+
+if ($A['display'] == 'new') {
+    $page .= calendarv2_display_calendars_new();
+    if (isset($_POST['new_calendar_name'])) {
+        calendarv2_create_calendar($_POST['new_calendar_name']);
+    }
+}   
+
 $display = '';
 if (isset($A['cid'])) {
     $cid = $A['cid'];

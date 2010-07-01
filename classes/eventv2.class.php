@@ -46,12 +46,11 @@ class Event {
     // Event details
     protected $_eid;
     protected $_calendar_id;
-    protected $_perm;
     protected $_creation_date;
     protected $_title;
     protected $_start;
     protected $_end;
-    protected $_recurring;
+    protected $_pid;
     protected $_location;
     protected $_description;
     protected $_allday;
@@ -84,11 +83,20 @@ class Event {
     public function getTitle() {
         return $this->_title;
     }
+        
+    public function getPid() {
+        return $this->_pid;
+    }
 
     // And some setters
     public function setEid($eid)
     {
         $this->_eid = $eid;
+    }
+    
+    public function setPid($pid)
+    {
+        $this->_pid = $pid;
     }
 
     /**
@@ -176,12 +184,12 @@ class Event {
     {
         global $_TABLES;
         $fields = 'eid,' . 'title,' . 'description,'. 'datestart,'. 
-                  'dateend,'. 'location,'. 'allday,' . 'owner_id,' . 'cid';
+                  'dateend,'. 'location,'. 'allday,' . 'owner_id,' . 'cid' . 'pid';
         $sanitized = $this->getSanitized();      
         $elements = "'{$sanitized['eid']}' ," . "'{$sanitized['title']}' ," . "'{$sanitized['description']}' ,"  
                     . "'{$sanitized['start']}'," . "'{$sanitized['end']}'," 
                     . "'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_owner',"
-                    . "'$this->_calendar_id'";
+                    . "'$this->_calendar_id'," . "'$this->_pid'";
 
         // Check to see if the events is directly saved into the database 
         // or mark for admin aproval.
@@ -488,11 +496,12 @@ class Revent extends Event {
     }
         
     private function parse_every_week($A) {
+        global $_TABLES;
         $this->_reid = COM_makeSid();
         $this->save_recurring_events($A); 
         for ($i = 0; $i < 7; $i++) {
             if ($A["day_recurring_$i"] == 'on') {
-                $fields = 'preid,' . 'week_day';
+                $fields = 'preid,' . 'which_day';
                 $values = "'$this->_reid'," . "'$i'";
                 DB_save($_TABLES['recurring_specification'], $fields, $values);
             }

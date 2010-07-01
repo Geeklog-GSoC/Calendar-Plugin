@@ -1,5 +1,5 @@
 <div>
-<form action = "calendars.php" method = "post">
+<form action = "index.php" method = "post">
 	{lang_calendar_name}: <br>
 	<input type = "text" value = "" name = "new_calendar_name">
 	<input type = "submit" value = "Submit">

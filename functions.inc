@@ -417,9 +417,7 @@ function calendarv2_form_display($A, $calendars)
     if((!empty($A['month'])) && !(empty($A['year']))) {
         $date->setDate(intval($A['year']), intval($A['month']), 1);
     }
-    // Generate Recurring Eevents in the database if it's the case (2 years have passed)
-    calendarv2_create_events($date);
-    // Ening an important section
+    
         
     $page->set_var('month_recurring_day' , $date->format('d'));
     $page->set_var('year_recurring_day' , $date->format('m/d/Y'));
@@ -429,6 +427,10 @@ function calendarv2_form_display($A, $calendars)
     $page->set_var('default_end_time', $date->format('h:i A'));
     $page->set_var('calendar', calendarv2_display_calendars($calendars));
     $retval .= $page->finish($page->parse('output', 'page'));
+    
+    // Generate Recurring Events in the database if it's the case (1 year have passed)
+    calendarv2_create_events($date);
+    // Ening an important section 
     return $retval; 
      
 }
@@ -644,7 +646,7 @@ function calendarv2_display_calendars($calendars)
         $options .= "<option value = {$calendar->getCid()}> {$calendar->getTitle()} </option>";
     }
     $page->set_var('options', $options); 
-    $link = $_CAV2_CONF['site_url'] . '/calendars.php';
+    $link = $_CAV2_CONF['site_url'] . '/index.php?display=new';
     $link = COM_createLink($LANG_CALENDARV2_EVENT['lang_create_new'] , $link);
     $page->set_var('create_new_link' , $link);
     $retval .= $page->finish($page->parse('output', 'page'));
@@ -777,67 +779,75 @@ function calendarv2_create_events(DateTime $last_event_generated = NULL)
     global $_TABLES;
     // Here will have to be added exceptions hashtable
     $events = new Aevents();
-    $sql = "select * from {$_TABLES['recurring_events']} where last_event is NULL OR last_event < {$last_event_generated->format('U')}";
+    $sql = "select * from {$_TABLES['recurring_events']} left join {$_TABLES['recurring_specification']} on " . 
+            "reid = preid where last_event is NULL or last_event < {$last_event_generated->format('U')} ";
     $result = DB_query($sql);
+    
     while ($array = DB_fetchArray($result)) {
-        $end_generating = $last_event_generated;
+        $end_generating  = clone $last_event_generated;
         $start_generating = new DateTime('@' . $array['datestart']);
         if ($array['recurring_ends'] == 1) {
-            $end_generating->modify("+1 year");  
+            $end_generating->modify("+1 year");
         }
         else {
             $end_generating = new DateTime('@' . $array['recurring_ends']);
-        } 
-        $sql = "select * from {$_TABLES['recurring_specification']} where preid = {$array['reid']}";
-        $result2 = DB_query($sql);
-        while ($array2 = DB_fetchArray($result2))
-        {   
-            $i = 0;
-            if ($array['exception'] == 0) {
-                $recurrence_start = new DateTime('@' . $array['datestart']);
-                $recurrence_end = new DateTime('@' . $array['dateend']);
-                // There are many, many types of recurrences that can / must be handled here.
-                // They should be grouped so that there are not many code duplications
-                                                                                          
-                // This part handles the fixed size recurrences. Daily, Monthly and Yearly.
-                if (!is_null($array2['day_period'])) {
-                    $rule = ('+' . $array2['day_period'] . ' days');
+        }
+ 
+        if ($array['exception'] == 0) {
+            $recurrence_start = new DateTime('@' . $array['datestart']);
+            $recurrence_end = new DateTime('@' . $array['dateend']);
+            // There are many, many types of recurrences that can / must be handled here.
+            // They should be grouped so that there are not many code duplications
+            // This part handles the fixed size recurrences. Daily, Monthly and Yearly.
+                if (!is_null($array['day_period'])) {
+                    $rule = ('+' . $array['day_period'] . ' days');
+                    $events = calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule);
                 }
-                if (!is_null($array2['month_period'])) {
-                    $rule = ('+' .$array2['month_period'] . ' months');
+                if (!is_null($array['month_period'])) {
+                    $rule = ('+' .$array['month_period'] . ' months');
+                    $events = calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule);
                 }
-                if (!is_null($array2['year_period'])) {
-                    $rule = ('+' .$array2['year_period'] . ' years');
+                if (!is_null($array['year_period'])) {
+                    $rule = ('+' .$array['year_period'] . ' years');
+                    $events = calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule);
                 }
-                $events = calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule);
-                /* if (!is_null($array2['week_day'])) {
+                if (!is_null($array['which_day'])) {
                     $date_start = new DateTime('@'. $array['datestart']);
                     $date_end = new DateTime('@'. $array['dateend']);
                     $rule = ('+7 days');
-                    if ($date_start->format('w') == $array2['week_day']) {
-                        calendarv2_fixed_recurrence($start_generating, $end_generating, $array, $rule);
+                    
+                    if ($date_start->format('w') == $array['which_day']) {
+                        $events = calendarv2_fixed_recurrence($start_generating, $end_generating, $array, $rule);
                     }
                     else {
-                        $date_start->modify($array2['week_day'] - $date_start->format('w'));
-                        $date_end->modify( $array2['week_day'] - $date_end->format('w'));
+                        $jump1 = $array['which_day'] - $date_start->format('w');
+                        $jump2 = $array['which_day'] - $date_end->format('w');
+                        if ($jump1 < 0) {
+                            $jump1 = $jump1 + 7;
+                        }
+                        if ($jump2 < 0) {
+                            $jump2 = $jump2 + 7;
+                        }
+                        $date_start->modify('+' . $jump1 . ' days');
+                        $date_end->modify('+' . $jump2 . ' days');
                         $array['datestart'] = $date_start->format('U');
                         $array['dateend'] = $date_end->format('U');
-                        calendarv2_fixed_recurrence($start_generating, $end_generating, $array, $rule);
+                        $events = calendarv2_fixed_recurrence($start_generating, $end_generating, $array, $rule);
                     }
-                } */
-            }
+                }
+                foreach($events as $key => $event) {
+                    $event->save_to_database();
+                }
         }
         // After generating 1 year of recurring events, we must update our event in the
-        // recurring events table so that in can spawn again, another year.
+        // recurring events table so that in can spawn again, another year. 
         $end = new DateTime('@'. $array['dateend']);
         $start = new DateTime('@' . $array['datestart']);
         $sql = "update {$_TABLES['recurring_events']} set last_event = {$end_generating->format('U')}," . 
                 "datestart = {$start->format('U')}, dateend = {$end->format('U')} where reid = {$array['reid']}";
-        DB_query($sql);  
+        DB_query($sql);   
     }
-    foreach($events as $key => $event) {
-        $event->save_to_database();
-    }
+    
     
 }   
 
