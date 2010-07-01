@@ -173,12 +173,11 @@ class Acalendarv2 implements arrayaccess, iterator {
         $i = 0;
         $sql = "select cid, title from {$_TABLES['calendarv2']} where owner_id = {$uid} OR cid = 1";
         $result = DB_query($sql);
-        $num_rows = DB_numRows($result);
         $i = 0;
-        while($num_rows) {
-            $this->_calendars[$i]->loadFromArray(DB_fetchArray($result));
+        while ($array = DB_fetchArray($result)) {
+            $this->_calendars[] = new Calendarv2();
+            $this[$i]->loadFromArray($array);
             $i++;
-            $num_rows--;
         }
     } 
 }

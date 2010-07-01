@@ -2,6 +2,6 @@
 <form action = "index.php" method = "post">
 	{lang_calendar_name}: <br>
 	<input type = "text" value = "" name = "new_calendar_name">
-	<input type = "submit" value = "Submit">
+	<input type = "submit" value = "submit" name = "calendar_submit">
 </form>
 </div>

@@ -49,12 +49,20 @@ require_once $_CONF['path'] . 'plugins/calendarv2/classes/reventv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/aeventsv2.class.php';
 $A = $_GET;
 
+
+// Section that handles creation of new calendars
+// TODO see if the user can create a new calendar
 if ($A['display'] == 'new') {
     $page .= calendarv2_display_calendars_new();
     if (isset($_POST['new_calendar_name'])) {
         calendarv2_create_calendar($_POST['new_calendar_name']);
     }
-}   
+}
+
+if (isset($_POST['calendar_submit'])) {
+   calendarv2_create_calendar($_POST['new_calendar_name']);
+} 
+
 
 $display = '';
 if (isset($A['cid'])) {
@@ -98,7 +106,6 @@ if (isset($_POST['submit'])) {
     }
         
 }
-
 
 $page .= calendarv2_display_calendar_links($calendars);
 
