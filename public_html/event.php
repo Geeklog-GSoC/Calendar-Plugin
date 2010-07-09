@@ -83,6 +83,10 @@ else {
         $event->modify($B);
         $page = calendarv2_single_event($event);
     }
+    if (isset($B['delete_whole'])) {
+        calendarv2_delete_recurring($B['hidden_parent']);
+        $page .= COM_refresh("index.php");
+    }
 }
 
 

@@ -50,8 +50,10 @@ class Revent extends Event {
             $this->_recurring_ends = 1;
         }
         else {
-            $this->_recurring_ends = new DateTime($A['recurring_ends_never']);
-            $this->_recurring_ends->format('U');
+            $this->_recurring_ends = new DateTime($A['recurring_ends']);
+            // Usualy datetime objects are kept, but now it's really not necesary since only
+            // the timestamp is needed.
+            $this->_recurring_ends = $this->_recurring_ends->format('U');
         }
         $this->_recurring_type = intval($A['recurring_type']);
         $this->_reid = COM_makeSid();
@@ -64,7 +66,7 @@ class Revent extends Event {
                     if ($A["day_recurring_$i"] == 'on') {
                         $this->_week[$i] = true;
                     }
-                } 
+                }
                 break; 
             case 4:
                 $this->_month = $A['recurring_month'];
@@ -80,8 +82,8 @@ class Revent extends Event {
                 throw new Exception('Something is wrong with the recurring type value');
         } 
     }
- 
-    private  function save_recurring_events() {
+    
+    private function save_recurring_events() {
         global $_TABLES;
         $sanitized = $this->getSanitized();
         $fields = 'reid,' . 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'recurring_ends';
@@ -109,7 +111,6 @@ class Revent extends Event {
             $fields .= "day_period";
             $values .= "'$this->_day'";
         }
-
         if (isset($this->_week)) {
             for ($i = 0; $i < 7; $i++) {
                 if ($this->_week[$i]) {

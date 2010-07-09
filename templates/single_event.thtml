@@ -13,6 +13,7 @@
 		<input type = "hidden" value = {hidden_eid} name = "eid">
 		<input type = "submit" value = {lang_modify} name = "modify">
 		<input type = "submit" value = {lang_delete} name = "delete">
+		{recurring_info}
 	</form>	
 
 </dl>

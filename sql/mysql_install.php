@@ -47,7 +47,7 @@ CREATE TABLE {$_TABLES['calendarv2']} (
 $_SQL[] = "
 CREATE TABLE {$_TABLES['c2events']} (
   eid varchar(20) NOT NULL default '',
-  pid int(10) unsigned NOT NULL default '0',
+  pid varchar(20) NOT NULL default '',
   cid int(10) unsigned NOT NULL default '1',
   title varchar(128) default NULL,
   description text,
@@ -68,7 +68,7 @@ CREATE TABLE {$_TABLES['c2events']} (
 $_SQL[] = "
 CREATE TABLE {$_TABLES['cv2submission']} (
   eid varchar(20) NOT NULL default '',
-  pid int(10) unsigned NOT NULL default '0',
+  pid varchar(20) NOT NULL default '',
   cid int(10) unsigned NOT NULL default '1',
   title varchar(128) default NULL,
   description text,

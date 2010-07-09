@@ -37,11 +37,13 @@
 
 require_once '../lib-common.php';
 
+
 // take user back to the homepage if the plugin is not active
 if (! in_array('calendarv2', $_PLUGINS)) {
     echo COM_refresh($_CONF['site_url'] . '/index.php');
     exit;
 }
+
 
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';

@@ -316,6 +316,7 @@ class Event {
         $this->_allday = $event['allday'];
         $this->_eid = $eid;
         $this->_calendar_id = $event['cid'];
+        $this->_pid = $event['pid'];
     }
 
     /**
@@ -334,6 +335,7 @@ class Event {
         $A['allday'] = $this->_allday;
         $A['eid'] = $this->_eid;
         $A['cid'] = $this->_calendar_id;
+        $A['pid'] = $this->_pid;
         return $A;
     }
 

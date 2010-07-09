@@ -573,7 +573,8 @@ function calendarv2_single_event($event)
     global $CAV2_CONF, $LANG_CALENDARV2_SINGLE;
     // start creating the page based on event details
     $page = new Template(calendarv2_templatePath());
-    $page->set_file(array ('page' => 'single_event.thtml')); 
+    $page->set_file(array ('page' => 'single_event.thtml',
+                            'recurring' => 'recurring_info.thtml'));
     $page->set_var('site_url', $CAV2_CONF['site_url']);
     $lang = $LANG_CALENDARV2_SINGLE;
     foreach ($lang as $key => $value) {
@@ -587,6 +588,11 @@ function calendarv2_single_event($event)
     list($day, $month, $year) = explode ('/' , date('d/m/Y' , $details['datestart']));
     $link = COM_createLink($lang['go_back'], $_CAV2_CONF['site_url'] . "/event.php?cid={$details['cid']}&day=$day&month=$month&year=$year");
     $page->set_var('go_back_link' , $link); 
+    // if the event is recurring we will have to display aditional information
+    if ($details['pid'] > 0) {
+        $page->set_var('hidden_parent', $details['pid']);
+        $page->set_var('recurring_info', $page->parse('output', 'recurring'));
+    }
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 }
@@ -761,16 +767,21 @@ function calendarv2_fixed_recurrence($start_generating, $end_generating, &$array
     $recurrence_start = new DateTime('@' . $array['datestart']);
     $recurrence_end = new DateTime('@' . $array['dateend']);
     $events = new Aevents(); 
+    if ($recurrence_end > $end_generating) {
+        return $events;
+    }
     while ($start_generating < $end_generating) {
         $event = new Event();
-        $recurrence_start->modify($rule);
-        $recurrence_end->modify($rule);
         $array['datestart'] = $recurrence_start->format('U');
         $array['dateend'] = $recurrence_end->format('U');
         $event->load_event_from_DB_array($array);
         $event->setEid(COM_makeSid() . $i++);
+        $event->setPid($array['preid']);
         $events->addEvent($event);
+        var_dump($start_generating->format('U'), $end_generating->format('U'));
         $start_generating->modify($rule);
+        $recurrence_start->modify($rule);
+        $recurrence_end->modify($rule); 
     }
     return $events; 
 }
@@ -850,9 +861,17 @@ function calendarv2_create_events(DateTime $last_event_generated = NULL)
                 "datestart = {$start->format('U')}, dateend = {$end->format('U')} where reid = {$array['reid']}";
         DB_query($sql);   
     }
-    
-    
-}   
+}
+
+function calendarv2_delete_recurring($id) {
+    global $_TABLES;
+    $sql = "delete from {$_TABLES['recurring_events']} where reid = {$id}";
+    DB_query($sql);
+    $sql = "delete from {$_TABLES['recurring_specification']} where preid = {$id}";
+    DB_query($sql);
+    $sql = "delete from {$_TABLES['c2events']} where pid = {$id}";
+    DB_query($sql);
+}
 
 
  
