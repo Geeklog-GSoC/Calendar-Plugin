@@ -121,7 +121,6 @@ class Acalendarv2 implements arrayaccess, iterator {
     // Implement iterator abastract methods
     public function __construct() {
         $this->_position = 0;
-        $this->_calendars[] = new Calendarv2();
     }
     public function rewind() {
         $this->_position = 0;
@@ -167,11 +166,11 @@ class Acalendarv2 implements arrayaccess, iterator {
         unset($this->_calendars[$offset]);
     }
     
-    // Gets the calendars a user has
-    public function getCalendars($uid) {
-        global $_TABLES;
-        $i = 0;
-        $sql = "select cid, title from {$_TABLES['calendarv2']} where owner_id = {$uid} OR cid = 1";
+    // Gets the calendars where user has read rights
+    public function getCalendars() {
+        global $_TABLES, $_USER;
+        $sql = "select * from {$_TABLES['calendarv2']}" ;
+        $sql .= COM_getPermSQL('where', $_USER['uid'], 2);
         $result = DB_query($sql);
         $i = 0;
         while ($array = DB_fetchArray($result)) {
@@ -180,6 +179,10 @@ class Acalendarv2 implements arrayaccess, iterator {
             $i++;
         }
     } 
+    
+    public function getNum() {
+        return count($this->_calendars);
+    }
 }
 
 ?>

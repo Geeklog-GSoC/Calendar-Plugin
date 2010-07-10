@@ -405,7 +405,7 @@ function calendarv2_display($A, $calendars, $calendar)
 function calendarv2_form_display($A, $calendars)
 {
     
-    global $_CONF, $LANG_CALENDARV2_FORM;
+    global $_CONF, $LANG_CALENDARV2_FORM, $_GROUPS, $LANG_ACCESS, $_USER;
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'form.thtml',
                             'calendar' => 'calendars.thtml'));
@@ -426,6 +426,15 @@ function calendarv2_form_display($A, $calendars)
     $page->set_var('default_start_time', $date->format('h:i A'));
     $page->set_var('default_end_time', $date->format('h:i A'));
     $page->set_var('calendar', calendarv2_display_calendars($calendars));
+    $page->set_var('permissions', SEC_getPermissionsHTML(3, 2, 2, 0));
+    $group_id = $_GROUPS['calendarv2 Admin'];
+    $acces = 3;
+    $page->set_var('lang_owner' , $LANG_ACCESS['owner']);
+    $ownername = COM_getDisplayName ($_USER['uid']);
+    $page->set_var('owner_name' , $ownername);
+    $page->set_var('lang_group', $LANG_ACCESS['group']);
+    $page->set_var('lang_permissions', $LANG_ACCESS['permissions']);
+    $page->set_var('group_dropdown', SEC_getGroupDropdown($group_id, $acces));
     $retval .= $page->finish($page->parse('output', 'page'));
     
     // Generate Recurring Events in the database if it's the case (1 year have passed)
@@ -627,7 +636,7 @@ function calendarv2_modify_event($event)
     $page->set_var('default_end_date' , $date_end->format('m/d/Y'));
     $page->set_var('default_start_time' , $date_start->format('h:i A'));
     $page->set_var('default_end_time' , $date_end->format('h:i A'));
-    $page->set_var('modify_eid' , $details['eid']);
+    $page->set_var('m$odify_eid' , $details['eid']);
     $page->set_var('modify_cid' , $details['cid']);
     $retval .= $page->finish($page->parse('output', 'page')); 
     return $retval;
@@ -670,10 +679,19 @@ function calendarv2_display_calendars($calendars)
 
 function calendarv2_display_calendars_new()
 {
-    global $LANG_CALENDARV2_EVENT;
+    global $LANG_CALENDARV2_EVENT, $_GROUPS, $LANG_ACCESS, $_USER;
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'create_calendars.thtml'));
-    $page->set_var('lang_calendar_name', $LANG_CALENDARV2_EVENT['calendar_name']);
+    $page->set_var('lang_calendar_name', $LANG_CALENDARV2_EVENT['calendar_name']); 
+    $group_id = $_GROUPS['calendarv2 Admin'];
+    $acces = 3;
+    $page->set_var('lang_owner' , $LANG_ACCESS['owner']);
+    $ownername = COM_getDisplayName ($_USER['uid']);
+    $page->set_var('owner_name' , $ownername);
+    $page->set_var('lang_group', $LANG_ACCESS['group']);
+    $page->set_var('lang_permissions', $LANG_ACCESS['permissions']);
+    $page->set_var('group_dropdown', SEC_getGroupDropdown($group_id, $acces)); 
+    $page->set_var('permissions', SEC_getPermissionsHTML(3, 2, 2, 0));
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 } 
@@ -684,11 +702,16 @@ function calendarv2_display_calendars_new()
 *
 */   
 
-function calendarv2_create_calendar($name) 
+function calendarv2_create_calendar($A) 
 {
-    global $_TABLES, $_USER;
-    $name = addslashes($name);
-    $sql = "insert into {$_TABLES['calendarv2']} (owner_id, title) values ('{$_USER['uid']}', '{$name}')";
+    global $_TABLES, $_USER; 
+    if (is_array($A['group_id']) or is_array($A['perm_owner']) or is_array($A['perm_group']) or is_array($A['perm_anon'])) {
+            list($perm_owner, $perm_group, $perm_members, $perm_anon) = 
+            SEC_getPermissionValues($A['perm_owner'], $A['perm_groups'] , $A['perm_members'], $A['perm_anon']); 
+    }
+    $name = addslashes($A['new_calendar_name']);
+    $sql = "insert into {$_TABLES['calendarv2']} (owner_id, title, perm_owner, perm_group, perm_members, perm_anon) values ('{$_USER['uid']}', '{$name}', '{$perm_owner}' , '{$perm_group}',
+            '{$perm_members}', '{$perm_anon}')";
     DB_query($sql);
 }
 
@@ -778,7 +801,6 @@ function calendarv2_fixed_recurrence($start_generating, $end_generating, &$array
         $event->setEid(COM_makeSid() . $i++);
         $event->setPid($array['preid']);
         $events->addEvent($event);
-        var_dump($start_generating->format('U'), $end_generating->format('U'));
         $start_generating->modify($rule);
         $recurrence_start->modify($rule);
         $recurrence_end->modify($rule); 

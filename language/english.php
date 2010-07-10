@@ -109,7 +109,8 @@ $LANG_CALENDARV2_SINGLE = array (
     'description' => 'Description:',
     'lang_modify' => 'Modify',
     'lang_delete' => 'Delete',
-    'go_back' => 'Go back'
+    'go_back' => 'Go back',
+    'lang_deleteall' => 'Delete All'
 );
 
 $LANG_CALENDARV2_MODERATION = array (

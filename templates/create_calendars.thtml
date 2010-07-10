@@ -2,6 +2,12 @@
 <form action = "index.php" method = "post">
 	{lang_calendar_name}: <br>
 	<input type = "text" value = "" name = "new_calendar_name">
-	<input type = "submit" value = "submit" name = "calendar_submit">
+	<dt> <label for = "owner" > {lang_owner}: </label> </dt>
+	<dd> {owner_name} </dd>
+	<dt> <label for = "groups" > {lang_group}: </label> </dt>
+	<dd> {group_dropdown} <dd>
+	<dt> <label for = "permissions" > {lang_permissions}: </label> </dt>
+	<dd> {permissions} <dd> 
+	<dt> <input type = "submit" value = "submit" name = "calendar_submit"> </dt>
 </form>
 </div>

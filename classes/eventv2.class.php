@@ -120,8 +120,12 @@ class Event {
                 $this->_owner = $_USER['uid'];
             }
         }
-
-        $start = $A['start_date'] . $A['start_time'];
+        //$this->_group TODO
+        if (is_array($A['group_id']) or is_array($A['perm_owner']) or is_array($A['perm_group']) or is_array($A['perm_anon'])) {
+                list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = 
+                SEC_getPermissionValues($A['perm_owner'], $A['perm_groups'] , $A['perm_members'], $A['perm_anon']);
+                $start = $A['start_date'] . $A['start_time'];
+        }
         try { 
             $this->_start = new DateTime($start);
         } catch (Exception $e) {
@@ -184,12 +188,14 @@ class Event {
     {
         global $_TABLES;
         $fields = 'eid,' . 'title,' . 'description,'. 'datestart,'. 
-                  'dateend,'. 'location,'. 'allday,' . 'owner_id,' . 'cid,' . 'pid';
+                  'dateend,'. 'location,'. 'allday,' . 'owner_id,' . 'cid,' . 'pid,' . 'perm_owner, ' .
+                  'perm_members,' . 'perm_group,' . 'perm_anon';
         $sanitized = $this->getSanitized();      
         $elements = "'{$sanitized['eid']}' ," . "'{$sanitized['title']}' ," . "'{$sanitized['description']}' ,"  
                     . "'{$sanitized['start']}'," . "'{$sanitized['end']}'," 
                     . "'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_owner',"
-                    . "'$this->_calendar_id'," . "'$this->_pid'";
+                    . "'$this->_calendar_id'," . "'$this->_pid'," . "'$this->_perm_owner'," 
+                    . "'$this->_perm_members'," . "'$this->_perm_group'," . "'$this->_perm_anon'";
 
         // Check to see if the events is directly saved into the database 
         // or mark for admin aproval.

@@ -72,5 +72,12 @@
 			<dd> <textarea id = "event_description" name = "event_description">{event_description}</textarea> </dd>
 			<dt> <label for = "Calendar"> {lang_calendars}: </label> </dt> 
 			<dd> {calendar} <dd>
+			<dt> <label for = "owner" > {lang_owner}: </label> </dt>
+			<dd> {owner_name} </dd>
+			<dt> <label for = "groups" > {lang_group}: </label> </dt>
+			<dd> {group_dropdown} <dd>
+			<dt> <label for = "permissions" > {lang_permissions}: </label> </dt>
+			<dd> {permissions} <dd>
+			<dt> <label for = "AccesRights"> {lang_accesrights} </label> </dt>
 			<dd> <input type="submit" value="{lang_add}" name = "submit"/> </dd>
 </form>

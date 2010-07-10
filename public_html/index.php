@@ -39,7 +39,7 @@ require_once '../lib-common.php';
 
 
 // take user back to the homepage if the plugin is not active
-if (! in_array('calendarv2', $_PLUGINS)) {
+if (!in_array('calendarv2', $_PLUGINS)) {
     echo COM_refresh($_CONF['site_url'] . '/index.php');
     exit;
 }
@@ -52,37 +52,48 @@ require_once $_CONF['path'] . 'plugins/calendarv2/classes/aeventsv2.class.php';
 $A = $_GET;
 
 
+if (COM_isAnonUser()) {
+    $_USER['uid'] = 1;
+}
+else {
+    // If the user is loged in he can always see the site wide calendar. 
+    // The site wide calendar will be the first thing he will see.
+    if (isset($A['cid'])) {
+        $cid = $A['cid'];
+    }
+    else {
+        $cid = 1;
+    } 
+}
+
+
+
 // Section that handles creation of new calendars
 // TODO see if the user can create a new calendar
 if ($A['display'] == 'new') {
     $page .= calendarv2_display_calendars_new();
-    if (isset($_POST['new_calendar_name'])) {
-        calendarv2_create_calendar($_POST['new_calendar_name']);
-    }
 }
 
+//TODO must do some security here also
 if (isset($_POST['calendar_submit'])) {
-   calendarv2_create_calendar($_POST['new_calendar_name']);
+   calendarv2_create_calendar($_POST);
 } 
 
 
 $display = '';
-if (isset($A['cid'])) {
-    $cid = $A['cid'];
-}
-else {
-    $cid = 1;
-}
-
-if (COM_isAnonUser()) {
-    $_USER['uid'] = 1;
-}
 
 
-$calendar = new Calendarv2();
-$calendar->setCid($cid);
-$calendars = new Acalendarv2();
-$calendars->getCalendars($_USER['uid']);
+
+
+if (empty($errors)) {
+    $calendar = new Calendarv2();
+    $calendar->setCid($cid);
+    $calendars = new Acalendarv2();
+    $calendars->getCalendars();
+    if ($calendars->getNum() == 0) {
+        $errors = "There are no calendars to display";
+    }
+}
 if (isset($_POST['submit'])) {
     if ($cid = 1) {
         if ($_POST['recurring_type'] == 1) {
@@ -109,7 +120,12 @@ if (isset($_POST['submit'])) {
         
 }
 
-$page .= calendarv2_display_calendar_links($calendars);
+if (empty($errors)) {
+    $page .= calendarv2_display_calendar_links($calendars);
+    $page .= calendarv2_display($A, $calendars, $calendar);
+}
+
+$page .= $errors;
 
 
 // MAIN
@@ -118,7 +134,6 @@ $display .= COM_startBlock($LANG_CALENDARV2_1['plugin_name']);
 $display .= '<p>Welcome to the ' . $LANG_CALENDARV2_1['plugin_name'] . ' plugin, '
          . $_USER['username'] . '!</p>';
 $display .= $page;
-$display .= calendarv2_display($A, $calendars, $calendar);
 $display .= COM_endBlock();
 $display .= COM_siteFooter();
 
