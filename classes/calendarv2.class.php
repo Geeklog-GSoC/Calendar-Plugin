@@ -33,6 +33,16 @@
 // the new calendar plugin. Developed During GSoC 2010
 
 class Calendarv2 {
+    //Geeklog Permissions
+    protected $_owner;
+    protected $_group;
+    protected $_group_id;
+    protected $_perm_owner;
+    protected $_perm_group;
+    protected $_perm_members;
+    protected $_perm_anon; 
+
+    // Normal Variables
     private $_creation_date;
     private $_events = array();
     private $_cid;
@@ -106,10 +116,16 @@ class Calendarv2 {
         $a->getElements($date, $day_end, $this->_cid);
         return $a;
     }
-        
+
+    public function getPermissions() {
+        $list = array($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon);
+        return $list;
+    }
     
     public function loadFromArray($A) {
         $this->_title = $A['title'];
+        list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = 
+                array($A['perm_owner'], $A['perm_groups'] , $A['perm_members'], $A['perm_anon']); 
         $this->_cid = $A['cid'];
     }
     
@@ -166,11 +182,11 @@ class Acalendarv2 implements arrayaccess, iterator {
         unset($this->_calendars[$offset]);
     }
     
-    // Gets the calendars where user has read rights
-    public function getCalendars() {
+    // Gets the calendars where user has rights
+    public function getCalendars($rights) {
         global $_TABLES, $_USER;
         $sql = "select * from {$_TABLES['calendarv2']}" ;
-        $sql .= COM_getPermSQL('where', $_USER['uid'], 2);
+        $sql .= COM_getPermSQL('where', $_USER['uid'], $rights);
         $result = DB_query($sql);
         $i = 0;
         while ($array = DB_fetchArray($result)) {

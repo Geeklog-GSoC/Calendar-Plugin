@@ -417,7 +417,6 @@ function calendarv2_form_display($A, $calendars)
     if((!empty($A['month'])) && !(empty($A['year']))) {
         $date->setDate(intval($A['year']), intval($A['month']), 1);
     }
-    
         
     $page->set_var('month_recurring_day' , $date->format('d'));
     $page->set_var('year_recurring_day' , $date->format('m/d/Y'));
@@ -439,7 +438,6 @@ function calendarv2_form_display($A, $calendars)
     
     // Generate Recurring Events in the database if it's the case (1 year have passed)
     calendarv2_create_events($date);
-    // Ening an important section 
     return $retval; 
      
 }
@@ -627,6 +625,9 @@ function calendarv2_modify_event($event)
     $page->set_file(array ('page' => 'modify_instance.thtml'));
     foreach ($lang as $key => $value) {
             $page->set_var($key, $value);
+    }
+    if ($details['allday'] == 1) {
+        $page->set_var('checked' , 'yes');
     }  
     $page->set_var('action' , 'event.php');
     $page->set_var('event_title', $details['title']);
@@ -707,11 +708,12 @@ function calendarv2_create_calendar($A)
     global $_TABLES, $_USER; 
     if (is_array($A['group_id']) or is_array($A['perm_owner']) or is_array($A['perm_group']) or is_array($A['perm_anon'])) {
             list($perm_owner, $perm_group, $perm_members, $perm_anon) = 
-            SEC_getPermissionValues($A['perm_owner'], $A['perm_groups'] , $A['perm_members'], $A['perm_anon']); 
-    }
+            SEC_getPermissionValues($A['perm_owner'], $A['perm_group'] , $A['perm_members'], $A['perm_anon']); 
+    }       
+    $A['group_id'] = COM_applyFilter($A['group_id'], true);
     $name = addslashes($A['new_calendar_name']);
-    $sql = "insert into {$_TABLES['calendarv2']} (owner_id, title, perm_owner, perm_group, perm_members, perm_anon) values ('{$_USER['uid']}', '{$name}', '{$perm_owner}' , '{$perm_group}',
-            '{$perm_members}', '{$perm_anon}')";
+    $sql = "insert into {$_TABLES['calendarv2']} (owner_id, title, perm_owner, perm_group, perm_members, perm_anon, group_id) values" . 
+            "('{$_USER['uid']}', '{$name}', '{$perm_owner}' , '{$perm_group}', '{$perm_members}', '{$perm_anon}', '{$A['group_id']}')";
     DB_query($sql);
 }
 

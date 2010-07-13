@@ -64,7 +64,10 @@ class Event {
     *
     */ 
 
-    public function __construct(){
+    public function __construct($A = NULL){
+        if ($A != NULL) {
+            $this->load_event_from_array($A);
+        }
     }
 
     // Implementation of some getters
@@ -122,10 +125,12 @@ class Event {
         }
         //$this->_group TODO
         if (is_array($A['group_id']) or is_array($A['perm_owner']) or is_array($A['perm_group']) or is_array($A['perm_anon'])) {
-                list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = 
-                SEC_getPermissionValues($A['perm_owner'], $A['perm_groups'] , $A['perm_members'], $A['perm_anon']);
-                $start = $A['start_date'] . $A['start_time'];
+                SEC_getPermissionValues($A['perm_owner'], $A['perm_group'] , $A['perm_members'], $A['perm_anon']);
         }
+        list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = 
+            array($A['perm_owner'], $A['perm_group'] , $A['perm_members'], $A['perm_anon']);
+
+        $start = $A['start_date'] . $A['start_time'];
         try { 
             $this->_start = new DateTime($start);
         } catch (Exception $e) {
@@ -148,9 +153,17 @@ class Event {
         }
 
         // Deal breakers
+
+        // All events should have titles
         if (empty($this->_title)) {
             throw new Exception("Event must have a title");
         }
+        // An events must start before it ends
+        if ($this->_end->format('U') - $this->_start->format('U') < 0) {
+            throw new Exception("Event must start before it ends");
+        }
+            
+            
         
     }
     /**
@@ -190,7 +203,7 @@ class Event {
         $fields = 'eid,' . 'title,' . 'description,'. 'datestart,'. 
                   'dateend,'. 'location,'. 'allday,' . 'owner_id,' . 'cid,' . 'pid,' . 'perm_owner, ' .
                   'perm_members,' . 'perm_group,' . 'perm_anon';
-        $sanitized = $this->getSanitized();      
+        $sanitized = $this->getSanitized();   
         $elements = "'{$sanitized['eid']}' ," . "'{$sanitized['title']}' ," . "'{$sanitized['description']}' ,"  
                     . "'{$sanitized['start']}'," . "'{$sanitized['end']}'," 
                     . "'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_owner',"

@@ -43,8 +43,6 @@ if (!in_array('calendarv2', $_PLUGINS)) {
     echo COM_refresh($_CONF['site_url'] . '/index.php');
     exit;
 }
-
-
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/reventv2.class.php';
@@ -63,9 +61,8 @@ else {
     }
     else {
         $cid = 1;
-    } 
+    }                       
 }
-
 
 
 // Section that handles creation of new calendars
@@ -78,51 +75,59 @@ if ($A['display'] == 'new') {
 if (isset($_POST['calendar_submit'])) {
    calendarv2_create_calendar($_POST);
 } 
-
-
 $display = '';
 
-
-
-
-if (empty($errors)) {
-    $calendar = new Calendarv2();
-    $calendar->setCid($cid);
-    $calendars = new Acalendarv2();
-    $calendars->getCalendars();
-    if ($calendars->getNum() == 0) {
-        $errors = "There are no calendars to display";
-    }
-}
+// Handle things if an event is subbmited via POST
 if (isset($_POST['submit'])) {
     if ($cid = 1) {
         if ($_POST['recurring_type'] == 1) {
-            $event = new Event();
-            $event->load_event_from_array($_POST);
+            try {
+                $event = new Event($_POST);
+            } catch (Exception $e) {
+                $errors = $e->getMessage();
+            }
         }
         else {
             $event = new Revent($_POST);
         }
-        if (SEC_hasRights('calendarv2.admin')) {
-            plugin_savesubmission_calendarv2($event, false);
-            $page .= COM_showMessageText("You have succesfully added an event", "Alert");
-        }
-        else {
-            plugin_savesubmission_calendarv2($event, true);
-            $page .= COM_showMessageText("Your event has been submitted and expects moderation");
+        if (empty($errors)) {
+            if (SEC_hasRights('calendarv2.admin')) {
+                plugin_savesubmission_calendarv2($event, false);
+                $page .= COM_showMessageText("You have succesfully added an event", "Alert");
+            }
+            else {
+                plugin_savesubmission_calendarv2($event, true);
+                $page .= COM_showMessageText("Your event has been submitted and expects moderation");
+            }
         }
     }
     else {
         //TODO Check if the user has rights to write in the calendar if so allow him to write else display an 
         // error message
-        plugin_savesubmission_calendarv2($event, true);
+        plugin_savesubmission_calendarv2($event, false);
     }
         
 }
 
 if (empty($errors)) {
+    $calendar = new Calendarv2();
+    $calendar->setCid($cid);
+    $calendars = new Acalendarv2();
+    // Rights are those found all over in Geeklog, 2 for reading only 3 for read/write.
+    $rights = 2;
+    $calendars->getCalendars($rights);
+    if ($calendars->getNum() == 0) {
+        $errors = "There are no calendars to display";
+    }
+} 
+
+if (empty($errors)) {
     $page .= calendarv2_display_calendar_links($calendars);
-    $page .= calendarv2_display($A, $calendars, $calendar);
+    // Get the calendars where the user has read and write acces
+    $calendarsw = new Acalendarv2();
+    $rights = 3;
+    $calendarsw->getCalendars($rights);
+    $page .= calendarv2_display($A, $calendarsw, $calendar);
 }
 
 $page .= $errors;
