@@ -128,15 +128,22 @@ $LANG_CALENDARV2_EVENT = array (
 ); 
 
 $LANG_confignames['calendarv2'] = array(
-    'folder' => 'Default plugin folder'
+    'folder' => 'Default plugin folder',
+    'calendarlimit' => 'Number of calendars an user can have',
+    'sitewide' => 'Annonymous users can see the site wide calendar'
 );
 
 $LANG_configsubgroups['calendarv2'] = array(
     'sg_main' => 'Main Settings'
 );
 
+$LANG_configselects['calendarv2'] = array(
+    0 => array('True' => 1, 'False' => 0),
+    1 => array('True' => TRUE, 'False' => FALSE)
+);
+
 $LANG_fs['calendarv2'] = array(
-    'fs_main' => 'Calendar Settings'
+    'fs_main' => 'Calendarv2 Settings'
 );
 
 

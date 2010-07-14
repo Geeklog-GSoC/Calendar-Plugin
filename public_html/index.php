@@ -48,38 +48,66 @@ require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/reventv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/aeventsv2.class.php';
 $A = $_GET;
+$display = '';
 
-
+// If the user is not logged in set his $_USER value
 if (COM_isAnonUser()) {
     $_USER['uid'] = 1;
 }
+
+// Check if the current user requested a specific calendar
+// If not show him first available calendar or an error message if none.
+if (isset($A['cid'])) {
+    $cid = COM_applyFilter($A['cid'], true);
+}
 else {
-    // If the user is loged in he can always see the site wide calendar. 
-    // The site wide calendar will be the first thing he will see.
-    if (isset($A['cid'])) {
-        $cid = $A['cid'];
+    $cid = 1;
+    // If the user is not logged in, check to see if a calendar is
+    // available for him
+    if (($_CAV2_CONF['sitewide']) and ($_USER['uid'] == 1)) {
+        $readable = new Acalendarv2();
+        $readable->getCalendars(2);
+        if ($readable->getNum() == 0) {
+            $errors = "There are no calendars to display";
+        }
+        else {
+            // Display the first readable Calendar
+            $cid = $readable[0]->getCid(); 
+        }
+    }  
+}
+
+// Here we have either the user logged in and the display the site wide calendar
+// or the user is anonymous and it's displayed a readable calendar, or 
+// the user is displayed an error message
+
+// Check if the current user can acces the requested calendar
+// he must have read rights.
+if (empty($errors)) {
+    if (!calendarv2_checkCalendar($cid, $_USER['uid'], 2)) {
+        $errors .= "The calendar you requested is not available for you";
+    } 
+}
+    
+// If creation of a new calendar was requested display the form
+if ($A['display'] == 'new') {
+        $page .= calendarv2_display_calendars_new();
+}
+
+// Create a new calendar
+if (isset($_POST['calendar_submit'])) {
+    // Check if the user has reached max calendars
+    if (calendarv2_checkMaxCalendar() and ($_USER['uid'] != 1)) {
+        calendarv2_create_calendar($_POST);
     }
     else {
-        $cid = 1;
-    }                       
-}
-
-
-// Section that handles creation of new calendars
-// TODO see if the user can create a new calendar
-if ($A['display'] == 'new') {
-    $page .= calendarv2_display_calendars_new();
-}
-
-//TODO must do some security here also
-if (isset($_POST['calendar_submit'])) {
-   calendarv2_create_calendar($_POST);
+        $errors = "You cannot create anymore calendars";
+    }
 } 
-$display = '';
 
 // Handle things if an event is subbmited via POST
 if (isset($_POST['submit'])) {
-    if ($cid = 1) {
+    if ($_POST['calendar_cid'] == 1) {
         if ($_POST['recurring_type'] == 1) {
             try {
                 $event = new Event($_POST);
@@ -102,36 +130,27 @@ if (isset($_POST['submit'])) {
         }
     }
     else {
-        //TODO Check if the user has rights to write in the calendar if so allow him to write else display an 
-        // error message
-        plugin_savesubmission_calendarv2($event, false);
+        if (calendarv2_checkCalendar($_POST['calendar_cid'], $_USER['uid'], 3)) {
+            plugin_savesubmission_calendarv2($event, false);
+        }
     }
-        
 }
 
-if (empty($errors)) {
-    $calendar = new Calendarv2();
-    $calendar->setCid($cid);
+if (empty($errors)) {  // if everything is allright then display the current calendar
     $calendars = new Acalendarv2();
-    // Rights are those found all over in Geeklog, 2 for reading only 3 for read/write.
-    $rights = 2;
-    $calendars->getCalendars($rights);
-    if ($calendars->getNum() == 0) {
-        $errors = "There are no calendars to display";
-    }
-} 
-
-if (empty($errors)) {
+    // Get the calendars where the user has read right.
+    $calendars->getCalendars(2);
     $page .= calendarv2_display_calendar_links($calendars);
     // Get the calendars where the user has read and write acces
     $calendarsw = new Acalendarv2();
-    $rights = 3;
-    $calendarsw->getCalendars($rights);
+    $calendarsw->getCalendars(3);   
+    // Get the calendars with the selected cid.
+    $calendar = new Calendarv2();
+    $calendar->setCid($cid);   
     $page .= calendarv2_display($A, $calendarsw, $calendar);
-}
+} 
 
 $page .= $errors;
-
 
 // MAIN
 $display .= COM_siteHeader('menu', $LANG_CALENDARV2_1['plugin_name']);

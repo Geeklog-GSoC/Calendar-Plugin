@@ -123,7 +123,7 @@ class Event {
                 $this->_owner = $_USER['uid'];
             }
         }
-        //$this->_group TODO
+        $this->_group = COM_applyFilter($A['group_id'] , true);
         if (is_array($A['group_id']) or is_array($A['perm_owner']) or is_array($A['perm_group']) or is_array($A['perm_anon'])) {
                 SEC_getPermissionValues($A['perm_owner'], $A['perm_group'] , $A['perm_members'], $A['perm_anon']);
         }

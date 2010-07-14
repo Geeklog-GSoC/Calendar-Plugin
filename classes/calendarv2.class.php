@@ -117,18 +117,13 @@ class Calendarv2 {
         return $a;
     }
 
-    public function getPermissions() {
-        $list = array($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon);
-        return $list;
-    }
-    
     public function loadFromArray($A) {
         $this->_title = $A['title'];
         list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = 
                 array($A['perm_owner'], $A['perm_groups'] , $A['perm_members'], $A['perm_anon']); 
         $this->_cid = $A['cid'];
     }
-    
+
 }
 
 class Acalendarv2 implements arrayaccess, iterator {
@@ -194,7 +189,8 @@ class Acalendarv2 implements arrayaccess, iterator {
             $this[$i]->loadFromArray($array);
             $i++;
         }
-    } 
+    }
+    
     
     public function getNum() {
         return count($this->_calendars);

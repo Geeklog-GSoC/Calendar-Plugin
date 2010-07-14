@@ -495,7 +495,8 @@ function calendarv2_day_events($A, $calendar)
 
 function calendarv2_minimal_display($A, $calendar)
 {
-    
+    global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH;
+
     $date = new DateTime();
     $generate = new DateTime();
     if (!isset($A['month']) && (!isset($A['year']))) {
@@ -503,7 +504,6 @@ function calendarv2_minimal_display($A, $calendar)
         $A['year'] = $date->format('Y');
     }
     $matrix = $calendar->generateMatrix($A['month'], $A['year']);
-    global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH;
     if (isset($A['month']) && isset($A['year'])) {
         $generate->setDate($A['year'], $A['month'], 1);
     }
@@ -887,7 +887,10 @@ function calendarv2_create_events(DateTime $last_event_generated = NULL)
     }
 }
 
-function calendarv2_delete_recurring($id) {
+
+//Deletes a recurring event
+function calendarv2_delete_recurring($id) 
+{
     global $_TABLES;
     $sql = "delete from {$_TABLES['recurring_events']} where reid = {$id}";
     DB_query($sql);
@@ -898,5 +901,40 @@ function calendarv2_delete_recurring($id) {
 }
 
 
- 
+// Verifies that a certain user has read or read-write acces to a certain calendar
+function calendarv2_checkCalendar($cid, $user, $right) 
+{
+    global $_TABLES;
+    $sql = "select * from {$_TABLES['calendarv2']} where (cid = '$cid')";
+    $sql .= COM_getPermSQL('AND', $user, $right); 
+    $result = DB_query($sql);
+    $array = DB_fetchArray($result);
+    if (is_array($array)) {         // If we have some results we have acces
+        return true;
+    }
+    return false;
+
+}
+
+// Verifies if an user can create more calendars
+function calendarv2_checkMaxCalendar() 
+{                                                                 
+    global $_CAV2_CONF, $_USER, $_TABLES;
+    // if the user is admin or in calendarv2 group
+    //  he can create as many calendars as he wants
+    if ((SEC_inGroup('Root')) or (SEC_inGroup('Calendarv2 Admin'))) {
+        return true;
+    }
+    
+    // else check how many calendars a user has created so far
+    $sql = "select * from {$_TABLES['calendarv2']} where owner_id = {$_USER['uid']}";
+    $result = DB_query($sql); 
+    $result = DB_numRows($result);
+    // if the cap is reached don't allow anymore
+    if ($result >= $_CAV2_CONF['calendarlimit']) {
+        return false;
+    }
+    return true;
+}
+
 ?>
