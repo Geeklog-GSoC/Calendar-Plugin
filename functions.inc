@@ -416,7 +416,10 @@ function calendarv2_form_display($A, $calendars)
     $date = new DateTime();
     if((!empty($A['month'])) && !(empty($A['year']))) {
         $date->setDate(intval($A['year']), intval($A['month']), 1);
-    }
+    }      
+    $timezone = TimeZoneConfig::getUserTimeZone();
+    $timezone = new DateTimeZone($timezone);
+    $date->setTimezone($timezone); 
         
     $page->set_var('month_recurring_day' , $date->format('d'));
     $page->set_var('year_recurring_day' , $date->format('m/d/Y'));
@@ -457,7 +460,6 @@ function calendarv2_day_events($A, $calendar)
     $date = new DateTime();
     $date->setDate($A['year'] , $A['month'], $A['day']);
     $date->setTime(0 , 0, 0);
-    //var_dump($calendar->getCid());
     $events = $calendar->getTodayEvents($date);
     $page = new Template(calendarv2_templatePath()); 
     $page->set_file(array ('page' => 'dayevent.thtml'));
@@ -473,8 +475,12 @@ function calendarv2_day_events($A, $calendar)
         foreach($events as $key => $event) {
                 if ($event) {
                     $event_link = $_CAV2_CONF['site_url'] . '/event.php?eid=' . $event->getEid();
+                    $timezone = TimeZoneConfig::getUserTimeZone();
+                    $timezone = new DateTimeZone($timezone);
                     $date_start = new DateTime('@' . $event->getDatestart());
                     $date_ends = new DateTime('@' . $event->getDateend());
+                    $date_start->setTimezone($timezone);
+                    $date_ends->setTimezone($timezone);
                     $new_event = COM_createLink($date_start->format('h:i A') . ' - ' . $date_ends->format('h:i A') .' '. $event->getTitle(), $event_link);
                     $page->set_var($date_start->format('G') + 1 . '_event', $new_event);
                 } 
@@ -519,7 +525,7 @@ function calendarv2_minimal_display($A, $calendar)
         $prev_month = 12;
     }
     $prev_year += $generate->format('Y');
-    $prev = COM_createLink('<<', $link2 . 'year=' . $prev_year .'&'. 'month=' . $prev_month);
+    $prev = COM_createLink('<<', $link2 . 'year=' . $prev_year .'&'. 'month=' . $prev_month . '&cid=' . $calendar->getCid());
     $page->set_var('prev', $prev);
     
     $next_month = $generate->format('m') + 1;
@@ -528,7 +534,7 @@ function calendarv2_minimal_display($A, $calendar)
         $next_year =  1;
     }
     $next_year += $generate->format('Y');
-    $next = COM_createLink('>>', $link2 . 'year=' . $next_year . '&' . 'month=' . $next_month);
+    $next = COM_createLink('>>', $link2 . 'year=' . $next_year . '&' . 'month=' . $next_month . '&cid=' . $calendar->getCid());
     $page->set_var('next', $next);
     
     $month_name = $LANG_CALENDARV2_MONTH[intval($generate->format("m"))];
@@ -587,12 +593,18 @@ function calendarv2_single_event($event)
     foreach ($lang as $key => $value) {
         $page->set_var($key, $value);
     }
+    $timezone = TimeZoneConfig::getUserTimeZone();
+    $timezone = new DateTimeZone($timezone);
+    $datestart = new DateTime('@' . $details['datestart']);
+    $dateend = new DateTime('@' . $details['dateend']);
+    $datestart->setTimezone($timezone);
+    $dateend->setTimezone($timezone);
     $page->set_var('event_title_value' , $details['title']);
-    $page->set_var('when_content' , date('h:i A', $details['datestart']) . ' - ' . date('h:i A', $details['dateend']) . ' ');
+    $page->set_var('when_content' , $datestart->format('h:i A') . ' - ' . $dateend->format('h:i A') . ' ');
     $page->set_var('where_content' , $details['location']);
     $page->set_var('description_content' , $details['description']);
     $page->set_var('hidden_eid' , $details['eid']);
-    list($day, $month, $year) = explode ('/' , date('d/m/Y' , $details['datestart']));
+    list($day, $month, $year) = array($datestart->format('d'), $datestart->format('m'), $datestart->format('Y'));
     $link = COM_createLink($lang['go_back'], $_CAV2_CONF['site_url'] . "/event.php?cid={$details['cid']}&day=$day&month=$month&year=$year");
     $page->set_var('go_back_link' , $link); 
     // if the event is recurring we will have to display aditional information
@@ -618,9 +630,13 @@ function calendarv2_modify_event($event)
 {
     global $LANG_CALENDARV2_FORM, $CAV2_CONF;
     $lang = $LANG_CALENDARV2_FORM;
-    $details = $event->get_details();
+    $details = $event->get_details();   
+    $timezone = TimeZoneConfig::getUserTimeZone();
+    $timezone = new DateTimeZone($timezone); 
     $date_end  = new DateTime('@' . $details['datestart']);
     $date_start = new DateTime('@' . $details['dateend']);
+    $date_end->setTimezone($timezone);
+    $date_start->setTimezone($timezone);
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'modify_instance.thtml'));
     foreach ($lang as $key => $value) {
@@ -637,7 +653,7 @@ function calendarv2_modify_event($event)
     $page->set_var('default_end_date' , $date_end->format('m/d/Y'));
     $page->set_var('default_start_time' , $date_start->format('h:i A'));
     $page->set_var('default_end_time' , $date_end->format('h:i A'));
-    $page->set_var('m$odify_eid' , $details['eid']);
+    $page->set_var('modify_eid' , $details['eid']);
     $page->set_var('modify_cid' , $details['cid']);
     $retval .= $page->finish($page->parse('output', 'page')); 
     return $retval;

@@ -60,7 +60,7 @@ if (COM_isAnonUser()) {
 if (isset($A['cid'])) {
     $cid = COM_applyFilter($A['cid'], true);
 }
-else {
+else {   
     $cid = 1;
     // If the user is not logged in, check to see if a calendar is
     // available for him
@@ -107,7 +107,6 @@ if (isset($_POST['calendar_submit'])) {
 
 // Handle things if an event is subbmited via POST
 if (isset($_POST['submit'])) {
-    if ($_POST['calendar_cid'] == 1) {
         if ($_POST['recurring_type'] == 1) {
             try {
                 $event = new Event($_POST);
@@ -118,22 +117,23 @@ if (isset($_POST['submit'])) {
         else {
             $event = new Revent($_POST);
         }
-        if (empty($errors)) {
-            if (SEC_hasRights('calendarv2.admin')) {
+        if ($_POST['calendar_cid'] == 1) {
+            if (empty($errors)) {
+                if (SEC_hasRights('calendarv2.admin')) {
+                    plugin_savesubmission_calendarv2($event, false);
+                    $page .= COM_showMessageText("You have succesfully added an event", "Alert");
+                }
+                else {
+                    plugin_savesubmission_calendarv2($event, true);
+                    $page .= COM_showMessageText("Your event has been submitted and expects moderation");
+                }
+            }
+        }
+        else {
+            if (calendarv2_checkCalendar($_POST['calendar_cid'], $_USER['uid'], 3)) {
                 plugin_savesubmission_calendarv2($event, false);
-                $page .= COM_showMessageText("You have succesfully added an event", "Alert");
-            }
-            else {
-                plugin_savesubmission_calendarv2($event, true);
-                $page .= COM_showMessageText("Your event has been submitted and expects moderation");
             }
         }
-    }
-    else {
-        if (calendarv2_checkCalendar($_POST['calendar_cid'], $_USER['uid'], 3)) {
-            plugin_savesubmission_calendarv2($event, false);
-        }
-    }
 }
 
 if (empty($errors)) {  // if everything is allright then display the current calendar

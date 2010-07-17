@@ -51,6 +51,7 @@ require_once $_CONF['path'] . 'plugins/calendarv2/classes/aeventsv2.class.php';
 $A = $_GET;
 $B = $_POST;
 $cid = $_GET['cid'];
+// Must do some security here.
 $calendar = new Calendarv2();
 $calendar->setCid($cid);
 // Check if mofication of an event or deletion is asked by a $_POST variable

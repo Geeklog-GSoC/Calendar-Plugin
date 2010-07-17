@@ -64,7 +64,7 @@ class Event {
     *
     */ 
 
-    public function __construct($A = NULL){
+    public function __construct($A = NULL) {
         if ($A != NULL) {
             $this->load_event_from_array($A);
         }
@@ -113,6 +113,7 @@ class Event {
     */  
     public function load_event_from_array($A) {
         global $_USER;
+        
         $this->_title = $A['event_title'];
         
         if (!isset($this->_owner)) {
@@ -130,16 +131,18 @@ class Event {
         list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = 
             array($A['perm_owner'], $A['perm_group'] , $A['perm_members'], $A['perm_anon']);
 
+        $timezone = TimeZoneConfig::getUserTimeZone();
+        $timezone = new DateTimeZone($timezone); 
         $start = $A['start_date'] . $A['start_time'];
         try { 
-            $this->_start = new DateTime($start);
+            $this->_start = new DateTime($start, $timezone);
         } catch (Exception $e) {
             throw new Exception('DateTime failed' , $e);
         }
 
         $end = $A['end_date'] . $A['end_time'];
         try {
-            $this->_end = new DateTime($end);
+            $this->_end = new DateTime($end, $timezone);
         } catch (Exception $e) {
             throw new Exception('DateTime failed' , $e);
         }
@@ -176,8 +179,12 @@ class Event {
     
     public function load_event_from_DB_array($A) {
         $this->_title = stripslashes($A['title']);
+        $timezone = TimeZoneConfig::getUserTimeZone();
+        $timezone = new DateTimeZone($timezone);
         $this->_start = new DateTime('@' . $A['datestart']);
-        $this->_end =  new DateTime('@' . $A['dateend']); 
+        $this->_start->setTimezone($timezone);
+        $this->_end =  new DateTime('@' . $A['dateend']);
+        $this->_end->setTimezone($timezone); 
         $this->_location = stripslashes($A['location']);
         $this->_description = stripslashes($A['description']);
         $this->_allday = $A['allday'];  
@@ -297,6 +304,7 @@ class Event {
     {
         $this->load_event_from_array($P);
         $this->_eid = $P['modify_eid'];
+        var_dump($this->_eid);
         $this->_calendar_id = $P['modify_cid'];
         $this->update_to_database($P['modify_eid'], 'cv2submission');
     }
@@ -328,8 +336,12 @@ class Event {
         $event = DB_fetchArray($result);
         $this->_calendar_id = $event['cid']; 
         $this->_title = $event['title'];
-        $this->_start = new DateTime('@' . $event['datestart']);     
+        $timezone = TimeZoneConfig::getUserTimeZone();
+        $timezone = new DateTimeZone($timezone);
+        $this->_start = new DateTime('@' . $event['datestart']);
+        $this->_start->setTimezone($timezone);     
         $this->_end =  new DateTime('@' . $event['dateend']);
+        $this->_end->setTimezone($timezone);
         $this->_location = $event['location'];
         $this->_description = $event['description'];
         $this->_allday = $event['allday'];

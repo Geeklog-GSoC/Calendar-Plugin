@@ -86,16 +86,16 @@ class Revent extends Event {
     private function save_recurring_events() {
         global $_TABLES;
         $sanitized = $this->getSanitized();
-        $fields = 'reid,' . 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'recurring_ends';
+        $fields = 'reid,' . 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'recurring_ends,' . 'cid';
         $values = "'$this->_reid'," . "'{$sanitized['title']}'," . "'{$sanitized['description']}'," . 
-                    "'{$sanitized['start']}' ," . "'{$sanitized['end']}'," ."'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_recurring_ends'";
+                    "'{$sanitized['start']}' ," . "'{$sanitized['end']}'," ."'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_recurring_ends'," . "'$this->_calendar_id'";
         DB_save($_TABLES['recurring_events'], $fields, $values); 
     } 
     
     public function save_to_database() {
         global $_TABLES;
         $this->save_recurring_events(); 
-        $fields = "preid, ";
+        $fields = "preid,";
         $values = "'$this->_reid',";
         $save = true;
         if (isset($this->_year)) { 
