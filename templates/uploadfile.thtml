@@ -1,0 +1,6 @@
+<form enctype="multipart/form-data" action="upload.php" method="POST">
+<input type="hidden" name="MAX_FILE_SIZE" value="100000" />
+<input name="uploadedfile" type="file" /><br />
+{calendars}<br>
+<input type="submit" value= "{lang_upload}" name = "uploadfile"/>
+</form>

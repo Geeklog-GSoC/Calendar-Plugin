@@ -72,6 +72,14 @@ class Calendarv2 {
     public function getTitle() {
         return $this->_title;
     }
+    
+    public function getEvents() {
+        return $this->_events;
+    }
+    
+    public function getEvent($eid) {
+        return $this->_events->getEvent($eid);
+    }
 
     /**
     * Returns a matrix with days of a month
@@ -101,7 +109,12 @@ class Calendarv2 {
         $this->_events = $events;
     }
     
-    public function addEvent(Event $event) {
+    public function addEvent(Event $event) 
+    {
+        $cid = $event->getCid();
+        if (is_null($cid)) {
+            $event->setCid($this->_cid);
+        }
         $this->_events->addEvent($event);
     }
     
@@ -122,6 +135,12 @@ class Calendarv2 {
         list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = 
                 array($A['perm_owner'], $A['perm_groups'] , $A['perm_members'], $A['perm_anon']); 
         $this->_cid = $A['cid'];
+    }
+
+    public function saveEvents() {
+        foreach ($this->_events as $event) {
+            $event->save_to_database();
+        }
     }
 
 }

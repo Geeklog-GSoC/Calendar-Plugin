@@ -581,7 +581,6 @@ function calendarv2_minimal_display($A, $calendar)
 
 function calendarv2_single_event($event)
 {
-    global $_CAV2_CONF;
     $details = $event->get_details();
     global $CAV2_CONF, $LANG_CALENDARV2_SINGLE;
     // start creating the page based on event details
@@ -589,6 +588,7 @@ function calendarv2_single_event($event)
     $page->set_file(array ('page' => 'single_event.thtml',
                             'recurring' => 'recurring_info.thtml'));
     $page->set_var('site_url', $CAV2_CONF['site_url']);
+    $pave->set_var('action' , 'event.php');
     $lang = $LANG_CALENDARV2_SINGLE;
     foreach ($lang as $key => $value) {
         $page->set_var($key, $value);
@@ -754,6 +754,18 @@ function calendarv2_display_calendar_links($calendars)
         $link_body .= '<br>'; 
     } 
     $page->set_var('link', $link_body);
+    $retval .= $page->finish($page->parse('output', 'page'));
+    return $retval;
+}
+
+function calendarv2_display_uploadForm($calendars)
+{
+    global $LANG_CALENDARV2_FORM;
+    $page = new Template(calendarv2_templatePath());
+    $page->set_file(array ('page' => 'uploadfile.thtml'));
+    $page->set_var('lang_upload', $LANG_CALENDARV2_FORM['lang_upload']);
+    $selects = calendarv2_display_calendars($calendars);
+    $page->set_var('calendars', $selects);
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 }
@@ -944,7 +956,7 @@ function calendarv2_checkMaxCalendar()
     
     // else check how many calendars a user has created so far
     $sql = "select * from {$_TABLES['calendarv2']} where owner_id = {$_USER['uid']}";
-    $result = DB_query($sql); 
+    $result = DB_query($sql);                           
     $result = DB_numRows($result);
     // if the cap is reached don't allow anymore
     if ($result >= $_CAV2_CONF['calendarlimit']) {
@@ -952,5 +964,55 @@ function calendarv2_checkMaxCalendar()
     }
     return true;
 }
+
+function calendarv2_createDate($date, $timezone) 
+{
+    // If the tz is set to Z then we have an UTC time and we ignore the timezone
+    if ($date['tz'] == 'Z') {
+        $timezone = "UTC";
+    } 
+    $datetime = new DateTime();
+    $datetime->setDate($date['year'] , $date['month'], $date['day']);
+    $datetime->setTime($date['hour'] , $date['min'], $date['sec']);
+    return $datetime;
+    
+}
+
+function calendarv2_display_uploadEvents($calendar, $filename) 
+{
+    global $CAV2_CONF, $LANG_CALENDARV2_SINGLE;
+    $page = new Template(calendarv2_templatePath());
+    $page->set_file(array ('page' => 'uploadevents.thtml',
+                            'single_event' => 'single_event.thtml',
+                            'recurring_info' => 'recurring_info.thtml'));
+    // I am using recurring_info because it curently does the job needed. Must be renaimed because does not work only with recurring.
+    $pseudo = $calendar->getEvents();
+    $lang = $LANG_CALENDARV2_SINGLE;
+    foreach ($lang as $key => $value) {
+        $page->set_var($key, $value);
+    } 
+    $page->set_var('action', 'upload.php');
+    $page->set_var('infos', $lang['upload_info']);
+    $page->set_var('lang_deleteall', $lang['aprove_all']);
+    $page->set_var('val', 'a');                                                                     
+    $page->set_var('buttons', $page->finish($page->parse('output', 'recurring_info')));
+    $page->parse('output', 'page');
+    $page->unset_var('lang_deleteall');
+    foreach ($pseudo as $event) {
+        $page->set_var('event_title_value', $event->getTitle());
+        $page->set_var('description_content', $event->getDescription());
+        $page->set_var('where_content', $event->getLocation());
+        $page->set_var('when_content' , date("Y-m-d H-i-s", $event->getDateStart()));
+        $page->set_var('filename', $filename);
+        $page->set_var('hidden_eid' , $event->getEid());   
+        $page->set_var('lang_deleteall', 'Aprove');                                                                     
+        $page->set_var('recurring_info' , $page->finish($page->parse('output', 'recurring_info', true)));
+        $page->set_var('uploads' , $page->parse('page', 'single_event', true));
+    }
+    $result = $page->finish($page->parse('output', 'page'));
+    return $result;
+} 
+        
+    
 
 ?>

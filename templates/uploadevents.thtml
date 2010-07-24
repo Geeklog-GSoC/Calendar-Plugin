@@ -1,0 +1,5 @@
+{infos} <br>
+<form method = "post" action = "upload.php">
+{buttons}
+{uploads}
+</form>

@@ -45,7 +45,7 @@ class Event {
 
     // Event details
     protected $_eid;
-    protected $_calendar_id;
+    protected $_cid;
     protected $_creation_date;
     protected $_title;
     protected $_start;
@@ -90,6 +90,18 @@ class Event {
     public function getPid() {
         return $this->_pid;
     }
+    
+    public function getCid() {
+        return $this->_cid;
+    }
+
+    public function getDescription() {
+        return $this->_description;
+    }
+    
+    public function getLocation() {
+        return $this->_location;
+    }
 
     // And some setters
     public function setEid($eid)
@@ -100,6 +112,39 @@ class Event {
     public function setPid($pid)
     {
         $this->_pid = $pid;
+    }
+    
+    public function setCid($cid)
+    {
+        $this->_cid = $cid;
+    }
+    
+    public function setTitle($title) 
+    {
+        $this->_title = $title;
+    }
+    
+    public function setStartDate(DateTime $date) 
+    {
+        $this->_start = $date;
+    }
+    
+    public function setEndDate(DateTime $date) 
+    {
+        $this->_end = $date;
+    }
+    
+    public function setTimezone(DateTimeZone $timezone) {
+        $this->_start->setTimezone($timezone);
+        $this->_end->setTimezone($timezone);
+    }
+
+    public function setLocation($location) {
+        $this->_location = $location;
+    }
+
+    public function setDescription($description) {
+        $this->_description = $description;
     }
 
     /**
@@ -149,7 +194,7 @@ class Event {
 
         $this->_description = $A['event_description'];
         $this->_location = $A['event_location'];
-        $this->_calendar_id = intval($A['calendar_cid']);
+        $this->_cid = intval($A['calendar_cid']);
         $this->_allday = 0;                                
         if ($A['all_day'] == 'on') {
             $this->_allday = 1;
@@ -165,8 +210,6 @@ class Event {
         if ($this->_end->format('U') - $this->_start->format('U') < 0) {
             throw new Exception("Event must start before it ends");
         }
-            
-            
         
     }
     /**
@@ -190,7 +233,7 @@ class Event {
         $this->_allday = $A['allday'];  
         $this->_eid = $A['eid'];
         $this->_recurring = $A['recurring'];
-        $this->_calendar_id =$A['cid'];
+        $this->_cid =$A['cid'];
         $this->_owner = $A['owner_id'];
     }
     
@@ -214,7 +257,7 @@ class Event {
         $elements = "'{$sanitized['eid']}' ," . "'{$sanitized['title']}' ," . "'{$sanitized['description']}' ,"  
                     . "'{$sanitized['start']}'," . "'{$sanitized['end']}'," 
                     . "'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_owner',"
-                    . "'$this->_calendar_id'," . "'$this->_pid'," . "'$this->_perm_owner'," 
+                    . "'$this->_cid'," . "'$this->_pid'," . "'$this->_perm_owner'," 
                     . "'$this->_perm_members'," . "'$this->_perm_group'," . "'$this->_perm_anon'";
 
         // Check to see if the events is directly saved into the database 
@@ -289,7 +332,7 @@ class Event {
     {
         $this->load_event_from_array($P);
         $this->_eid = $P['modify_eid'];
-        $this->_calendar_id = $P['modify_cid'];
+        $this->_cid = $P['modify_cid'];
         $this->update_to_database($P['modify_eid'], 'c2events');
     }
 
@@ -305,7 +348,7 @@ class Event {
         $this->load_event_from_array($P);
         $this->_eid = $P['modify_eid'];
         var_dump($this->_eid);
-        $this->_calendar_id = $P['modify_cid'];
+        $this->_cid = $P['modify_cid'];
         $this->update_to_database($P['modify_eid'], 'cv2submission');
     }
     
@@ -334,7 +377,7 @@ class Event {
         $sql = "select * from {$_TABLES[$table]} where eid = {$eid}";
         $result = DB_query($sql);
         $event = DB_fetchArray($result);
-        $this->_calendar_id = $event['cid']; 
+        $this->_cid = $event['cid']; 
         $this->_title = $event['title'];
         $timezone = TimeZoneConfig::getUserTimeZone();
         $timezone = new DateTimeZone($timezone);
@@ -346,7 +389,6 @@ class Event {
         $this->_description = $event['description'];
         $this->_allday = $event['allday'];
         $this->_eid = $eid;
-        $this->_calendar_id = $event['cid'];
         $this->_pid = $event['pid'];
     }
 
@@ -365,7 +407,7 @@ class Event {
         $A['description'] = $this->_description;
         $A['allday'] = $this->_allday;
         $A['eid'] = $this->_eid;
-        $A['cid'] = $this->_calendar_id;
+        $A['cid'] = $this->_cid;
         $A['pid'] = $this->_pid;
         return $A;
     }

@@ -112,4 +112,16 @@ class Aevents implements arrayaccess, iterator {
     public function getNumEvents() {
         return count($this->_events);
     }
+    
+    public function getEvent($eid) {
+        foreach ($this->_events as $event) {
+            $test = $event->getEid();
+            var_dump("$test - $eid");
+            if ($event->getEid() == $eid) {
+                return $event;
+            }
+        }
+        return NULL;
+    }
+
 }
