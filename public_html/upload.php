@@ -49,6 +49,8 @@ require_once $_CONF['path'] . 'plugins/calendarv2/classes/iCalcreator.class.php'
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/aeventsv2.class.php';
+$v = new vcalendar();
+$v->returnCalendar();
  
 $calendars = new Acalendarv2();
 // Get the calendars where the user has read right.

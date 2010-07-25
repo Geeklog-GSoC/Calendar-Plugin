@@ -116,12 +116,30 @@ class Aevents implements arrayaccess, iterator {
     public function getEvent($eid) {
         foreach ($this->_events as $event) {
             $test = $event->getEid();
-            var_dump("$test - $eid");
             if ($event->getEid() == $eid) {
                 return $event;
             }
         }
         return NULL;
     }
+
+    public function getEvents($cid) 
+    {
+        global $_TABLES;
+        $cid = COM_applyFilter($cid, true);
+        $sql = "select * from {$_TABLES['c2events']} where cid = $cid";
+        $result = DB_query($sql);
+        $i = 0;
+        while($event = DB_fetchArray($result)) {
+            $this->_events[] = new Event();
+            if($event['eid'] != NULL) {
+                $this->_events[$i]->load_event_from_DB_array($event, 'c2events');
+                $i++;
+            }
+        }
+    }
+        
+    
+    
 
 }

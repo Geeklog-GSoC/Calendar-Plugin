@@ -750,10 +750,12 @@ function calendarv2_display_calendar_links($calendars)
     $page->set_file(array ('page' => 'calendar_links.thtml'));
     $link = $_CAV2_CONF['site_url'] . '/index.php?';
     foreach($calendars as $key => $calendar) {
-        $link_body .= COM_createLink($calendar->getTitle(), $link . 'cid=' . $calendar->getCid());
-        $link_body .= '<br>'; 
+        $link_body .= COM_createLink($calendar->getTitle() . "  ", $link . 'cid=' . $calendar->getCid());
+        $export_link .= COM_createLink("Export" . "  ", $link . 'cid=' . $calendar->getCid() . '&export=1');
+        $page->set_var('link', $link_body);
+        $page->set_var('export_link', $export_link);
+        $page->parse('output', 'page', true);
     } 
-    $page->set_var('link', $link_body);
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 }
@@ -1012,6 +1014,42 @@ function calendarv2_display_uploadEvents($calendar, $filename)
     $result = $page->finish($page->parse('output', 'page'));
     return $result;
 } 
+
+function calendarv2_exportics($cid)
+{        
+    global $_USER, $_CONF;
+    //check to see if the user has read rights on the requested calendar
+    $calendar = new calendarv2();
+    $calendar->getCalendar($cid);
+    if (calendarv2_checkCalendar($cid, $_USER['uid'], 2)) {
+        $v = new vcalendar();
+        $id = COM_makeSid();
+        $v->setConfig('unique_id', "geeklog.net" . $id);
+        $directory = $_CONF['path'] . '/plugins/calendarv2/uploads';
+        $v->setConfig('directory', $directory);
+        $v->setConfig('filename', $id . '.ics');
+        $v->setConfig('calscale', "GREGORIAN");
+        $v->setProperty('x-wr-calname', $id);
+        $events = $calendar->getEvents();
+        foreach ($events as $event) {
+            $ev = new vevent();
+            $start = new DateTime('@' . $event->getDatestart());
+            $end = new DateTime('@' . $event->getDateend());
+            $ev->setProperty('dtstart', $start->format('Y'), $start->format('m'), 
+                $start->format('d'), $start->format('h'), $start->format('i'), $start->format('s'));
+            $ev->setProperty('dtend', $end->format('Y'), $end->format('m'), 
+                $end->format('d'), $end->format('h'), $end->format('i'), $end->format('s'));
+            $description = $event->getDescription();
+            $ev->setProperty('description', $description);
+            $title = $event->getTitle();
+            $ev->setProperty('summary', $title);
+            $v->setComponent($ev);
+        }
+        $v->saveCalendar(); 
+        $v->returnCalendar();
+    }
+}
+        
         
     
 

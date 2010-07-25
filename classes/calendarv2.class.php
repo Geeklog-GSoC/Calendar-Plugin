@@ -142,6 +142,13 @@ class Calendarv2 {
             $event->save_to_database();
         }
     }
+    
+    public function getCalendar($cid) {
+        $this->_events->getEvents($cid);
+    }
+        
+        
+
 
 }
 

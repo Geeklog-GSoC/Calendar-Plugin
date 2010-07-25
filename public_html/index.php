@@ -47,6 +47,7 @@ require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/reventv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/aeventsv2.class.php';
+require_once $_CONF['path'] . 'plugins/calendarv2/classes/iCalcreator.class.php';
 $A = $_GET;
 $display = '';
 
@@ -75,6 +76,10 @@ else {
             $cid = $readable[0]->getCid(); 
         }
     }  
+}
+
+if (isset($cid) && $A['export'] == 1) {
+    calendarv2_exportics($cid);
 }
 
 // Here we have either the user logged in and the display the site wide calendar
