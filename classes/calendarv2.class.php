@@ -144,12 +144,10 @@ class Calendarv2 {
     }
     
     public function getCalendar($cid) {
+        // I should also get the title
+        $this->_cid = $cid;
         $this->_events->getEvents($cid);
     }
-        
-        
-
-
 }
 
 class Acalendarv2 implements arrayaccess, iterator {

@@ -329,7 +329,7 @@ function plugin_autouninstall_calendarv2()
         /* give the full name of the feature, as in the db */
         'features' => array('calendarv2.admin, calendarv2.moderate, calendarv2.submit'),
         /* give the full name of the block, including 'phpblock_', etc */
-        'php_blocks' => array(),
+        'php_blocks' => array(phpblock_calendarv2),
         /* give all vars with their name */
         'vars' => array()
     );
@@ -499,7 +499,7 @@ function calendarv2_day_events($A, $calendar)
 *
 */ 
 
-function calendarv2_minimal_display($A, $calendar)
+function calendarv2_minimal_display($A, $calendar, $block = false)
 {
     global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH;
 
@@ -519,24 +519,26 @@ function calendarv2_minimal_display($A, $calendar)
                             'each_element2'=> 'each_element2.thtml'));
     $link = $_CAV2_CONF['site_url'] . "/event.php?cid={$calendar->getCid()}&";
     $link2 = $_CAV2_CONF['site_url'] . '/index.php?';
-    $prev_month = $generate->format('m') - 1;
-    if ($prev_month == 0) {
-        $prev_year = -1;
-        $prev_month = 12;
+    // If we display the calendar in a block, we don't display the prev and next buttons
+    if ($block == false) {
+        $prev_month = $generate->format('m') - 1;
+        if ($prev_month == 0) {
+            $prev_year = -1;
+            $prev_month = 12;
+        }
+        $prev_year += $generate->format('Y');
+        $prev = COM_createLink('<<', $link2 . 'year=' . $prev_year .'&'. 'month=' . $prev_month . '&cid=' . $calendar->getCid());
+        $page->set_var('prev', $prev);
+
+        $next_month = $generate->format('m') + 1;
+        if ($next_month == 13) {
+            $next_month = 1;
+            $next_year =  1;
+        }
+        $next_year += $generate->format('Y');
+        $next = COM_createLink('>>', $link2 . 'year=' . $next_year . '&' . 'month=' . $next_month . '&cid=' . $calendar->getCid());
+        $page->set_var('next', $next);
     }
-    $prev_year += $generate->format('Y');
-    $prev = COM_createLink('<<', $link2 . 'year=' . $prev_year .'&'. 'month=' . $prev_month . '&cid=' . $calendar->getCid());
-    $page->set_var('prev', $prev);
-    
-    $next_month = $generate->format('m') + 1;
-    if ($next_month == 13) {
-        $next_month = 1;
-        $next_year =  1;
-    }
-    $next_year += $generate->format('Y');
-    $next = COM_createLink('>>', $link2 . 'year=' . $next_year . '&' . 'month=' . $next_month . '&cid=' . $calendar->getCid());
-    $page->set_var('next', $next);
-    
     $month_name = $LANG_CALENDARV2_MONTH[intval($generate->format("m"))];
     $page->set_var('month', $month_name);
     $page->set_var('year' , $generate->format('Y'));
@@ -1048,6 +1050,36 @@ function calendarv2_exportics($cid)
         $v->saveCalendar(); 
         $v->returnCalendar();
     }
+}
+
+
+// Manages the display of the calendar in a left or right block.
+function phpblock_calendarv2()
+{
+    global $_USER, $_CONF;
+    require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';  
+    require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
+    require_once $_CONF['path'] . 'plugins/calendarv2/classes/reventv2.class.php';
+    require_once $_CONF['path'] . 'plugins/calendarv2/classes/aeventsv2.class.php'; 
+    // Check the user
+    if (COM_isAnonUser()) {
+        $_USER['uid'] = 1;
+    }
+    else {
+        $uid = $_USER['uid'];
+    }
+    // Only the site wide event will be displayed in a block.
+    $cid = 1;
+    // Check to see if the user can read the site-wide event 
+    if (calendarv2_checkCalendar($cid, $uid, 2)) {
+        $calendar = new Calendarv2();
+        $calendar->getCalendar($cid);
+        $result = calendarv2_minimal_display(NULL, $calendar, true);
+    }
+    else {
+        $result = "You don't have acces to the site wide calendar";
+    }
+    return $result;
 }
         
         
