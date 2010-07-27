@@ -36,6 +36,9 @@
 global $_CAV2_CONF, $_CONF;
 $_CAV2_CONF = array();
 $_CAV2_CONF['folder'] = 'calendarv2';
+$_CAV2_CONF['first_day'] = 1;
+$_CAV2_CONF['calendarlimit'] = '10';
+$_CAV2_CONF['sitewide'] = 'false';
 
 function plugin_initconfig_calendarv2()
 {
@@ -48,6 +51,12 @@ function plugin_initconfig_calendarv2()
         $c->add('fs_main', NULL, 'fieldset', 0, 0, NULL, 0, true, 'calendarv2');
         $c->add('folder', $_CAV2_CONF['folder'],
                 'text', 0, 0, 0, 10, true, 'calendarv2');
+        $c->add('first_day', $_CAV2_CONF['first_day'], 
+                'select', 0, 0, 2, 20, true, 'calendarv2');
+        $c->add('calendarlimit', $_CAV2_CONF['calendarlimit'],
+                'text', 0, 0, 0, 30, true, 'calendarv2');
+        $c->add('sitewide', $_CAV2_CONT['sitewide'],
+                'select', 0, 0, 1, 40, true, 'calendarv2');
     }
 
     return true;

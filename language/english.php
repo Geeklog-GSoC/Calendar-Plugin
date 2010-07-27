@@ -103,6 +103,16 @@ $LANG_CALENDARV2_MONTH = array (
     '12' => 'December'
 );
 
+$LANG_CALENDARV2_WEEK = array ( 
+    '1' => 'Sun',
+    '2' => 'Mon', 
+    '3' => 'Tue',
+    '4' => 'Wed',
+    '5' => 'Thu',
+    '6' => 'Fri',
+    '7' => 'Sat'
+);
+
 $LANG_CALENDARV2_SINGLE = array (
     'event_title' => 'Event Title:',
     'when' => 'When:',
@@ -134,7 +144,7 @@ $LANG_confignames['calendarv2'] = array(
     'folder' => 'Default plugin folder',
     'calendarlimit' => 'Number of calendars an user can have',
     'sitewide' => 'Annonymous users can see the site wide calendar',
-    'zones' => 'Default Time Zone'
+    'first_day' => 'First Day of the week',
 );
 
 $LANG_configsubgroups['calendarv2'] = array(
@@ -143,9 +153,10 @@ $LANG_configsubgroups['calendarv2'] = array(
 
 $LANG_configselects['calendarv2'] = array(
         0 => array('True' => 1, 'False' => 0),
-        1 => array('True' => TRUE, 'False' => FALSE)
-       
-);
+        1 => array('True' => TRUE, 'False' => FALSE),
+        2 => array('Sun' => 1, 'Mon' => 2, 'Tue' => 3, 'Wed' => 4, 'Thu' => 5,
+                    'Fri' => 6, 'Sat' => 7
+));
 
 $LANG_fs['calendarv2'] = array(
             'fs_main' => 'Calendarv2 Settings'

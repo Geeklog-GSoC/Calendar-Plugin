@@ -82,17 +82,19 @@ class Calendarv2 {
     }
 
     /**
-    * Returns a matrix with days of a month
+    * Returns a matrix with days of a month first day of the month is set 
+    * to default 1 (Sun)
     * 
     * @param    int     $month  the month number
     * @param    int     $year   the year number
+    * @param    int     $first_day_config the first day of the week for display.
     * @return   array   
     */ 
-     public function generateMatrix($month, $year) {
+     public function generateMatrix($month, $year, $first_day_config = 1) {
         $start_date = mktime(0,0,0, $month, 1, $year);
         $days_in_month = date('t', $start_date);
         $first_day = date('w', $start_date);
-        $j = $first_day;
+        $j = $first_day - $first_day_config + 1;  // Trick to set the first day corectly
         $num_weeks = 1;
         for ($i = 1; $i <= $days_in_month; $i++) {
             $matrix[$num_weeks][$j] = $i;

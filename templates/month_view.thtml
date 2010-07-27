@@ -1,10 +1,12 @@
 <div id = "month_center">
 	<span> {month} {year} </span>
 </div>
+
 <div id = "month_something">
 <span id = "month_prev"> {prev} </span>
 <span id = "month_next"> {next} </span>
 </div>
 <table id = "month_view">
+<td>{day1}</td><td>{day2}</td><td>{day3}</td><td>{day4}</td><td>{day5}</td><td>{day6}</td><td>{day7}</td>
 {calendar_view}
 </table>

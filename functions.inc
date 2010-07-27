@@ -501,7 +501,7 @@ function calendarv2_day_events($A, $calendar)
 
 function calendarv2_minimal_display($A, $calendar, $block = false)
 {
-    global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH;
+    global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH, $LANG_CALENDARV2_WEEK;
 
     $date = new DateTime();
     $generate = new DateTime();
@@ -509,7 +509,6 @@ function calendarv2_minimal_display($A, $calendar, $block = false)
         $A['month'] = $date->format('m');
         $A['year'] = $date->format('Y');
     }
-    $matrix = $calendar->generateMatrix($A['month'], $A['year']);
     if (isset($A['month']) && isset($A['year'])) {
         $generate->setDate($A['year'], $A['month'], 1);
     }
@@ -543,8 +542,22 @@ function calendarv2_minimal_display($A, $calendar, $block = false)
     $page->set_var('month', $month_name);
     $page->set_var('year' , $generate->format('Y'));
     $i = 0;
+    $lang = $LANG_CALENDARV2_WEEK;
+    $first_day = $_CAV2_CONF['first_day'];
+    for ($i = 1; $i <= 7; $i++) {
+        $j = $first_day + $i - 1;
+        if ($j > 7) {
+            $j = $j - 7;
+        }
+        $page->set_var('day' . $i, $lang[$j]);
+    }
+    $matrix = $calendar->generateMatrix($A['month'], $A['year'], $first_day);
     for ($i = 1; $i <= 6; $i++) {
         for ($j = 0; $j < 7; $j++) {
+            if ($j >= 7) {
+                $j = $j - 7;
+                $once = true;
+            }           
             if(!empty($matrix[$i][$j])) {
                 $page->set_var('strong' ,'');
                 $page->set_var('end_strong', ''); 
