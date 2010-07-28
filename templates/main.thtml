@@ -4,13 +4,17 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 <script src="{site_url}/javascript/jquery.js"></script> 
 <div id = calendar-container>  
-<div id = "calendar-content">
-	{minimal}
+	<div id = "leftb">
+		{left-block}
+	</div>
+	<div id = "rightb">
+		{right-block}
+	</div> 
+	<div id = "calendar-content">
+		{minimal}
+	</div>
 </div>
-<div id = "form-content">
-	{event_form}
-</div>
-</div>
+
 <div id = "event-container">
 	<div id = "daily-events">
 	{day_events}

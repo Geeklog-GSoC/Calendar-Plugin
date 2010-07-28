@@ -145,14 +145,10 @@ if (empty($errors)) {  // if everything is allright then display the current cal
     $calendars = new Acalendarv2();
     // Get the calendars where the user has read right.
     $calendars->getCalendars(2);
-    $page .= calendarv2_display_calendar_links($calendars);
-    // Get the calendars where the user has read and write acces
-    $calendarsw = new Acalendarv2();
-    $calendarsw->getCalendars(3);   
     // Get the calendars with the selected cid.
     $calendar = new Calendarv2();
     $calendar->setCid($cid);   
-    $page .= calendarv2_display($A, $calendarsw, $calendar);
+    $page .= calendarv2_display($A, $calendars, $calendar);
 } 
 
 $page .= $errors;

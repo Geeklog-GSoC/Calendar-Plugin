@@ -1,9 +1,23 @@
 #calendar-container {
 	height : 250px;
-}
-#calendar-content {
+	margin: auto;
+} 
+
+#leftb {
+	width: 15%;
 	float: left;
-	width: 20%;
+} 
+
+#rightb {
+	width: 19%;
+	float: right;
+	text-align: left;
+}
+
+#calendar-content {
+	width: 65%;
+	padding: 0;
+	margin: auto;
 }
 
 #form-content {

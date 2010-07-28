@@ -126,6 +126,7 @@ $LANG_CALENDARV2_SINGLE = array (
     'aprove_all' => 'Aprove All'
 );
 
+
 $LANG_CALENDARV2_MODERATION = array (
     'submissionlabel' => 'Calendarv2 Moderation',
     '1' => 'Event Id',
@@ -134,10 +135,17 @@ $LANG_CALENDARV2_MODERATION = array (
     '4' => 'Location'
 );
 
+$LANG_CALENDARV2_MESSAGES = array (
+    'view_calendars' => 'Available calendars: ',
+    'import' => 'Import Events',
+    'right_block' => 'Actions: '
+);
+
 $LANG_CALENDARV2_EVENT = array (
     'back' => '[ Go back to Calendar ]',
     'lang_create_new' => 'Create new',
-    'calendar_name' => 'Calendar Name'
+    'calendar_name' => 'Calendar Name',
+    'addevent' => 'Add Event',
 ); 
 
 $LANG_confignames['calendarv2'] = array(

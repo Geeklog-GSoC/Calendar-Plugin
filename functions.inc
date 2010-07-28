@@ -382,12 +382,13 @@ function calendarv2_display($A, $calendars, $calendar)
     
     global $_CONF, $_CAV2_CONF;
     $page = new Template(calendarv2_templatePath());
-    $page->set_file(array ('page' => 'main.thtml'));
+    $page->set_file(array ('page' => 'main.thtml'));                                                                  
     $page->set_var('site_url', $_CAV2_CONF['site_url']);
-    $page->set_var('calendar', "test_text");
+    $left = calendarv2_display_leftBlock($calendars);
+    $page->set_var('left-block', $left);
+    $right = calendarv2_display_rightBlock();
+    $page->set_var('right-block', $right);
     $page->set_var('display_today_events', 'today events');
-    $form = calendarv2_form_display($A, $calendars);
-    $page->set_var('event_form', $form);
     $minimal = calendarv2_minimal_display($A, $calendar);
     $page->set_var('minimal' , $minimal);
     $retval .= $page->finish($page->parse('output', 'page'));
@@ -748,32 +749,45 @@ function calendarv2_create_calendar($A)
     DB_query($sql);
 }
 
- /**
-*
-* return a list of links for the calendars.
-*
-*
-* @return   string  html
-*
-*/   
-
-
-function calendarv2_display_calendar_links($calendars)
+function calendarv2_display_leftBlock($calendars)
 {
-    global $_CAV2_CONF;
+    global $_CAV2_CONF, $LANG_CALENDARV2_MESSAGES, $LANG_CALENDARV2_EVENT;
     $page = new Template(calendarv2_templatePath());
-    $page->set_file(array ('page' => 'calendar_links.thtml'));
+    $page->set_file(array ('page' => 'left_right_main.thtml'));
     $link = $_CAV2_CONF['site_url'] . '/index.php?';
+    $page->set_var('message', $LANG_CALENDARV2_MESSAGES['view_calendars']);
+    $page->set_block('page', 'row', 'rows');
     foreach($calendars as $key => $calendar) {
-        $link_body .= COM_createLink($calendar->getTitle() . "  ", $link . 'cid=' . $calendar->getCid());
-        $export_link .= COM_createLink("Export" . "  ", $link . 'cid=' . $calendar->getCid() . '&export=1');
-        $page->set_var('link', $link_body);
-        $page->set_var('export_link', $export_link);
-        $page->parse('output', 'page', true);
+        $link_body = COM_createLink($calendar->getTitle() . "  ", $link . 'cid=' . $calendar->getCid());
+        $page->set_var('content', $link_body);
+        $page->parse('rows', 'row', true);
     } 
+    $page->set_var('div3id', 'div3');
+    $link_create_new = $_CAV2_CONF['site_url'] . '/index.php?display=new';
+    $link_create_new = COM_createLink($LANG_CALENDARV2_EVENT['lang_create_new'] , $link_create_new);
+    $page->set_var('content3', $link_create_new);
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 }
+
+function calendarv2_display_rightBlock()
+{   
+    global $_CAV2_CONF, $LANG_CALENDARV2_MESSAGES, $LANG_CALENDARV2_EVENT;
+    $page = new Template(calendarv2_templatePath());
+    $page->set_file(array ('page' => 'left_right_main.thtml'));
+    $page->set_var('message', $LANG_CALENDARV2_MESSAGES['right_block']);
+    $page->set_block('page', 'row', 'rows');
+    $addevent = $_CAV2_CONF['site_url'] . '/event.php?new=true';
+    $addevent = COM_createLink($LANG_CALENDARV2_EVENT['addevent'], $addevent);
+    $page->set_var('content', $addevent);
+    $page->parse('rows', 'row', true);
+    $import = $_CAV2_CONF['site_url'] . '/index.php?import=true';
+    $import = COM_createLink($LANG_CALENDARV2_MESSAGES['import'], $import);
+    $page->set_var('content', $import);
+    $page->parse('rows', 'row', true);
+    $retval .= $page->finish($page->parse('output', 'page'));
+    return $retval;
+}  
 
 function calendarv2_display_uploadForm($calendars)
 {
@@ -786,6 +800,8 @@ function calendarv2_display_uploadForm($calendars)
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 }
+
+
 
 // Site Wide Event Submission functions, Part of the moderation capability
 
