@@ -597,13 +597,13 @@ function calendarv2_minimal_display($A, $calendar, $block = false)
 function calendarv2_single_event($event)
 {
     $details = $event->get_details();
-    global $CAV2_CONF, $LANG_CALENDARV2_SINGLE;
+    global $_CAV2_CONF, $LANG_CALENDARV2_SINGLE;
     // start creating the page based on event details
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'single_event.thtml',
                             'recurring' => 'recurring_info.thtml'));
     $page->set_var('site_url', $CAV2_CONF['site_url']);
-    $pave->set_var('action' , 'event.php');
+    $page->set_var('action' , 'event.php');
     $lang = $LANG_CALENDARV2_SINGLE;
     foreach ($lang as $key => $value) {
         $page->set_var($key, $value);
