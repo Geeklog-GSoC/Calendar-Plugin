@@ -78,9 +78,7 @@ else {
     }  
 }
 
-if (isset($cid) && $A['export'] == 1) {
-    calendarv2_exportics($cid);
-}
+
 
 // Here we have either the user logged in and the display the site wide calendar
 // or the user is anonymous and it's displayed a readable calendar, or 
@@ -109,37 +107,6 @@ if (isset($_POST['calendar_submit'])) {
         $errors = "You cannot create anymore calendars";
     }
 } 
-
-// Handle things if an event is subbmited via POST
-if (isset($_POST['submit'])) {
-        if ($_POST['recurring_type'] == 1) {
-            try {
-                $event = new Event($_POST);
-            } catch (Exception $e) {
-                $errors = $e->getMessage();
-            }
-        }
-        else {
-            $event = new Revent($_POST);
-        }
-        if ($_POST['calendar_cid'] == 1) {
-            if (empty($errors)) {
-                if (SEC_hasRights('calendarv2.admin')) {
-                    plugin_savesubmission_calendarv2($event, false);
-                    $page .= COM_showMessageText("You have succesfully added an event", "Alert");
-                }
-                else {
-                    plugin_savesubmission_calendarv2($event, true);
-                    $page .= COM_showMessageText("Your event has been submitted and expects moderation");
-                }
-            }
-        }
-        else {
-            if (calendarv2_checkCalendar($_POST['calendar_cid'], $_USER['uid'], 3)) {
-                plugin_savesubmission_calendarv2($event, false);
-            }
-        }
-}
 
 if (empty($errors)) {  // if everything is allright then display the current calendar
     $calendars = new Acalendarv2();

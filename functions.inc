@@ -386,7 +386,7 @@ function calendarv2_display($A, $calendars, $calendar)
     $page->set_var('site_url', $_CAV2_CONF['site_url']);
     $left = calendarv2_display_leftBlock($calendars);
     $page->set_var('left-block', $left);
-    $right = calendarv2_display_rightBlock();
+    $right = calendarv2_display_rightBlock($calendar);
     $page->set_var('right-block', $right);
     $page->set_var('display_today_events', 'today events');
     $minimal = calendarv2_minimal_display($A, $calendar);
@@ -403,24 +403,28 @@ function calendarv2_display($A, $calendars, $calendar)
 *
 */  
 
-function calendarv2_form_display($A, $calendars)
+function calendarv2_display_form($cid)
 {
     
-    global $_CONF, $LANG_CALENDARV2_FORM, $_GROUPS, $LANG_ACCESS, $_USER;
+    global $_CONF, $LANG_CALENDARV2_FORM, $_GROUPS, $LANG_ACCESS, $_USER, $_CAV2_CONF, $LANG_CALENDARV2_EVENT;
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'form.thtml',
                             'calendar' => 'calendars.thtml'));
     $lang = $LANG_CALENDARV2_FORM;
     foreach ($lang as $key => $value) {
             $page->set_var($key, $value);
-    }
+    }     
+    $go_back_link = $_CAV2_CONF['site_url'] . '/index.php'; 
+    $prev = COM_createLink($LANG_CALENDARV2_EVENT['back'] , $go_back_link);
+    $page->set_var('go_back_link', $prev);
     $date = new DateTime();
     if((!empty($A['month'])) && !(empty($A['year']))) {
         $date->setDate(intval($A['year']), intval($A['month']), 1);
     }      
     $timezone = TimeZoneConfig::getUserTimeZone();
     $timezone = new DateTimeZone($timezone);
-    $date->setTimezone($timezone); 
+    $date->setTimezone($timezone);
+    $page->set_var('site_url', $_CAV2_CONF['site_url']); 
         
     $page->set_var('month_recurring_day' , $date->format('d'));
     $page->set_var('year_recurring_day' , $date->format('m/d/Y'));
@@ -428,7 +432,7 @@ function calendarv2_form_display($A, $calendars)
     $page->set_var('default_end_date' , $date->format('m/d/Y'));
     $page->set_var('default_start_time', $date->format('h:i A'));
     $page->set_var('default_end_time', $date->format('h:i A'));
-    $page->set_var('calendar', calendarv2_display_calendars($calendars));
+    $page->set_var('calendar', $cid);
     $page->set_var('permissions', SEC_getPermissionsHTML(3, 2, 2, 0));
     $group_id = $_GROUPS['calendarv2 Admin'];
     $acces = 3;
@@ -770,20 +774,25 @@ function calendarv2_display_leftBlock($calendars)
     return $retval;
 }
 
-function calendarv2_display_rightBlock()
+function calendarv2_display_rightBlock($calendar)
 {   
     global $_CAV2_CONF, $LANG_CALENDARV2_MESSAGES, $LANG_CALENDARV2_EVENT;
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'left_right_main.thtml'));
     $page->set_var('message', $LANG_CALENDARV2_MESSAGES['right_block']);
     $page->set_block('page', 'row', 'rows');
-    $addevent = $_CAV2_CONF['site_url'] . '/event.php?new=true';
+    $cid = $calendar->getCid();
+    $addevent = $_CAV2_CONF['site_url'] . "/event.php?new=true&cid=$cid";
     $addevent = COM_createLink($LANG_CALENDARV2_EVENT['addevent'], $addevent);
     $page->set_var('content', $addevent);
     $page->parse('rows', 'row', true);
-    $import = $_CAV2_CONF['site_url'] . '/index.php?import=true';
+    $import = $_CAV2_CONF['site_url'] . '/upload.php?import=true';
     $import = COM_createLink($LANG_CALENDARV2_MESSAGES['import'], $import);
     $page->set_var('content', $import);
+    $page->parse('rows', 'row', true);
+    $export = $_CAV2_CONF['site_url'] . "/upload.php?export=true&cid=$cid";
+    $export = COM_createLink($LANG_CALENDARV2_MESSAGES['export'], $export);
+    $page->set_var('content', $export);
     $page->parse('rows', 'row', true);
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;

@@ -171,10 +171,9 @@ class Event {
         }
         $this->_group = COM_applyFilter($A['group_id'] , true);
         if (is_array($A['group_id']) or is_array($A['perm_owner']) or is_array($A['perm_group']) or is_array($A['perm_anon'])) {
-                SEC_getPermissionValues($A['perm_owner'], $A['perm_group'] , $A['perm_members'], $A['perm_anon']);
+                $permission = SEC_getPermissionValues($A['perm_owner'], $A['perm_group'] , $A['perm_members'], $A['perm_anon']);
         }
-        list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = 
-            array($A['perm_owner'], $A['perm_group'] , $A['perm_members'], $A['perm_anon']);
+        list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = $permission;
 
         $timezone = TimeZoneConfig::getUserTimeZone();
         $timezone = new DateTimeZone($timezone); 

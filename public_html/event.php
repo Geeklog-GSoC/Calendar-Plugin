@@ -55,17 +55,19 @@ $cid = $_GET['cid'];
 $calendar = new Calendarv2();
 $calendar->setCid($cid);
 // Check if mofication of an event or deletion is asked by a $_POST variable
-if (empty($_POST)) {
+if (empty($B)) {
     // Check if we need to display a single event.
+    if ($A['new'] == true) {
+        $cid = COM_applyFilter($A['cid'], true);
+        $page = calendarv2_display_form($cid);
+    }
     if (isset($A['eid'])) {
         $event = new Event();
         $event->get_event($A['eid'], 'c2events');
         $page = calendarv2_single_event($event);
     }
-    else {
-        if (is_array($A)) {
+    if (isset($A['day'])) {
             $page = calendarv2_day_events($_GET, $calendar);
-        }
     }
 }
 else {
@@ -87,7 +89,37 @@ else {
     if (isset($B['delete_whole'])) {
         calendarv2_delete_recurring($B['hidden_parent']);
         $page .= COM_refresh("index.php");
-    }
+    } 
+    // Handle things if an event is subbmited via POST
+    if (isset($B['submit'])) {
+        if ($B['recurring_type'] == 1) {
+            try {
+                $event = new Event($B);
+            } catch (Exception $e) {
+                $errors = $e->getMessage();
+            }
+        }
+        else {
+            $event = new Revent($B);
+        }
+        if ($B['calendar_cid'] == 1) {
+            if (empty($errors)) {
+                if (SEC_hasRights('calendarv2.admin')) {
+                    plugin_savesubmission_calendarv2($event, false);
+                    $page .= COM_showMessageText("You have succesfully added an event", "Alert");
+                }
+                else {
+                    plugin_savesubmission_calendarv2($event, true);
+                    $page .= COM_showMessageText("Your event has been submitted and expects moderation");
+                }
+            }
+        }
+        else {
+            if (calendarv2_checkCalendar($B['calendar_cid'], $_USER['uid'], 3)) {
+                plugin_savesubmission_calendarv2($event, false);
+            }
+        }
+    } 
 }
 
 

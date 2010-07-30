@@ -138,6 +138,7 @@ $LANG_CALENDARV2_MODERATION = array (
 $LANG_CALENDARV2_MESSAGES = array (
     'view_calendars' => 'Available calendars: ',
     'import' => 'Import Events',
+    'export' => 'Export Events',
     'right_block' => 'Actions: '
 );
 

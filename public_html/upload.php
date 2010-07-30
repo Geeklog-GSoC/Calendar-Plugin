@@ -49,13 +49,8 @@ require_once $_CONF['path'] . 'plugins/calendarv2/classes/iCalcreator.class.php'
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/aeventsv2.class.php';
-$v = new vcalendar();
-$v->returnCalendar();
  
-$calendars = new Acalendarv2();
-// Get the calendars where the user has read right.
-$calendars->getCalendars(2); 
-$page = calendarv2_display_uploadForm($calendars);
+
 function calendarv2_getCalendarfromics($filename, $directory)
 {
     $v = new vcalendar();
@@ -119,6 +114,18 @@ if (isset($_POST['modify'])) {
     $event = $calendar->getEvent($_POST['eid']); // Some bug here because another eid is created.
     $page = $calendarv2_modify_event($event);
 }
+
+if ($_GET['import'] == true) {
+    $calendars = new Acalendarv2();
+    // Get the calendars where the user has write right.
+    $calendars->getCalendars(3); 
+    $page = calendarv2_display_uploadForm($calendars); 
+}
+
+if ($_GET['export'] == true) {
+    $cid = COM_applyFilter($_GET['cid']);
+    calendarv2_exportics($cid);
+} 
 
  // MAIN
 $display .= COM_siteHeader('menu', $LANG_CALENDARV2_1['plugin_name']);

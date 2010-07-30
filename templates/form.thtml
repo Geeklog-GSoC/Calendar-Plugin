@@ -1,5 +1,10 @@
+<link href="{site_url}/style.css" rel = "stylesheet" type = "text/css">      
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+<script src="{site_url}/javascript/jquery.js"></script> 
+<p id = "go_back" > {go_back_link} </p> 
 <p id = "form_message"> {lang_intro_msg} </p>
-<form id = "submit_form" method = "post" action = "index.php">
+<form id = "submit_form" method = "post" action = "event.php">
 			<dl><dt>
 			<label for = "event_title"> {lang_event_title}: </label> </dt>
 			<dd><input id = "event_title" type = "text" value = "{event_title}" size = "46" name = "event_title"/></dd>
@@ -70,8 +75,6 @@
 			<dd> <input id = "event_location" type = "text" value = "{event_location}" size = "46" name = "event_location"/> </dd> 
 			<dt> <label for = "event_description"> {lang_event_description}: </label> </dt>
 			<dd> <textarea id = "event_description" name = "event_description">{event_description}</textarea> </dd>
-			<dt> <label for = "Calendar"> {lang_calendars}: </label> </dt> 
-			<dd> {calendar} <dd>
 			<dt> <label for = "owner" > {lang_owner}: </label> </dt>
 			<dd> {owner_name} </dd>
 			<dt> <label for = "groups" > {lang_group}: </label> </dt>
@@ -79,5 +82,6 @@
 			<dt> <label for = "permissions" > {lang_permissions}: </label> </dt>
 			<dd> {permissions} <dd>
 			<dt> <label for = "AccesRights"> {lang_accesrights} </label> </dt>
+			<dd> <input type="hidden" value={calendar} name = "calendar_cid"> </dd>
 			<dd> <input type="submit" value="{lang_add}" name = "submit"/> </dd>
 </form>
