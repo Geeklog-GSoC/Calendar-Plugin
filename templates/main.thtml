@@ -3,7 +3,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 <script src="{site_url}/javascript/jquery.js"></script> 
-<div id = calendar-container>  
+<div id = "calendar-container">  
 	<div id = "leftb">
 		{left-block}
 	</div>
@@ -15,9 +15,9 @@
 	</div>
 </div>
 
-<div id = "event-container">
-	<div id = "daily-events">
-	{day_events}
-	{day_events2}
-	</div>
+<div id = "upcoming-events">
+	<span> {upcoming} </span>
+	<!-- Begin upcoming -->
+	<div id = "event"> {event} </div>
+	<!-- End upcoming -->
 </div>

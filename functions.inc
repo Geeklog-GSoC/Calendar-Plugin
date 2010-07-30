@@ -391,6 +391,8 @@ function calendarv2_display($A, $calendars, $calendar)
     $page->set_var('display_today_events', 'today events');
     $minimal = calendarv2_minimal_display($A, $calendar);
     $page->set_var('minimal' , $minimal);
+    $upcoming = calendarv2_display_upcoming($calendar);
+    $page->set_var('upcoming', $upcoming);
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 }
@@ -599,7 +601,7 @@ function calendarv2_minimal_display($A, $calendar, $block = false)
 *
 */  
 
-function calendarv2_single_event($event)
+function calendarv2_single_event($event, $upcoming = false)
 {
     $details = $event->get_details();
     global $_CAV2_CONF, $LANG_CALENDARV2_SINGLE;
@@ -625,7 +627,9 @@ function calendarv2_single_event($event)
     $page->set_var('description_content' , $details['description']);
     $page->set_var('hidden_eid' , $details['eid']);
     list($day, $month, $year) = array($datestart->format('d'), $datestart->format('m'), $datestart->format('Y'));
-    $link = COM_createLink($lang['go_back'], $_CAV2_CONF['site_url'] . "/event.php?cid={$details['cid']}&day=$day&month=$month&year=$year");
+    if (!($upcoming)) {
+        $link = COM_createLink($lang['go_back'], $_CAV2_CONF['site_url'] . "/event.php?cid={$details['cid']}&day=$day&month=$month&year=$year");
+    }
     $page->set_var('go_back_link' , $link); 
     // if the event is recurring we will have to display aditional information
     if ($details['pid'] > 0) {
@@ -1088,6 +1092,25 @@ function calendarv2_exportics($cid)
         $v->saveCalendar(); 
         $v->returnCalendar();
     }
+}
+
+function calendarv2_display_upcoming($calendar) 
+{
+    global $_CAV2_CONF, $LANG_CALENDARV2_MESSAGES;
+    $start_upcoming = new DateTime();
+    $end_upcoming = new DateTime();
+    $end_upcoming->modify('+' . $_CAV2_CONF['upcoming'] . ' days');
+    $calendar->getEventsSpan($start_upcoming, $end_upcoming);
+    $events = $calendar->getEvents();
+    if ($events->getNumEvents() == 0) {
+        $page = $LANG_CALENDARV2_MESSAGES['upcoming'];
+    }
+    else {
+        foreach ($events as $event) {
+            $page .= calendarv2_single_event($event, true);
+        }
+    }
+    return $page;
 }
 
 

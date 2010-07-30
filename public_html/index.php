@@ -112,7 +112,7 @@ if (empty($errors)) {  // if everything is allright then display the current cal
     $calendars = new Acalendarv2();
     // Get the calendars where the user has read right.
     $calendars->getCalendars(2);
-    // Get the calendars with the selected cid.
+    // Get the calendar with the selected cid.
     $calendar = new Calendarv2();
     $calendar->setCid($cid);   
     $page .= calendarv2_display($A, $calendars, $calendar);

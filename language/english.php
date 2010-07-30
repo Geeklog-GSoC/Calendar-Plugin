@@ -139,7 +139,8 @@ $LANG_CALENDARV2_MESSAGES = array (
     'view_calendars' => 'Available calendars: ',
     'import' => 'Import Events',
     'export' => 'Export Events',
-    'right_block' => 'Actions: '
+    'right_block' => 'Actions: ',
+    'upcoming' => 'There are no upcoming events' 
 );
 
 $LANG_CALENDARV2_EVENT = array (
@@ -154,6 +155,7 @@ $LANG_confignames['calendarv2'] = array(
     'calendarlimit' => 'Number of calendars an user can have',
     'sitewide' => 'Annonymous users can see the site wide calendar',
     'first_day' => 'First Day of the week',
+    'upcoming' => 'Number of days the calendar will look into the future for upcoming events'
 );
 
 $LANG_configsubgroups['calendarv2'] = array(
@@ -164,7 +166,8 @@ $LANG_configselects['calendarv2'] = array(
         0 => array('True' => 1, 'False' => 0),
         1 => array('True' => TRUE, 'False' => FALSE),
         2 => array('Sun' => 1, 'Mon' => 2, 'Tue' => 3, 'Wed' => 4, 'Thu' => 5,
-                    'Fri' => 6, 'Sat' => 7
+                    'Fri' => 6, 'Sat' => 7),
+        3 => array('1 day' => 1, '2 days' => 2, '3 days' => 3
 ));
 
 $LANG_fs['calendarv2'] = array(
