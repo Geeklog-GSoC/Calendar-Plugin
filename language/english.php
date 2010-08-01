@@ -140,7 +140,11 @@ $LANG_CALENDARV2_MESSAGES = array (
     'import' => 'Import Events',
     'export' => 'Export Events',
     'right_block' => 'Actions: ',
-    'upcoming' => 'There are no upcoming events' 
+    'upcoming_message' => 'Here is a list of upcoming events: ',
+    'upcoming' => 'There are no upcoming events',
+    'once_every' => 'Once every',
+    'months' => 'months',
+    'years' => 'years' 
 );
 
 $LANG_CALENDARV2_EVENT = array (

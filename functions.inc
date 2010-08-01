@@ -408,7 +408,8 @@ function calendarv2_display($A, $calendars, $calendar)
 function calendarv2_display_form($cid)
 {
     
-    global $_CONF, $LANG_CALENDARV2_FORM, $_GROUPS, $LANG_ACCESS, $_USER, $_CAV2_CONF, $LANG_CALENDARV2_EVENT;
+    global $_CONF, $LANG_CALENDARV2_FORM, $_GROUPS, $LANG_ACCESS, $_USER; 
+    global $_CAV2_CONF, $LANG_CALENDARV2_EVENT, $LANG_CALENDARV2_MESSAGES;
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'form.thtml',
                             'calendar' => 'calendars.thtml'));
@@ -426,7 +427,10 @@ function calendarv2_display_form($cid)
     $timezone = TimeZoneConfig::getUserTimeZone();
     $timezone = new DateTimeZone($timezone);
     $date->setTimezone($timezone);
-    $page->set_var('site_url', $_CAV2_CONF['site_url']); 
+    $page->set_var('site_url', $_CAV2_CONF['site_url']);
+    $page->set_var('once_every', $LANG_CALENDARV2_MESSAGES['once_every']);
+    $page->set_var('months' , $LANG_CALENDARV2_MESSAGES['months']);
+    $page->set_var('years' , $LANG_CALENDARV2_MESSAGES['years']); 
         
     $page->set_var('month_recurring_day' , $date->format('d'));
     $page->set_var('year_recurring_day' , $date->format('m/d/Y'));
@@ -446,8 +450,7 @@ function calendarv2_display_form($cid)
     $page->set_var('group_dropdown', SEC_getGroupDropdown($group_id, $acces));
     $retval .= $page->finish($page->parse('output', 'page'));
     
-    // Generate Recurring Events in the database if it's the case (1 year have passed)
-    calendarv2_create_events($date);
+    
     return $retval; 
      
 }
@@ -889,7 +892,7 @@ function calendarv2_fixed_recurrence($start_generating, $end_generating, &$array
 function calendarv2_create_events(DateTime $last_event_generated = NULL) 
 {
     global $_TABLES;
-    // Here will have to be added exceptions hashtable
+    // Here will have to be added exceptions hashtable when exceptions are implemented
     $events = new Aevents();
     $sql = "select * from {$_TABLES['recurring_events']} left join {$_TABLES['recurring_specification']} on " . 
             "reid = preid where last_event is NULL or last_event < {$last_event_generated->format('U')} ";
@@ -1097,13 +1100,18 @@ function calendarv2_exportics($cid)
 function calendarv2_display_upcoming($calendar) 
 {
     global $_CAV2_CONF, $LANG_CALENDARV2_MESSAGES;
+    // Generate Recurring Events in the database if it's the case (1 year have passed)
+    $date = new DateTime();
+    calendarv2_create_events($date);
+ 
     $start_upcoming = new DateTime();
     $end_upcoming = new DateTime();
     $end_upcoming->modify('+' . $_CAV2_CONF['upcoming'] . ' days');
     $calendar->getEventsSpan($start_upcoming, $end_upcoming);
     $events = $calendar->getEvents();
+    $page = $LANG_CALENDARV2_MESSAGES['upcoming_message'];
     if ($events->getNumEvents() == 0) {
-        $page = $LANG_CALENDARV2_MESSAGES['upcoming'];
+        $page .= $LANG_CALENDARV2_MESSAGES['upcoming'];
     }
     else {
         foreach ($events as $event) {

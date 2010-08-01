@@ -69,14 +69,10 @@ class Revent extends Event {
                 }
                 break; 
             case 4:
-                $this->_month = $A['recurring_month'];
-                //FIXME when once every x month is implemented;
-                $this->_month = 1;
+                $this->_month = $A['monthly'];
                 break;
             case 5:
-                $this->_year = $A['recurring_year'];
-                //FIXME when once every x years is implemented;
-                $this->_year = 1;
+                $this->_year = $A['yearly'];
                 break;
             default:
                 throw new Exception('Something is wrong with the recurring type value');
@@ -88,7 +84,7 @@ class Revent extends Event {
         $sanitized = $this->getSanitized();
         $fields = 'reid,' . 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'recurring_ends,' . 'cid';
         $values = "'$this->_reid'," . "'{$sanitized['title']}'," . "'{$sanitized['description']}'," . 
-                    "'{$sanitized['start']}' ," . "'{$sanitized['end']}'," ."'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_recurring_ends'," . "'$this->_calendar_id'";
+                    "'{$sanitized['start']}' ," . "'{$sanitized['end']}'," ."'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_recurring_ends'," . "'$this->_cid'";
         DB_save($_TABLES['recurring_events'], $fields, $values); 
     } 
     

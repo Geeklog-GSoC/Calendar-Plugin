@@ -59,8 +59,24 @@
 					
 				</div>	
 				<div id = "monthly_recurring">
+					{once_every}
+					<select id = "monthly" name = "monthly">
+						<option value = "1"> 1 </option>
+						<option value = "2"> 2 </option>
+						<option value = "3"> 3 </option>
+						<option value = "4"> 4 </option>
+					</select>
+					{months}
 				</div> 
-				<div id = "yearly_recurring">	
+				<div id = "yearly_recurring">  
+					{once_every} 
+					<select id = "yearly" name = "yearly">
+						<option value = "1"> 1 </option>
+						<option value = "2"> 2 </option>
+						<option value = "3"> 3 </option>
+						<option value = "4"> 4 </option>
+					</select> 
+					{years}
 				</div>
 				{lang_date_recurring}:
 				<input id = "recurring_ends" name = "recurring_ends"> <br>
