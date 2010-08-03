@@ -120,8 +120,8 @@ class Calendarv2 {
         $this->_events->addEvent($event);
     }
     
-    public function getEventsSpan(DateTime $datestart, DateTime $dateend) {
-        $this->_events->getElements($datestart, $dateend, $this->_cid);
+    public function getEventsSpan(DateTime $datestart, DateTime $dateend, $debug = NULL) {
+        $this->_events->getElements($datestart, $dateend, $this->_cid, $debug);
     }
     
     public function getTodayEvents(Datetime $date) {

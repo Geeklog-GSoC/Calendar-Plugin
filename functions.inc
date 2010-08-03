@@ -1107,7 +1107,7 @@ function calendarv2_display_upcoming($calendar)
     $start_upcoming = new DateTime();
     $end_upcoming = new DateTime();
     $end_upcoming->modify('+' . $_CAV2_CONF['upcoming'] . ' days');
-    $calendar->getEventsSpan($start_upcoming, $end_upcoming);
+    $calendar->getEventsSpan($start_upcoming, $end_upcoming, $debug = 1);
     $events = $calendar->getEvents();
     $page = $LANG_CALENDARV2_MESSAGES['upcoming_message'];
     if ($events->getNumEvents() == 0) {

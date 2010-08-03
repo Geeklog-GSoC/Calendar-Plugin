@@ -87,10 +87,12 @@ class Aevents implements arrayaccess, iterator {
     /**
     * populates an array of events. It querys the datebase betwen 2 moments of time
     */
-    public function getElements(DateTime $date_start, DateTime $date_end, $cid) {
-        global $_TABLES;
+    public function getElements(DateTime $date_start, DateTime $date_end, $cid, $debug = NULL) {
+        global $_TABLES;           
+        if (!is_null($debug)) {
+        }
         $sql = "select * from {$_TABLES['c2events']} where {$date_start->format('U')}";
-        $sql .= "<= datestart AND dateend < {$date_end->format('U')} AND cid = '$cid'";
+        $sql .= "<= datestart AND datestart < {$date_end->format('U')} AND cid = '$cid'";
         $result = DB_query($sql);
         $i = 0;
         while($event = DB_fetchArray($result)) {
