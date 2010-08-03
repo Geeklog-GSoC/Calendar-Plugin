@@ -102,6 +102,9 @@ class Event {
     public function getLocation() {
         return $this->_location;
     }
+    public function getAllday() {
+        return $this->_allday;
+    }
 
     // And some setters
     public function setEid($eid)

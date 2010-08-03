@@ -337,7 +337,23 @@ function plugin_autouninstall_calendarv2()
     return $out;
 }
 
- /**
+/**
+* Geeklog informs us that we're about to be enabled or disabled
+*
+* @param    boolean     $enabled    true = we're being enabled, false = disabled
+* @return   void
+*/
+function plugin_enablestatechange_calendarv2 ($enable)
+{
+    global $_TABLES;
+
+    $is_enabled = $enable ? 1 : 0;
+
+    // toggle upcoming events block
+    DB_query ("UPDATE {$_TABLES['blocks']} SET is_enabled = $is_enabled WHERE (type = 'phpblock') AND (phpblockfn = 'phpblock_calendarv2')");
+}
+
+/**
 * Get path for the template files.
 *
 * @param    string  $path   subdirectory within the base template path
@@ -466,7 +482,7 @@ function calendarv2_display_form($cid)
 
 function calendarv2_day_events($A, $calendar)
 {
-    global $_CAV2_CONF, $LANG_CALENDARV2_EVENT;
+    global $_CAV2_CONF, $LANG_CALENDARV2_EVENT, $LANG_CALENDARV2_SINGLE;
     $date = new DateTime();
     $date->setDate($A['year'] , $A['month'], $A['day']);
     $date->setTime(0 , 0, 0);
@@ -489,9 +505,14 @@ function calendarv2_day_events($A, $calendar)
                     $timezone = new DateTimeZone($timezone);
                     $date_start = new DateTime('@' . $event->getDatestart());
                     $date_ends = new DateTime('@' . $event->getDateend());
+                    $allday = $event->getAllday();
+                    if ($allday == 1)
+                        $allday = ', ' . $LANG_CALENDARV2_SINGLE['allday'] . ', ';
+                    else
+                        $allday = ''; 
                     $date_start->setTimezone($timezone);
-                    $date_ends->setTimezone($timezone);
-                    $new_event = COM_createLink($date_start->format('h:i A') . ' - ' . $date_ends->format('h:i A') .' '. $event->getTitle(), $event_link);
+                    $date_ends->setTimezone($timezone); 
+                    $new_event = COM_createLink($date_start->format('h:i A') . ' - ' . $date_ends->format('h:i A') ."$allday ". $event->getTitle(), $event_link);
                     $page->set_var($date_start->format('G') + 1 . '_event', $new_event);
                 } 
         }
@@ -589,6 +610,12 @@ function calendarv2_minimal_display($A, $calendar, $block = false)
                 $page->parse('line' . $i, 'each_element2', true);
             }
         }
+    // Add an add event link in the block footer
+    if ($block == true) {
+        $quick_add = COM_createLink('Add Event' , 'event.php?new=true&cid=' . $calendar->getCid());
+        $page->set_var('footer_info', $quick_add);
+    }  
+
     $page->finish($page->parse('calendar_view', 'each_element')); 
     }
     $retval .= $page->finish($page->parse('output', 'page'));
@@ -625,7 +652,12 @@ function calendarv2_single_event($event, $upcoming = false)
     $datestart->setTimezone($timezone);
     $dateend->setTimezone($timezone);
     $page->set_var('event_title_value' , $details['title']);
-    $page->set_var('when_content' , $datestart->format('h:i A') . ' - ' . $dateend->format('h:i A') . ' ');
+    $allday = $details['allday'];
+    if ($allday == 1)
+        $allday = $LANG_CALENDARV2_SINGLE['allday'];
+    else
+        $allday = '';
+    $page->set_var('when_content' , $datestart->format('h:i A') . ' - ' . $dateend->format('h:i A') . ', '. $allday);
     $page->set_var('where_content' , $details['location']);
     $page->set_var('description_content' , $details['description']);
     $page->set_var('hidden_eid' , $details['eid']);

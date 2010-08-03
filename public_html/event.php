@@ -79,8 +79,7 @@ else {
         }
     if (isset($B['delete'])) {
         $event->delete($B['eid']);
-        $page .= COM_refresh("index.php");
-        $page .= COM_showMessageText('You have succesfully deleted an event', 'Alert');
+        $page .= COM_refresh("index.php?alert=1");
     }
     if (isset($B['modify_eid'])) {
         $event->modify($B);
@@ -106,11 +105,11 @@ else {
             if (empty($errors)) {
                 if (SEC_hasRights('calendarv2.admin')) {
                     plugin_savesubmission_calendarv2($event, false);
-                    $page .= COM_showMessageText("You have succesfully added an event", "Alert");
+                    $page .= COM_refresh('index.php?alert=2');
                 }
                 else {
                     plugin_savesubmission_calendarv2($event, true);
-                    $page .= COM_showMessageText("Your event has been submitted and expects moderation");
+                    $page .= COM_refresh('index.php?alert=3');
                 }
             }
         }

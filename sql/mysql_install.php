@@ -118,7 +118,10 @@ CREATE TABLE {$_TABLES['recurring_specification']} (
     which_month tinyint(2) unsigned default NULL
 ) ENGINE=MyISAM
 "; 
-      
-     
 
+$_SQL[] = "INSERT INTO {$_TABLES['blocks']} (
+    is_enabled, name, type, title, tid, blockorder, content, onleft, 
+    phpblockfn, owner_id, group_id, perm_owner, perm_group) VALUES 
+    (1,'events_block','phpblock','Events','all',100,'',1,'phpblock_calendarv2',
+    {$_USER['uid']},#group#,3,3)"; 
 ?>

@@ -123,7 +123,8 @@ $LANG_CALENDARV2_SINGLE = array (
     'go_back' => 'Go back',
     'upload_info' => 'Here you have a list of events imported from Ical file. They are not currently imported, will be after you aprove them',
     'lang_deleteall' => 'Delete All',
-    'aprove_all' => 'Aprove All'
+    'aprove_all' => 'Aprove All',
+    'allday' => 'All day event'
 );
 
 
@@ -144,7 +145,10 @@ $LANG_CALENDARV2_MESSAGES = array (
     'upcoming' => 'There are no upcoming events',
     'once_every' => 'Once every',
     'months' => 'months',
-    'years' => 'years' 
+    'years' => 'years',
+    '2' => 'You have succesfully added an event', 
+    '1' => 'You have succesfully deleted an event',
+    '3' => 'Your event has been submitted an expects moderation' 
 );
 
 $LANG_CALENDARV2_EVENT = array (

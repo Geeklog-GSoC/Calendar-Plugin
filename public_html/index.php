@@ -56,6 +56,12 @@ if (COM_isAnonUser()) {
     $_USER['uid'] = 1;
 }
 
+// CHeck to see if a message should be displayed
+if (isset($A['alert'])) {
+    $alert = COM_applyFilter($A['alert'], true);
+    $page .= COM_showMessageText($LANG_CALENDARV2_MESSAGES[$alert]);
+}
+
 // Check if the current user requested a specific calendar
 // If not show him first available calendar or an error message if none.
 if (isset($A['cid'])) {
