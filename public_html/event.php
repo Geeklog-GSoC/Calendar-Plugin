@@ -76,14 +76,25 @@ else {
         $event->get_event($B['eid'], 'c2events');
         // Creates a template for a single instance modification
         $page = calendarv2_modify_event($event);
-        }
+    }
     if (isset($B['delete'])) {
         $event->delete($B['eid']);
         $page .= COM_refresh("index.php?alert=1");
     }
     if (isset($B['modify_eid'])) {
-        $event->modify($B);
-        $page = calendarv2_single_event($event);
+        try {
+            $event->modify($B);
+        } catch (Exception $e) {
+            $errors = $e->getMessage();
+        }
+        if (empty($errors)) {
+            $page = calendarv2_single_event($event);
+        }
+        else { 
+            $page .= COM_showMessageText($errors, "Error");
+            $page .= calendarv2_modify_event($event);
+        }
+        
     }
     if (isset($B['delete_whole'])) {
         calendarv2_delete_recurring($B['hidden_parent']);
@@ -120,6 +131,8 @@ else {
         }
     } 
 }
+
+    
 
 
 // MAIN

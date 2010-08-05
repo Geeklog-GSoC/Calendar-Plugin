@@ -633,8 +633,8 @@ function calendarv2_minimal_display($A, $calendar, $block = false)
 
 function calendarv2_single_event($event, $upcoming = false)
 {
-    $details = $event->get_details();
     global $_CAV2_CONF, $LANG_CALENDARV2_SINGLE;
+    $details = $event->get_details();
     // start creating the page based on event details
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'single_event.thtml',
@@ -692,8 +692,8 @@ function calendarv2_modify_event($event)
     $details = $event->get_details();   
     $timezone = TimeZoneConfig::getUserTimeZone();
     $timezone = new DateTimeZone($timezone); 
-    $date_end  = new DateTime('@' . $details['datestart']);
-    $date_start = new DateTime('@' . $details['dateend']);
+    $date_start  = new DateTime('@' . $details['datestart']);
+    $date_end = new DateTime('@' . $details['dateend']);
     $date_end->setTimezone($timezone);
     $date_start->setTimezone($timezone);
     $page = new Template(calendarv2_templatePath());

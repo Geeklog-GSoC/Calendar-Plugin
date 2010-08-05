@@ -196,7 +196,9 @@ class Event {
 
         $this->_description = $A['event_description'];
         $this->_location = $A['event_location'];
-        $this->_cid = intval($A['calendar_cid']);
+        if (!isset($this->_cid)) {
+            $this->_cid = intval($A['calendar_cid']);
+        }
         $this->_allday = 0;                                
         if ($A['all_day'] == 'on') {
             $this->_allday = 1;
@@ -332,9 +334,9 @@ class Event {
 
     public function modify($P) 
     {
+        $this->_eid = COM_applyFilter($P['modify_eid'], true);
+        $this->_cid = COM_applyFilter($P['modify_cid'], true);
         $this->load_event_from_array($P);
-        $this->_eid = $P['modify_eid'];
-        $this->_cid = $P['modify_cid'];
         $this->update_to_database($P['modify_eid'], 'c2events');
     }
 
