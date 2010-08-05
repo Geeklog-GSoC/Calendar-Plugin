@@ -50,16 +50,18 @@ require_once $_CONF['path'] . 'plugins/calendarv2/classes/aeventsv2.class.php';
 
 $A = $_GET;
 $B = $_POST;
-$cid = $_GET['cid'];
+$cid = COM_applyFilter($_GET['cid']);
 // Must do some security here.
 $calendar = new Calendarv2();
 $calendar->setCid($cid);
-// Check if mofication of an event or deletion is asked by a $_POST variable
 if (empty($B)) {
     // Check if we need to display a single event.
     if ($A['new'] == true) {
         $cid = COM_applyFilter($A['cid'], true);
-        $page = calendarv2_display_form($cid);
+        $calendars = new Acalendarv2();
+        // Get the calendars where the user has write right for displaying the dropbox
+        $calendars->getCalendars(3); 
+        $page = calendarv2_display_form($calendars);
     }
     if (isset($A['eid'])) {
         $event = new Event();
@@ -70,6 +72,7 @@ if (empty($B)) {
             $page = calendarv2_day_events($_GET, $calendar);
     }
 }
+// Check if mofication of an event or deletion is asked by a $_POST variable
 else {
     $event = new Event();
     if (isset($B['modify'])) {
@@ -116,17 +119,21 @@ else {
             if (empty($errors)) {
                 if (SEC_hasRights('calendarv2.admin')) {
                     plugin_savesubmission_calendarv2($event, false);
-                    $page .= COM_refresh('index.php?alert=2');
+                    COM_output(COM_refresh('index.php?alert=2'));
+                    exit();
                 }
                 else {
                     plugin_savesubmission_calendarv2($event, true);
-                    $page .= COM_refresh('index.php?alert=3');
+                    COM_output(COM_refresh('index.php?alert=3'));
+                    exit();
                 }
             }
         }
         else {
             if (calendarv2_checkCalendar($B['calendar_cid'], $_USER['uid'], 3)) {
                 plugin_savesubmission_calendarv2($event, false);
+                COM_output(COM_refresh('index.php?alert=2'));
+                exit();
             }
         }
     } 

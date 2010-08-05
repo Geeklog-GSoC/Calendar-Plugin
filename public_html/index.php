@@ -50,6 +50,8 @@ require_once $_CONF['path'] . 'plugins/calendarv2/classes/aeventsv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/iCalcreator.class.php';
 $A = $_GET;
 $display = '';
+// COntrols the display of the main calendar
+$main = true;
 
 // If the user is not logged in set his $_USER value
 if (COM_isAnonUser()) {
@@ -101,6 +103,7 @@ if (empty($errors)) {
 // If creation of a new calendar was requested display the form
 if ($A['display'] == 'new') {
         $page .= calendarv2_display_calendars_new();
+        $main = false;
 }
 
 // Create a new calendar
@@ -114,13 +117,13 @@ if (isset($_POST['calendar_submit'])) {
     }
 } 
 
-if (empty($errors)) {  // if everything is allright then display the current calendar
+if (empty($errors) && $main != false) {  // if everything is allright then display the current calendar
     $calendars = new Acalendarv2();
     // Get the calendars where the user has read right.
     $calendars->getCalendars(2);
     // Get the calendar with the selected cid.
     $calendar = new Calendarv2();
-    $calendar->setCid($cid);   
+    $calendar->setCid($cid);
     $page .= calendarv2_display($A, $calendars, $calendar);
 } 
 

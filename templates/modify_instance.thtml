@@ -19,6 +19,8 @@
 			<dd> <input id = "event_location" type = "text" value = "{event_location}" size = "46" name = "event_location"/> </dd> 
 			<dt> <label for = "event_description"> {lang_event_description}: </label> </dt>
 			<dd> <textarea id = "event_description" name = "event_description">{event_description}</textarea> </dd>
+			<dt> <label for = "calendars"> {lang_calendars}: </label> </dt>
+			<dd> {calendars} </dd> 
 			<input type = "hidden" name = 'modify_eid' value = {modify_eid}>
 			<input type = "hidden" name = 'modify_cid' value = {modify_cid}>
 			<dd> <input type="submit" value="{lang_add}" name = "submit_modify"/> </dd>

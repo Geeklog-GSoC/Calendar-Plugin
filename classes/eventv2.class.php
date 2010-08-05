@@ -319,7 +319,8 @@ class Event {
         $fields .= "datestart = '{$sanitized['start']}',";
         $fields .= "dateend = '{$sanitized['end']}',";
         $fields .= "location = '{$sanitized['location']}',";
-        $fields .= "allday = '$this->_allday'";
+        $fields .= "allday = '{$this->_allday}',";
+        $fields .= "cid = '{$this->_cid}'";
         $sql = "update {$_TABLES[$table]} set {$fields} where eid = {$sanitized['eid']}";
         DB_query($sql);
     }
@@ -335,7 +336,7 @@ class Event {
     public function modify($P) 
     {
         $this->_eid = COM_applyFilter($P['modify_eid'], true);
-        $this->_cid = COM_applyFilter($P['modify_cid'], true);
+        $this->_cid = COM_applyFilter($P['calendar_cid'], true);
         $this->load_event_from_array($P);
         $this->update_to_database($P['modify_eid'], 'c2events');
     }

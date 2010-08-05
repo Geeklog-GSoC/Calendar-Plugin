@@ -421,7 +421,7 @@ function calendarv2_display($A, $calendars, $calendar)
 *
 */  
 
-function calendarv2_display_form($cid)
+function calendarv2_display_form($calendars)
 {
     
     global $_CONF, $LANG_CALENDARV2_FORM, $_GROUPS, $LANG_ACCESS, $_USER; 
@@ -454,7 +454,8 @@ function calendarv2_display_form($cid)
     $page->set_var('default_end_date' , $date->format('m/d/Y'));
     $page->set_var('default_start_time', $date->format('h:i A'));
     $page->set_var('default_end_time', $date->format('h:i A'));
-    $page->set_var('calendar', $cid);
+    $select = calendarv2_display_calendars($calendars);
+    $page->set_var('select', $select);
     $page->set_var('permissions', SEC_getPermissionsHTML(3, 2, 2, 0));
     $group_id = $_GROUPS['calendarv2 Admin'];
     $acces = 3;
@@ -714,6 +715,10 @@ function calendarv2_modify_event($event)
     $page->set_var('default_end_time' , $date_end->format('h:i A'));
     $page->set_var('modify_eid' , $details['eid']);
     $page->set_var('modify_cid' , $details['cid']);
+    $calendars = new Acalendarv2();
+    $calendars->getCalendars(3);
+    $calendars = calendarv2_display_calendars($calendars);
+    $page->set_var('calendars', $calendars);
     $retval .= $page->finish($page->parse('output', 'page')); 
     return $retval;
 }
