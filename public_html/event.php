@@ -61,15 +61,15 @@ if (empty($B)) {
         $calendars = new Acalendarv2();
         // Get the calendars where the user has write right for displaying the dropbox
         $calendars->getCalendars(3); 
-        $page = calendarv2_display_form($calendars);
+        $page .= calendarv2_display_form($calendars);
     }
     if (isset($A['eid'])) {
         $event = new Event();
         $event->get_event($A['eid'], 'c2events');
-        $page = calendarv2_single_event($event);
+        $page .= calendarv2_single_event($event);
     }
     if (isset($A['day'])) {
-            $page = calendarv2_day_events($_GET, $calendar);
+            $page .= calendarv2_day_events($_GET, $calendar);
     }
 }
 // Check if mofication of an event or deletion is asked by a $_POST variable
@@ -84,7 +84,7 @@ else {
         $event->delete($B['eid']);
         $page .= COM_refresh("index.php?alert=1");
     }
-    if (isset($B['modify_eid'])) {
+    if (isset($B['modify_eid']) && !isset($B['cancel'])) {
         try {
             $event->modify($B);
         } catch (Exception $e) {
@@ -137,6 +137,10 @@ else {
             }
         }
     } 
+    if (isset($B['cancel'])) {
+        COM_output(COM_refresh('index.php'));
+        exit(); 
+    }
 }
 
     
@@ -145,8 +149,6 @@ else {
 // MAIN
 $display .= COM_siteHeader('menu', $LANG_CALENDARV2_1['plugin_name']);
 $display .= COM_startBlock($LANG_CALENDARV2_1['plugin_name']);
-$display .= '<p>Welcome to the ' . $LANG_CALENDARV2_1['plugin_name'] . ' plugin, '
-         . $_USER['username'] . '!</p>';
 $display .= $page;
 $display .= COM_endBlock();
 $display .= COM_siteFooter();

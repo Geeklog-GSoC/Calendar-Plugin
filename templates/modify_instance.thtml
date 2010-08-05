@@ -22,6 +22,5 @@
 			<dt> <label for = "calendars"> {lang_calendars}: </label> </dt>
 			<dd> {calendars} </dd> 
 			<input type = "hidden" name = 'modify_eid' value = {modify_eid}>
-			<input type = "hidden" name = 'modify_cid' value = {modify_cid}>
-			<dd> <input type="submit" value="{lang_add}" name = "submit_modify"/> </dd>
+			<dd> <input type="submit" value="{lang_add}" name = "submit_modify"/> <input type= "submit" value="{lang_cancel}" name = "cancel"/></dd>
 </form> 

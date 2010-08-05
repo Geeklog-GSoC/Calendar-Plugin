@@ -102,5 +102,5 @@
 			<dd> {permissions} <dd>
 			<dt> <label for = "AccesRights"> {lang_accesrights} </label> </dt>
 			<dd> <input type="hidden" value={calendar} name = "calendar_cid"> </dd>
-			<dd> <input type="submit" value="{lang_add}" name = "submit"/> </dd>
+			<dd> <input type="submit" value="{lang_add}" name = "submit"/> <input type= "submit" value="{lang_cancel}" name = "cancel"/></dd>
 </form>

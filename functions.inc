@@ -613,7 +613,7 @@ function calendarv2_minimal_display($A, $calendar, $block = false)
         }
     // Add an add event link in the block footer
     if ($block == true) {
-        $quick_add = COM_createLink('Add Event' , 'event.php?new=true&cid=' . $calendar->getCid());
+        $quick_add = COM_createLink('Add Event' , $_CAV2_CONF['site_url'] . '/event.php?new=true&cid=' . $calendar->getCid());
         $page->set_var('footer_info', $quick_add);
     }  
 
@@ -714,7 +714,6 @@ function calendarv2_modify_event($event)
     $page->set_var('default_start_time' , $date_start->format('h:i A'));
     $page->set_var('default_end_time' , $date_end->format('h:i A'));
     $page->set_var('modify_eid' , $details['eid']);
-    $page->set_var('modify_cid' , $details['cid']);
     $calendars = new Acalendarv2();
     $calendars->getCalendars(3);
     $calendars = calendarv2_display_calendars($calendars);
@@ -897,7 +896,7 @@ function plugin_itemlist_calendarv2()
         $plugin->getsubmissionssql = "select eid, location, description from {$_TABLES['cv2submission']}";
         $plugin->addSubmissionHeading($lang[2]);
         $plugin->addSubmissionHeading($lang[3]);
-        return $plugin;
+    return $plugin;
     }
 }
 

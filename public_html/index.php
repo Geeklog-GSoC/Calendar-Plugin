@@ -132,8 +132,6 @@ $page .= $errors;
 // MAIN
 $display .= COM_siteHeader('menu', $LANG_CALENDARV2_1['plugin_name']);
 $display .= COM_startBlock($LANG_CALENDARV2_1['plugin_name']);
-$display .= '<p>Welcome to the ' . $LANG_CALENDARV2_1['plugin_name'] . ' plugin, '
-         . $_USER['username'] . '!</p>';
 $display .= $page;
 $display .= COM_endBlock();
 $display .= COM_siteFooter();
