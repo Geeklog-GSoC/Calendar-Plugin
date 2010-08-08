@@ -1186,8 +1186,124 @@ function phpblock_calendarv2()
     }
     return $result;
 }
-        
-        
-    
 
+ 
+function calendarv2_listevents()
+{
+    global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_CAL_ADMIN, $LANG_ACCESS,
+           $_IMAGE_TYPE, $_CAV2_CONF;
+
+    require_once( $_CONF['path_system'] . 'lib-admin.php' );
+
+    $retval = '';
+
+    $header_arr = array(      # display 'text' and use table field 'field'
+        array('text' => $LANG_ADMIN['edit'], 'field' => 'edit', 'sort' => false),
+        array('text' => $LANG_ADMIN['title'], 'field' => 'title', 'sort' => true)
+    );
+    if ($_CONF['show_fullname'] == 1) {
+        $header_arr[] = array('text' => $LANG_CAL_ADMIN[13], 'field' => 'fullname', 'sort' => true);
+    } else {
+        $header_arr[] = array('text' => $LANG_CAL_ADMIN[13], 'field' => 'username', 'sort' => true);
+    }
+    $header_arr[] = array('text' => $LANG_ACCESS['access'], 'field' => 'access', 'sort' => false);
+    $header_arr[] = array('text' => $LANG_CAL_ADMIN[14], 'field' => 'datestart', 'sort' => true);
+    $header_arr[] = array('text' => $LANG_CAL_ADMIN[15], 'field' => 'dateend', 'sort' => true);
+
+    $defsort_arr = array('field' => 'datestart', 'direction' => 'desc');
+
+    $menu_arr = array (
+        array('url' => $_CAV2_CONF['site_url'] . '/event.php?new=true',
+              'text' => $LANG_ADMIN['create_new']),
+        //Batch delete not yet implemented. Must decide what to do with recurring events 
+        /*
+        array('url' => $_CONF['site_admin_url'] . '/plugins/calendarv2/index.php?mode=batchdelete',
+              'text' => $LANG_CAL_ADMIN[26]),
+        */
+        array('url' => $_CONF['site_admin_url'],
+              'text' => $LANG_ADMIN['admin_home'])
+    );
+
+    $retval .= COM_startBlock($LANG_CAL_ADMIN[11], '',
+                              COM_getBlockTemplate('_admin_block', 'header'));
+    $retval .= ADMIN_createMenu($menu_arr, $LANG_CAL_ADMIN[12], plugin_geticon_calendar());
+
+    $text_arr = array(
+        'has_extras' => true,
+        'form_url'   => $_CONF['site_admin_url'] . '/plugins/calendarv2/index.php'
+    );
+
+    $sql = "SELECT {$_TABLES['c2events']}.*, {$_TABLES['users']}.username, {$_TABLES['users']}.fullname "
+          ."FROM {$_TABLES['c2events']} "
+          ."LEFT JOIN {$_TABLES['users']} "
+          ."ON {$_TABLES['c2events']}.owner_id={$_TABLES['users']}.uid "
+          ."WHERE 1=1 ";
+
+    $query_arr = array(
+        'table' => 'c2events',
+        'sql' => $sql,
+        'query_fields' => array('title', 'datestart', 'dateend'),
+        'default_filter' => COM_getPermSQL('AND')
+    );
+
+    $retval .= ADMIN_list ('calendarV2', 'plugin_getListField_calendarv2',
+                           $header_arr, $text_arr, $query_arr,
+                           $defsort_arr);
+
+    $retval .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
+
+    return $retval;
+} 
+
+
+
+function plugin_getListField_calendarv2($fieldname, $fieldvalue, $A, $icon_arr)
+{
+    global $_CAV2_CONF, $LANG_ACCESS;
+    $access = SEC_hasAccess($A['owner_id'], $A['group_id'], $A['perm_owner'], 
+                    $A['perm_group'], $A['perm_members'], $A['perm_anon']);
+
+    switch($fieldname) {
+
+        case 'access':
+            if ($access == 3) {
+                $retval = $LANG_ACCESS['edit'];
+            } else {
+                $retval = $LANG_ACCESS['readonly'];
+            }
+            break;
+
+        case 'title':
+            $retval = COM_createLink(stripslashes($A['title']),
+                    "{$_CAV2_CONF['site_url']}/event.php?eid={$A['eid']}");
+            break;
+
+        case 'delete':
+            $retval = "<input type=\"checkbox\" name=\"delitem[{$A['eid']}]\" checked=\"checked\"" . XHTML . ">";
+            break;
+
+        case 'edit':
+            if ($access == 3) {
+                $retval = COM_createLink(
+                        $icon_arr['edit'],
+                        "{$_CAV2_CONF['site_url']}/event.php"
+                        . "?eid={$A['eid']}");
+            break;
+            }
+            break;
+        case 'datestart':
+            $datestart = new DateTime('@' . $fieldvalue);
+            // Format to be completed with info from CONF variable
+            $retval = $datestart->format('H:i');
+            break;
+        case 'dateend':
+            $dateend = new DateTime('@' . $fieldvalue);
+            // Format to be completed with info from CONF variable
+            $retval = $dateend->format('H:i');
+            break;
+        default:
+            $retval = $fieldvalue;
+    } 
+    return $retval; 
+} 
 ?>

@@ -62,6 +62,9 @@ if ($A['mode'] == 'editsubmission') {
     $page = calendarv2_modify_event($event);
     
 }
+else {
+    $page .= calendarv2_listevents();
+}
 
 
 // MAIN
