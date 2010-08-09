@@ -86,11 +86,14 @@ class Aevents implements arrayaccess, iterator {
     
     /**
     * populates an array of events. It querys the datebase betwen 2 moments of time
+    *
+    * @param    object  $date_start The start of the timespan
+    * @param    object  $date_end   The end of the timespan
+    * @param    integer $cid    The calendar id
+    *
     */
-    public function getElements(DateTime $date_start, DateTime $date_end, $cid, $debug = NULL) {
+    public function getElements(DateTime $date_start, DateTime $date_end, $cid) {
         global $_TABLES;           
-        if (!is_null($debug)) {
-        }
         $sql = "select * from {$_TABLES['c2events']} where {$date_start->format('U')}";
         $sql .= "<= datestart AND datestart < {$date_end->format('U')} AND cid = '$cid'";
         $result = DB_query($sql);
@@ -106,14 +109,27 @@ class Aevents implements arrayaccess, iterator {
     
     /**
     * adds an event to the array of events
+    * 
+    * @param    object  $event  An event
     */ 
     public function addEvent($event) {
             $this->_events[$this->getNumEvents()] = $event;
     }
-    
+    /**
+    *
+    * Get the Number of events
+    *
+    */
     public function getNumEvents() {
         return count($this->_events);
     }
+    /**
+    *
+    * Gets an event with a specific id
+    *
+    * @param integer    $eid    The id
+    *
+    */
     
     public function getEvent($eid) {
         foreach ($this->_events as $event) {
@@ -124,6 +140,13 @@ class Aevents implements arrayaccess, iterator {
         }
         return NULL;
     }
+
+    /**
+    *
+    * Gets the events from a calendar. This function should be improved to look
+    * if the user has rights to look for a certain event?
+    *
+    */
 
     public function getEvents($cid) 
     {
@@ -140,8 +163,4 @@ class Aevents implements arrayaccess, iterator {
             }
         }
     }
-        
-    
-    
-
 }

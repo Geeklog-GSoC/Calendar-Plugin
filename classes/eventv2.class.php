@@ -63,7 +63,6 @@ class Event {
     * Initializes event object
     *
     */ 
-
     public function __construct($A = NULL) {
         if ($A != NULL) {
             $this->load_event_from_array($A);
@@ -158,6 +157,8 @@ class Event {
     * the elemnts are not secure, they must be processed before adding
     * to the database
     *
+    * @param    array   $A  POST variable
+    *
     */  
     public function load_event_from_array($A) {
         global $_USER;
@@ -223,7 +224,6 @@ class Event {
     * Takes a DB query and adds info to the class elements
     *
     */  
-    
     public function load_event_from_DB_array($A) {
         $this->_title = stripslashes($A['title']);
         $timezone = TimeZoneConfig::getUserTimeZone();
@@ -241,16 +241,11 @@ class Event {
         $this->_owner = $A['owner_id'];
     }
     
-     
-
     /**
-    *
-    * save to database
     *
     * Saves information to database from an event object
     *
     */   
-    
     public function save_to_database()
     {
         global $_TABLES;
@@ -281,7 +276,6 @@ class Event {
     *
     *
     */
-    
     public function setModeration($bool)
     {
         $this->_moderation = $bool;
@@ -294,7 +288,6 @@ class Event {
     * Saves information to database from an event object
     *
     */   
-    
     public function remove_from_database($eid)
     {
         global $_TABLES;
@@ -307,9 +300,12 @@ class Event {
     * update database
     *
     * Updates information to database from an event object
+    * @param    int     $eid    the id
+    * @param    string  $table  the table to be saved in. The reason behind this
+    *                           variable is that we save events in 2 different tables
+    *                           moderation and events
     *
     */   
-    
     public function update_to_database($eid, $table)
     {
         global $_TABLES;
@@ -327,12 +323,12 @@ class Event {
 
     /**
     *
-    *
     * Modifies the information of an event, based on his eid.
     * And saves the new event in the database
     *
+    * @param    array   $P  some information about the modified event
+    *
     */    
-
     public function modify($P) 
     {
         $this->_eid = COM_applyFilter($P['modify_eid'], true);
@@ -362,7 +358,6 @@ class Event {
     * Deletes an event based on his EID
     *
     */    
-
     public function delete($eid) 
     {
         $this->remove_from_database($eid);
@@ -373,7 +368,6 @@ class Event {
     * Fils and event with information from database based on an eid.
     *
     */    
-
     public function get_event($eid, $table) 
     {
         global $_TABLES;
@@ -402,7 +396,6 @@ class Event {
     * Returns a string with all the information needed for an event
     *
     */     
-
     public function get_details()
     {
         $A['title'] = $this->_title;
@@ -432,6 +425,4 @@ class Event {
     }
         
 }                               
-
-
 ?>

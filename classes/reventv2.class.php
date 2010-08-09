@@ -44,6 +44,10 @@ class Revent extends Event {
         $this->load_event_from_array($A);
     }
 
+    /**
+    * Loads an recurring event from a POST variable
+    *
+    */
     public function load_event_from_array($A) {
         parent::load_event_from_array($A);
         if ($A['recurring_ends_never'] == 'on') {
@@ -79,6 +83,10 @@ class Revent extends Event {
         } 
     }
     
+    /**
+    * Saves the event in recurring_events table
+    *
+    */ 
     private function save_recurring_events() {
         global $_TABLES;
         $sanitized = $this->getSanitized();
@@ -88,6 +96,10 @@ class Revent extends Event {
         DB_save($_TABLES['recurring_events'], $fields, $values); 
     } 
     
+    /**
+    * Save the event in the recurring_specification table
+    *
+    */
     public function save_to_database() {
         global $_TABLES;
         $this->save_recurring_events(); 

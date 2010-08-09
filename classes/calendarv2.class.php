@@ -33,7 +33,7 @@
 // the new calendar plugin. Developed During GSoC 2010
 
 class Calendarv2 {
-    //Geeklog Permissions
+    //Geeklog Permissions Variables
     protected $_owner;
     protected $_group;
     protected $_group_id;
@@ -55,16 +55,21 @@ class Calendarv2 {
     * Initializes calendar object
     *
     */
-
     public function __construct() {
         $this->_creation_date = getdate(time());
         $this->_events = new Aevents;
     }
     
+    // Some setters.
     public function setCid($cid) {
         $this->_cid = $cid;
     }
 
+    public function setEvents(Aevents $events) {
+        $this->_events = $events;
+    } 
+
+    // Some getters.
     public function getCid() {
         return $this->_cid;
     }
@@ -106,11 +111,13 @@ class Calendarv2 {
         }
         return $matrix;
     }
-        
-    public function setEvents(Aevents $events) {
-        $this->_events = $events;
-    }
-    
+
+    /**
+    *   Add an event to the current list of events for this specific calendar object
+    *
+    * @param    object  $event
+    *
+    */ 
     public function addEvent(Event $event) 
     {
         $cid = $event->getCid();
@@ -119,11 +126,25 @@ class Calendarv2 {
         }
         $this->_events->addEvent($event);
     }
-    
+
+    /**
+    * populates an array of events. It querys the datebase betwen 2 moments of time
+    *
+    * @param    object  $date_start The start of the timespan
+    * @param    object  $date_end   The end of the timespan
+    * @param    integer $cid    The calendar id
+    *
+    */ 
     public function getEventsSpan(DateTime $datestart, DateTime $dateend, $debug = NULL) {
         $this->_events->getElements($datestart, $dateend, $this->_cid, $debug);
     }
-    
+
+    /** 
+    * Gets the events from a certain day
+    *
+    * @param    object  $date   A DateTime object   for the current day
+    *
+    */
     public function getTodayEvents(Datetime $date) {
         $a = new Aevents();
         $day_end = clone($date);
@@ -132,6 +153,12 @@ class Calendarv2 {
         return $a;
     }
 
+    /** 
+    * Loads a calendar from a POST array
+    *
+    * @param    object  $date   A DateTime object   for the current day
+    *
+    */ 
     public function loadFromArray($A) {
         $this->_title = $A['title'];
         list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = 
@@ -139,12 +166,20 @@ class Calendarv2 {
         $this->_cid = $A['cid'];
     }
 
+    /**
+    * Saves an event to the database
+    *
+    */
     public function saveEvents() {
         foreach ($this->_events as $event) {
             $event->save_to_database();
         }
     }
-    
+
+    /** 
+    * Gets details for a calendar, The id and the events
+    *
+    */
     public function getCalendar($cid) {
         // I should also get the title
         $this->_cid = $cid;
@@ -203,7 +238,14 @@ class Acalendarv2 implements arrayaccess, iterator {
         unset($this->_calendars[$offset]);
     }
     
-    // Gets the calendars where user has rights
+    /** 
+    * Get the calendars where the user has certain rights.
+    * The values of $rights variable are those used through geeklog
+    * 3 for writing, 2 for reading
+    *
+    * @param    $rights 
+    *
+    */  
     public function getCalendars($rights) {
         global $_TABLES, $_USER;
         $sql = "select * from {$_TABLES['calendarv2']}" ;
@@ -216,8 +258,11 @@ class Acalendarv2 implements arrayaccess, iterator {
             $i++;
         }
     }
-    
-    
+
+    /** 
+    * Get the number of calendars.
+    *
+    */ 
     public function getNum() {
         return count($this->_calendars);
     }

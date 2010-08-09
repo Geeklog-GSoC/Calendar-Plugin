@@ -385,10 +385,9 @@ function calendarv2_templatePath ($path = '')
  /**
 * Creates the main page from the template
 *
-* @param    int  $month   current Month to be displayed
-* @param    int  $year   current Year to be displayed
-* @param    cid         current calendar to be displayed
-*
+* @param    int  $A     Information transmitted via POST or get to display the 
+*                        month the user is seeing.
+* @param    $calendars  A list of calendars where the user has reads rights
 * @return   string      proper page made from template
 *
 */  
@@ -416,7 +415,7 @@ function calendarv2_display($A, $calendars, $calendar)
   /**
 * Creates the form page from the template
 *
-* @param    array   Post Variables.
+* @param    $calendars   Array of calendars where user has write rights
 * @return   string  the page from template
 *
 */  
@@ -524,9 +523,11 @@ function calendarv2_day_events($A, $calendar)
     
 
 /**
-* Creates the calendar from the template
+* Creates the calendar matrix to be displayed from template.
 *
-*
+* @param    array   $A  List of POST or GET   
+* @param    object  $calendars  The calendar from wich we display events   
+* @param    bool    $block  shows if we display a block for geeklog sidebar. 
 * @return   string      proper page made from template
 *
 */ 
@@ -626,8 +627,9 @@ function calendarv2_minimal_display($A, $calendar, $block = false)
 /**
 * Creates a page with a single event 
 *
-* @param    array  $details     an event object
-*
+* @param    object  $event  The event object needed for display
+* @param    bool    $upcoming   Show us if this is an upcoming event
+*                                or a current event.
 * @return   string      proper page made from template
 *
 */  
@@ -680,7 +682,7 @@ function calendarv2_single_event($event, $upcoming = false)
 * Gets details about the current event then generates a page from 
 * a template
 *
-* @param    array  $details     an event object
+* @param    object  $event  An event object
 *
 * @return   string      proper page made from template
 *
@@ -779,6 +781,7 @@ function calendarv2_display_calendars_new()
 /**
 *
 * Adds the new created calendars to the database
+* @param    array   $A info from POST for a new calendar 
 *
 */   
 
@@ -795,6 +798,15 @@ function calendarv2_create_calendar($A)
             "('{$_USER['uid']}', '{$name}', '{$perm_owner}' , '{$perm_group}', '{$perm_members}', '{$perm_anon}', '{$A['group_id']}')";
     DB_query($sql);
 }
+
+/**
+* Curently the main page display is divide in to 3 sections.
+* This particular function handles the display of the left section
+*
+* @param    object  $calendars  The calendars where user has read rights.
+* @return   string      proper page made from template
+*
+*/   
 
 function calendarv2_display_leftBlock($calendars)
 {
@@ -816,6 +828,15 @@ function calendarv2_display_leftBlock($calendars)
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
 }
+
+/**
+* Curently the main page display is divide in to 3 sections.
+* This particular function handles the display of the right section
+*
+* @param    object  $calendar  The current calendar
+* @return   string      proper page made from template
+*
+*/    
 
 function calendarv2_display_rightBlock($calendar)
 {   
@@ -839,7 +860,16 @@ function calendarv2_display_rightBlock($calendar)
     $page->parse('rows', 'row', true);
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
-}  
+}
+
+/**
+* This function handles the proper display of an upload form
+* 
+*
+* @param    object  $calendars  Calendars where the user has write rights
+* @return   string      proper page made from template
+*
+*/      
 
 function calendarv2_display_uploadForm($calendars)
 {
@@ -900,6 +930,19 @@ function plugin_itemlist_calendarv2()
     }
 }
 
+/**
+* This function handles fixed recurence via DateTime::modify method
+* 
+*
+* @param    object  $start_generating   DateTime object where the generation is started
+* @param    object  $end_generating     DateTime object where generating is ended.
+* @param    array   $array  Info about the event. It is passed by reference so that inside
+*                            timespans to be permanently modified.
+* @return   object  $events     A list of events that were generated in the timespan based on
+*                                the recurrence $rule
+*
+*/       
+
 function calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule) 
 {
     $recurrence_start = new DateTime('@' . $array['datestart']);
@@ -924,7 +967,16 @@ function calendarv2_fixed_recurrence($start_generating, $end_generating, &$array
 }
 
 
-// Searches in the recurring_events table and does dirty work.
+/**
+* This function does the dirty work of recurring events. It searches the database and deciedes
+* what recurring events need modification
+* 
+*
+* @param    object  $last_event_generated
+* @return   object  $events     A list of events that were generated in the timespan based on
+*                                the recurrence $rule
+*
+*/        
 function calendarv2_create_events(DateTime $last_event_generated = NULL) 
 {
     global $_TABLES;
@@ -1050,6 +1102,7 @@ function calendarv2_checkMaxCalendar()
     return true;
 }
 
+// Creates a date based on a GMT date and a timezone
 function calendarv2_createDate($date, $timezone) 
 {
     // If the tz is set to Z then we have an UTC time and we ignore the timezone
@@ -1062,6 +1115,16 @@ function calendarv2_createDate($date, $timezone)
     return $datetime;
     
 }
+
+
+/**
+* This function handles the proper display of a list of events after the upload
+*
+* @param    object  $calendar  The Calendar in which the events will be uploaded
+* @param    string  $filename   Filename that will be uploaded
+* @return   string      proper page made from template
+*
+*/       
 
 function calendarv2_display_uploadEvents($calendar, $filename) 
 {
@@ -1096,7 +1159,16 @@ function calendarv2_display_uploadEvents($calendar, $filename)
     }
     $result = $page->finish($page->parse('output', 'page'));
     return $result;
-} 
+}
+
+/**
+* This function handles the export of a calendar into a .ics file
+* Notice that function is far from complete and offers only an example of how
+* things should work
+*
+* @param    integer  $cid   The id of the calendar from which events are exported
+*
+*/        
 
 function calendarv2_exportics($cid)
 {        
@@ -1132,6 +1204,15 @@ function calendarv2_exportics($cid)
         $v->returnCalendar();
     }
 }
+
+/**
+*   
+* This function searches for events in the upcoming future(set by a config value)
+* and make a list with upcoming events
+*
+* @param    object  $calendar   The calendar for which we look
+*
+*/         
 
 function calendarv2_display_upcoming($calendar) 
 {
@@ -1187,11 +1268,18 @@ function phpblock_calendarv2()
     return $result;
 }
 
- 
+
+/**
+*   
+* This function lists the events in the admin area
+* it is ripped from the old calendar.
+*
+*/
+          
 function calendarv2_listevents()
 {
-    global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_CAL_ADMIN, $LANG_ACCESS,
-           $_IMAGE_TYPE, $_CAV2_CONF;
+    global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_CALV2_ADMIN, $LANG_ACCESS,
+           $_CAV2_CONF;
 
     require_once( $_CONF['path_system'] . 'lib-admin.php' );
 
@@ -1202,13 +1290,13 @@ function calendarv2_listevents()
         array('text' => $LANG_ADMIN['title'], 'field' => 'title', 'sort' => true)
     );
     if ($_CONF['show_fullname'] == 1) {
-        $header_arr[] = array('text' => $LANG_CAL_ADMIN[13], 'field' => 'fullname', 'sort' => true);
+        $header_arr[] = array('text' => $LANG_CALV2_ADMIN[13], 'field' => 'fullname', 'sort' => true);
     } else {
-        $header_arr[] = array('text' => $LANG_CAL_ADMIN[13], 'field' => 'username', 'sort' => true);
+        $header_arr[] = array('text' => $LANG_CALV2_ADMIN[13], 'field' => 'username', 'sort' => true);
     }
     $header_arr[] = array('text' => $LANG_ACCESS['access'], 'field' => 'access', 'sort' => false);
-    $header_arr[] = array('text' => $LANG_CAL_ADMIN[14], 'field' => 'datestart', 'sort' => true);
-    $header_arr[] = array('text' => $LANG_CAL_ADMIN[15], 'field' => 'dateend', 'sort' => true);
+    $header_arr[] = array('text' => $LANG_CALV2_ADMIN[14], 'field' => 'datestart', 'sort' => true);
+    $header_arr[] = array('text' => $LANG_CALV2_ADMIN[15], 'field' => 'dateend', 'sort' => true);
 
     $defsort_arr = array('field' => 'datestart', 'direction' => 'desc');
 
@@ -1218,7 +1306,7 @@ function calendarv2_listevents()
         //Batch delete not yet implemented. Must decide what to do with recurring events 
         /*
         array('url' => $_CONF['site_admin_url'] . '/plugins/calendarv2/index.php?mode=batchdelete',
-              'text' => $LANG_CAL_ADMIN[26]),
+              'text' => $LANG_CALV2_ADMIN[26]),
         */
         array('url' => $_CONF['site_admin_url'],
               'text' => $LANG_ADMIN['admin_home'])
@@ -1226,7 +1314,7 @@ function calendarv2_listevents()
 
     $retval .= COM_startBlock($LANG_CAL_ADMIN[11], '',
                               COM_getBlockTemplate('_admin_block', 'header'));
-    $retval .= ADMIN_createMenu($menu_arr, $LANG_CAL_ADMIN[12], plugin_geticon_calendar());
+    $retval .= ADMIN_createMenu($menu_arr, $LANG_CALV2_ADMIN[12], plugin_geticon_calendar());
 
     $text_arr = array(
         'has_extras' => true,
@@ -1255,7 +1343,12 @@ function calendarv2_listevents()
     return $retval;
 } 
 
-
+/**
+* This function fills the table values with proper values in admin area.
+* Ripped from old calendar 
+*
+*
+*/ 
 
 function plugin_getListField_calendarv2($fieldname, $fieldvalue, $A, $icon_arr)
 {

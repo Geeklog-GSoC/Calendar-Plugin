@@ -184,6 +184,46 @@ $LANG_fs['calendarv2'] = array(
             );
 
 
+$LANG_CALV2_ADMIN = array(
+    1 => 'Event Editor',
+    2 => 'Error',
+    3 => 'Post Mode',
+    4 => 'Event URL',
+    5 => 'Event Start Date',
+    6 => 'Event End Date',
+    7 => 'Event Location',
+    8 => 'Event Description',
+    9 => '(include http://)',
+    10 => 'You must provide the dates/times, event title, and description',
+    11 => 'Calendar Manager',
+    12 => 'To modify or delete an event, click on that event\'s edit icon below.  To create a new event, click on "Create New" above. Click on the copy icon to create a copy of an existing event.',
+    13 => 'Author',
+    14 => 'Start Date',
+    15 => 'End Date',
+    16 => '',
+    17 => "You are trying to access an event that you don't have rights to.  This attempt has been logged. Please <a href=\"{$_CONF['site_admin_url']}/plugins/calendar/index.php\">go back to the event administration screen</a>.",
+    18 => '',
+    19 => '',
+    20 => 'save',
+    21 => 'cancel',
+    22 => 'delete',
+    23 => 'Bad start date.',
+    24 => 'Bad end date.',
+    25 => 'End date is before start date.',
+    26 => 'Delete old entries',
+    27 => 'These are the events that are older than ',
+    28 => ' months. Please click on the trashcan Icon on the bottom to delete them, or select a different timespan:<br' . XHTML . '>Find all entries that are older than ',
+    29 => ' months.',
+    30 => 'Update List',
+    31 => 'Are You sure you want to permanently delete ALL selected users?',
+    32 => 'List all',
+    33 => 'No events selected for deletion',
+    34 => 'Event ID',
+    35 => 'could not be deleted',
+    36 => 'Sucessfully deleted'
+); 
+
+
 // Messages for the plugin upgrade
 $PLG_calendarv2_MESSAGE3002 = $LANG32[9]; // "requires a newer version of Geeklog"
 
