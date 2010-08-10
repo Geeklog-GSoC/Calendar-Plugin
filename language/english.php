@@ -86,7 +86,8 @@ $LANG_CALENDARV2_FORM = array (
     'lang_modify_msg' => 'Modify Event',
     'lang_calendars' => 'Calendar',
     'lang_upload' => 'Upload',
-    'lang_cancel' => 'Cancel'
+    'lang_cancel' => 'Cancel',
+    'lang_weeks' => "Weeks",
 );
 
 $LANG_CALENDARV2_MONTH = array (

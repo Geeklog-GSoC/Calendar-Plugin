@@ -419,7 +419,6 @@ function calendarv2_display($A, $calendars, $calendar)
 * @return   string  the page from template
 *
 */  
-
 function calendarv2_display_form($calendars)
 {
     
@@ -465,11 +464,10 @@ function calendarv2_display_form($calendars)
     $page->set_var('lang_permissions', $LANG_ACCESS['permissions']);
     $page->set_var('group_dropdown', SEC_getGroupDropdown($group_id, $acces));
     $retval .= $page->finish($page->parse('output', 'page'));
-    
-    
     return $retval; 
      
 }
+
  /**
  *
  * Searches for events in the current day in the database. If there
@@ -1017,7 +1015,8 @@ function calendarv2_create_events(DateTime $last_event_generated = NULL)
                 if (!is_null($array['which_day'])) {
                     $date_start = new DateTime('@'. $array['datestart']);
                     $date_end = new DateTime('@'. $array['dateend']);
-                    $rule = ('+7 days');
+                    $days = 7 * $array['week_period'];
+                    $rule = ("+$days days");
                     
                     if ($date_start->format('w') == $array['which_day']) {
                         $events = calendarv2_fixed_recurrence($start_generating, $end_generating, $array, $rule);
@@ -1125,7 +1124,6 @@ function calendarv2_createDate($date, $timezone)
 * @return   string      proper page made from template
 *
 */       
-
 function calendarv2_display_uploadEvents($calendar, $filename) 
 {
     global $CAV2_CONF, $LANG_CALENDARV2_SINGLE;
@@ -1169,7 +1167,6 @@ function calendarv2_display_uploadEvents($calendar, $filename)
 * @param    integer  $cid   The id of the calendar from which events are exported
 *
 */        
-
 function calendarv2_exportics($cid)
 {        
     global $_USER, $_CONF;
@@ -1213,7 +1210,6 @@ function calendarv2_exportics($cid)
 * @param    object  $calendar   The calendar for which we look
 *
 */         
-
 function calendarv2_display_upcoming($calendar) 
 {
     global $_CAV2_CONF, $LANG_CALENDARV2_MESSAGES;
@@ -1275,7 +1271,6 @@ function phpblock_calendarv2()
 * it is ripped from the old calendar.
 *
 */
-          
 function calendarv2_listevents()
 {
     global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_CALV2_ADMIN, $LANG_ACCESS,

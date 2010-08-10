@@ -43,6 +43,15 @@
 					<input id = "saturday" type = "checkbox" name = "day_recurring_5"><br> 
 					{lang_sunday}
 					<input id = "sunday" type = "checkbox" name = "day_recurring_6">  <br>
+					{lang_once} {lang_every}
+					<select id = "every_weeks" name = "every_weeks">
+						<option value = "1"> 1 </option>
+						<option value = "2"> 2 </option>
+						<option value = "3"> 3 </option>
+						<option value = "4"> 4 </option>
+						<option value = "5"> 5 </option>
+					</select> 
+					{lang_weeks}
 				</div>
 				<div id = "day_recurring">
 					{lang_every}:

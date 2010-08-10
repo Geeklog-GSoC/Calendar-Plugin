@@ -40,6 +40,7 @@ class Revent extends Event {
     private $_month;
     private $_day;
     private $_reid;
+    private $_period;
     public function __construct($A) {
         $this->load_event_from_array($A);
     }
@@ -71,6 +72,7 @@ class Revent extends Event {
                         $this->_week[$i] = true;
                     }
                 }
+                $this->_period = COM_applyFilter($A['every_weeks']);
                 break; 
             case 4:
                 $this->_month = $A['monthly'];
@@ -122,8 +124,8 @@ class Revent extends Event {
         if (isset($this->_week)) {
             for ($i = 0; $i < 7; $i++) {
                 if ($this->_week[$i]) {
-                    $fields = 'preid,' . 'which_day';
-                    $values = "'$this->_reid'," . "'$i'";
+                    $fields = 'week_period,' . 'preid,' . 'which_day';
+                    $values = "'$this->_period', '$this->_reid'," . "'$i'";
                     DB_save($_TABLES['recurring_specification'], $fields, $values);
                     $save = false;
                 }
