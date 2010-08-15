@@ -1,0 +1,19 @@
+{go_back_link} <br>
+<dl>
+	<dt> {event_title} </dt> 
+	<dd> {event_title_value} </dd>
+	<dt> {when} </dt>
+	<dd> {when_content} </dd>
+	<dt> {where} </dt>
+	<dd> {where_content} </dd>
+	<dt> {description} </dt>
+	<dd> {description_content} </dd>
+	<form method = "post" name = "modify_form" action = {action}>
+		<input type = "hidden" value = {filename} name = "filename">
+		<input type = "hidden" value = {hidden_eid} name = "eid">
+		<input type = "submit" value = {lang_modify} name = "modify">
+		<input type = "submit" value = {lang_delete} name = "delete">
+		{recurring_info}
+	</form>	
+
+</dl>

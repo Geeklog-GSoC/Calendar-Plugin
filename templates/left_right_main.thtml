@@ -1,0 +1,6 @@
+<div> {message} </div>
+<!-- BEGIN row -->
+<div> {content} </div> 
+<!-- END row -->
+
+<div id = "{div3id}" > {content3} </div> 

@@ -1,0 +1,115 @@
+<link href="{site_url}/style.css" rel = "stylesheet" type = "text/css">      
+<link href="{site_url}/javascript/jquery-ui.css" rel="stylesheet" type="text/css"/>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+<script src="{site_url}/javascript/jquery.js"></script> 
+<p id = "go_back" > {go_back_link} </p> 
+<p id = "form_message"> {lang_intro_msg} </p>
+<form id = "submit_form" method = "post" action = "event.php">
+			<dl><dt>
+			<label for = "event_title"> {lang_event_title}: </label> </dt>
+			<dd><input id = "event_title" type = "text" value = "{event_title}" size = "46" name = "event_title"/></dd>
+			<dt><label for = "event_starts"> {lang_event_starts}: </label> </dt>
+			<dd><input id = "start_date" value = "{default_start_date}" name = "start_date"/>
+			{lang_event_at}:
+			<input id = "start_time" value = "{default_start_time}" name = "start_time"/> 
+			</dd>
+			<dt>
+			<label for = "event_ends"> {lang_event_ends}: </label>  </dt> 
+			<dd> <input id = "end_date" value = "{default_end_date}" name = "end_date"/> 
+			{lang_event_at}:
+			<input id = "end_time" value = "{default_end_time}" name = "end_time"/>   </dd>
+			<dt> <label for = "repeats">  {lang_repeats}: </label> </dt>
+			<dd> <select id = "form_select" name = "recurring_type">
+				<option value = "1"> {lang_does_not} </option>
+				<option value = "2"> {lang_daily} </option>
+				<option value = "3"> {lang_weekley} </option>
+				<option value = "4"> {lang_monthly} </option>
+				<option value = "5"> {lang_yearly} </option>
+			     </select>
+				<div id = "recurring_container">
+				<div id = "week_day"> <div> {lang_which_day}: </div>
+					{lang_monday} 
+					<input id = "monday" type = "checkbox" name = "day_recurring_0"><br>
+					{lang_tuesday}
+					<input id = "tuesday" type = "checkbox" name = "day_recurring_1"><br>
+					{lang_wednesday}
+					<input id = "wednesday" type = "checkbox" name = "day_recurring_2"><br>
+					{lang_friday}
+					<input id = "thursday" type = "checkbox" name = "day_recurring_3"><br>
+					{lang_thursday}
+					<input id = "friday" type = "checkbox" name = "day_recurring_4"><br>
+					{lang_saturday}
+					<input id = "saturday" type = "checkbox" name = "day_recurring_5"><br> 
+					{lang_sunday}
+					<input id = "sunday" type = "checkbox" name = "day_recurring_6">  <br>
+					{lang_once} {lang_every}
+					<select id = "every_weeks" name = "every_weeks">
+						<option value = "1"> 1 </option>
+						<option value = "2"> 2 </option>
+						<option value = "3"> 3 </option>
+						<option value = "4"> 4 </option>
+						<option value = "5"> 5 </option>
+					</select> 
+					{lang_weeks}
+				</div>
+				<div id = "day_recurring">
+					{lang_every}:
+					<select id = "day_select" name = "recurring_every_day">
+						<option value = "1"> 1 </option>
+						<option value = "2"> 2 </option>
+						<option value = "3"> 3 </option>
+						<option value = "4"> 4 </option>
+						<option value = "5"> 5 </option>
+						<option value = "6"> 6 </option>
+						<option value = "7"> 7 </option>
+					</select> 
+					{lang_days}
+					
+				</div>	
+				<div id = "monthly_recurring">
+					{once_every}
+					<select id = "monthly" name = "monthly">
+						<option value = "1"> 1 </option>
+						<option value = "2"> 2 </option>
+						<option value = "3"> 3 </option>
+						<option value = "4"> 4 </option>
+					</select>
+					{months}
+				</div> 
+				<div id = "yearly_recurring">  
+					{once_every} 
+					<select id = "yearly" name = "yearly">
+						<option value = "1"> 1 </option>
+						<option value = "2"> 2 </option>
+						<option value = "3"> 3 </option>
+						<option value = "4"> 4 </option>
+					</select> 
+					{years}
+				</div>
+				{lang_date_recurring}:
+				<input id = "recurring_ends" name = "recurring_ends"> <br>
+				{lang_date_never}
+				<input id = "date_never" type = "checkbox"  name = "recurring_ends_never" >
+				</div> 
+					
+		
+			</dd>
+  			<dt> <label for = "all_day" >{lang_event_all_day}: </label> </dt> 
+			<dd> <input type = "checkbox" id = "all_day" name = "all_day">  </dd>
+			<dt><label for = "event_location"> {lang_event_location}: </label> </dt>
+			<dd> <input id = "event_location" type = "text" value = "{event_location}" size = "46" name = "event_location"/> </dd> 
+			<dt> <label for = "event_description"> {lang_event_description}: </label> </dt>
+			<dd> <textarea id = "event_description" name = "event_description">{event_description}</textarea> </dd>
+			<dt> <label for = "calendars"> {lang_calendars}: </label></dt>
+			<dd> {select} </dd> 
+			<dt> <label for = "owner" > {lang_owner}: </label> </dt>
+			<dd> {owner_name} </dd>
+			<dt> <label for = "groups" > {lang_group}: </label> </dt>
+			<dd> {group_dropdown} <dd>
+			<dt> <label for = "permissions" > {lang_permissions}: </label> </dt>
+			<dd> {permissions} <dd>
+			<dt> <label for = "AccesRights"> {lang_accesrights} </label> </dt>
+			<dd> <input type="hidden" value={calendar} name = "calendar_cid"> </dd>
+			<dd> <input type="submit" value="{lang_add}" name = "submit"/> <input type= "submit" value="{lang_cancel}" name = "cancel"/></dd>
+</form>

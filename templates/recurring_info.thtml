@@ -1,0 +1,2 @@
+<input id = "hidden_parent" name = "hidden_parent" value = "{hidden_parent}" type = "hidden">
+<input id = "delete_whole" name = "delete_whole{val}" value = "{lang_deleteall}" type = "submit">
