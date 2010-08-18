@@ -90,12 +90,17 @@ class Revent extends Event {
     *
     */ 
     private function save_recurring_events() {
-        global $_TABLES;
+        global $_TABLES, $_USER;
         $sanitized = $this->getSanitized();
         $fields = 'reid,' . 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'recurring_ends,' . 'cid';
         $values = "'$this->_reid'," . "'{$sanitized['title']}'," . "'{$sanitized['description']}'," . 
                     "'{$sanitized['start']}' ," . "'{$sanitized['end']}'," ."'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_recurring_ends'," . "'$this->_cid'";
-        DB_save($_TABLES['c2_recurring_events'], $fields, $values); 
+        if (calendarv2_checkCalendar($this->_cid, $_USER['uid'], 3)) {   
+            DB_save($_TABLES['c2_recurring_events'], $fields, $values);
+        }
+        else {
+            // Throw some exceptions?
+        }
     } 
     
     /**

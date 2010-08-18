@@ -150,6 +150,14 @@ class Event {
     }
 
     /**
+    * sets the moderation flag for an event
+    */
+    public function setModeration($bool)
+    {
+        $this->_moderation = $bool;
+    } 
+
+    /**
     *
     * load_event_from_array
     *
@@ -239,6 +247,12 @@ class Event {
         $this->_recurring = $A['recurring'];
         $this->_cid =$A['cid'];
         $this->_owner = $A['owner_id'];
+        $this->_group = $A['group'];
+        $this->_group_id = $A['group_id'];
+        $this->_perm_owner = $A['perm_owner'];
+        $this->_perm_group = $A['perm_group'];
+        $this->_perm_members = $A['perm_members'];
+        $this->_perm_anon = $A['perm_anon']; 
     }
     
     /**
@@ -248,11 +262,11 @@ class Event {
     */   
     public function save_to_database()
     {
-        global $_TABLES;
+        global $_TABLES, $_USER;
         $fields = 'eid,' . 'title,' . 'description,'. 'datestart,'. 
                   'dateend,'. 'location,'. 'allday,' . 'owner_id,' . 'cid,' . 'pid,' . 'perm_owner, ' .
                   'perm_members,' . 'perm_group,' . 'perm_anon';
-        $sanitized = $this->getSanitized();   
+        $sanitized = $this->getSanitized();
         $elements = "'{$sanitized['eid']}' ," . "'{$sanitized['title']}' ," . "'{$sanitized['description']}' ,"  
                     . "'{$sanitized['start']}'," . "'{$sanitized['end']}'," 
                     . "'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_owner',"
@@ -261,25 +275,22 @@ class Event {
 
         // Check to see if the events is directly saved into the database 
         // or mark for admin aproval.
-        if ($this->_moderation == false) {
-            DB_save($_TABLES['c2_events'], $fields, $elements);
+        
+        
+        // Check to see if the user has write rights to the calendar
+        if (calendarv2_checkCalendar($this->_cid, $_USER['uid'], 3)) {   
+            if ($this->_moderation == false) {
+                DB_save($_TABLES['c2_events'], $fields, $elements);
+            }
         }
         else {
-            DB_save($_TABLES['c2_submission'], $fields, $elements);
+            if ($this->_cid == 1) {
+                DB_save($_TABLES['c2_submission'], $fields, $elements);
+            }
         } 
-        
    }
- 
-    /**
-    *
-    * sets the moderation flag for an event
-    *
-    *
-    */
-    public function setModeration($bool)
-    {
-        $this->_moderation = $bool;
-    }
+
+    
 
     /**
     *

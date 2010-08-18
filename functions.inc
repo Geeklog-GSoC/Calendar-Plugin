@@ -1131,7 +1131,7 @@ function calendarv2_display_uploadEvents($calendar, $filename)
     $page->set_file(array ('page' => 'uploadevents.thtml',
                             'single_event' => 'single_event.thtml',
                             'recurring_info' => 'recurring_info.thtml'));
-    // I am using recurring_info because it curently does the job needed. Must be renaimed because does not work only with recurring.
+    // I am using recurring_info because it curently does the job needed. Must be renamed because does not work only with recurring.
     $pseudo = $calendar->getEvents();
     $lang = $LANG_CALENDARV2_SINGLE;
     foreach ($lang as $key => $value) {

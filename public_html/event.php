@@ -65,7 +65,7 @@ if (empty($B)) {
     }
     if (isset($A['eid'])) {
         $event = new Event();
-        $event->get_event($A['eid'], 'c2events');
+        $event->get_event($A['eid'], 'c2_events');
         $page .= calendarv2_single_event($event);
     }
     if (isset($A['day'])) {
@@ -76,7 +76,7 @@ if (empty($B)) {
 else {
     $event = new Event();
     if (isset($B['modify'])) {
-        $event->get_event($B['eid'], 'c2events');
+        $event->get_event($B['eid'], 'c2_events');
         // Creates a template for a single instance modification
         $page = calendarv2_modify_event($event);
     }

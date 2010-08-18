@@ -36,7 +36,7 @@ class Aevents implements arrayaccess, iterator {
     private $_events = array();
     private $_position;
 
-    // Implement iterator abastract methods
+    // Implement iterator abstract methods
     public function __construct() {
         $this->_position = 0;
     }
@@ -133,7 +133,6 @@ class Aevents implements arrayaccess, iterator {
     
     public function getEvent($eid) {
         foreach ($this->_events as $event) {
-            $test = $event->getEid();
             if ($event->getEid() == $eid) {
                 return $event;
             }
@@ -147,19 +146,29 @@ class Aevents implements arrayaccess, iterator {
     * if the user has rights to look for a certain event?
     *
     */
-
     public function getEvents($cid) 
     {
-        global $_TABLES;
+        global $_TABLES, $_USER;
         $cid = COM_applyFilter($cid, true);
-        $sql = "select * from {$_TABLES['c2_events']} where cid = $cid";
-        $result = DB_query($sql);
-        $i = 0;
-        while($event = DB_fetchArray($result)) {
-            $this->_events[] = new Event();
-            if($event['eid'] != NULL) {
-                $this->_events[$i]->load_event_from_DB_array($event, 'c2_events');
-                $i++;
+        if (COM_isAnonUser()) {
+            $_USER['uid'] = 1;
+        }
+        // Check to see if the user has access to the calendar in the first place
+        if (calendarv2_checkCalendar($cid, $_USER['uid'], 2)) {
+            $sql = "select * from {$_TABLES['c2_events']} where cid = $cid";
+            $result = DB_query($sql);
+            $access = SEC_hasAccess($result['owner_id'], $result['group_id'], $result['perm_owner'],
+                            $result['perm_group'], $result['perm_members'], $result['perm_anon']);
+            // More than, or read rights.
+            if ($access >= 2) { 
+                $i = 0;
+                while($event = DB_fetchArray($result)) {
+                    $this->_events[] = new Event();
+                    if($event['eid'] != NULL) {
+                        $this->_events[$i]->load_event_from_DB_array($event, 'c2_events');
+                        $i++;
+                    }
+                }
             }
         }
     }
