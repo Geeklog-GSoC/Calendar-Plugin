@@ -67,9 +67,11 @@ if (empty($B)) {
         $event = new Event();
         $event->get_event($A['eid'], 'c2_events');
         $page .= calendarv2_single_event($event);
+        $page_title = $event->getTitle();
     }
     if (isset($A['day'])) {
             $page .= calendarv2_day_events($_GET, $calendar);
+            $page_title = "Today Events";
     }
 }
 // Check if mofication of an event or deletion is asked by a $_POST variable
@@ -92,6 +94,7 @@ else {
         }
         if (empty($errors)) {
             $page = calendarv2_single_event($event);
+            $page_title = $event->getTitle();
         }
         else { 
             $page .= COM_showMessageText($errors, "Error");
@@ -147,7 +150,7 @@ else {
 
 
 // MAIN
-$display .= COM_siteHeader('menu', $LANG_CALENDARV2_1['plugin_name']);
+$display .= COM_siteHeader('menu', $page_title, $_LANG_CALENDARV2['display_name']);
 $display .= COM_startBlock($LANG_CALENDARV2_1['plugin_name']);
 $display .= $page;
 $display .= COM_endBlock();

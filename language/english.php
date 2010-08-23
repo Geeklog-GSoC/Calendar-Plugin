@@ -49,9 +49,9 @@ global $LANG32;
 // |               YY    - phrase id or number                                 |
 // +---------------------------------------------------------------------------+
 
-$LANG_CALENDARV2_1 = array(
-    'plugin_name' => 'calendarv2',
-    'hello' => 'Hello, world!' // this is an example only - feel free to remove
+$LANG_CALENDARV2 = array(
+    'calendarv2_display' => 'calendarv2',
+    'display_name' => 'Calendarv2'
 );
 
 $LANG_CALENDARV2_FORM = array (

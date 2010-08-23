@@ -88,10 +88,10 @@ $_CAV2_CONF['site_url'] = $_CONF['site_url'] . '/' . $_CAV2_CONF['folder'];
 */
 function plugin_getmenuitems_calendarv2()
 {
-    global $_CONF,$_CAV2_CONF, $LANG_CALENDARV2_1;
+    global $_CONF,$_CAV2_CONF, $LANG_CALENDARV2;
 
     $url = $_CAV2_CONF['site_url'] . '/index.php';
-    $menuitems[$LANG_CALENDARV2_1['plugin_name']] = $url;
+    $menuitems[$LANG_CALENDARV2['display_name']] = $url;
 
     return $menuitems;
 }
@@ -213,11 +213,11 @@ function plugin_autotags_calendarv2($op, $content = '', $autotag = '')
 */
 function plugin_cclabel_calendarv2()
 {
-    global $_CONF, $LANG_CALENDARV2_1;
+    global $_CONF, $LANG_CALENDARV2;
 
     $retval = array();
     if (SEC_hasRights('calendarv2.admin')) {
-        $retval = array($LANG_CALENDARV2_1['plugin_name'],
+        $retval = array($LANG_CALENDARV2_1['display_name'],
             $_CONF['site_admin_url'] . '/plugins/calendarv2/index.php',
             plugin_geticon_calendarv2());
     }
@@ -232,10 +232,10 @@ function plugin_cclabel_calendarv2()
 */
 function plugin_getadminoption_calendarv2()
 {
-    global $_CONF, $LANG_CALENDARV2_1;
+    global $_CONF, $LANG_CALENDARV2;
 
     if (SEC_hasRights('calendarv2.admin')) {
-        return array($LANG_CALENDARV2_1['plugin_name'],
+        return array($LANG_CALENDARV2_1['display_name'],
             $_CONF['site_admin_url'] . '/plugins/calendarv2/index.php', 0);
     }
 }
