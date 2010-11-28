@@ -144,6 +144,10 @@ else {
         COM_output(COM_refresh('index.php'));
         exit(); 
     }
+    // Must display an error if something got wrong 
+    if (!empty($errors)) {
+        COM_output(COM_refresh('index.php?alert=4'));
+    }
 }
 
     

@@ -150,7 +150,8 @@ $LANG_CALENDARV2_MESSAGES = array (
     'years' => 'years',
     '2' => 'You have succesfully added an event', 
     '1' => 'You have succesfully deleted an event',
-    '3' => 'Your event has been submitted an expects moderation' 
+    '3' => 'Your event has been submitted an expects moderation',
+    '4' => 'The start date must be before end date' 
 );
 
 $LANG_CALENDARV2_EVENT = array (
