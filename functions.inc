@@ -487,7 +487,9 @@ function calendarv2_day_events($A, $calendar)
     $events = $calendar->getTodayEvents($date);
     $page = new Template(calendarv2_templatePath()); 
     $page->set_file(array ('page' => 'dayevent.thtml'));
-    $page->set_var('site_url', $_CAV2_CONF['site_url']); 
+    $page->set_var('site_url', $_CAV2_CONF['site_url']);
+    // Hardcoded, I think we must do this by user preferences in all this function, by the way
+    $page->set_var('current_date', $date->format('Y-m-d')); 
     for ($i = 1; $i <= 24; $i++) {
         // No DateTime object needed for this display trick
         $page->set_var($i . '_hour' , date('h:i A' , mktime($i-1 , 0 ,0 ,0, 0 )));

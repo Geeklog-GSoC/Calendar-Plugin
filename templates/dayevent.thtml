@@ -1,7 +1,8 @@
 <link href="{site_url}/style.css" rel="stylesheet" type="text/css"/> 
+{current_date} <br/>
 <table class = "event_table">
 <tr>
-	{go_back_link}
+	{go_back_link} 
 </tr>
 <tr class = trevent>
 	<td> {1_hour} </td>
