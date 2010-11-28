@@ -705,8 +705,8 @@ function calendarv2_modify_event($event)
             $page->set_var($key, $value);
     }
     if ($details['allday'] == 1) {
-        $page->set_var('checked' , 'yes');
-    }  
+        $page->set_var('checked' , 'checked="checked"');
+    } 
     $page->set_var('action' , 'event.php');
     $page->set_var('event_title', $details['title']);
     $page->set_var('event_description', $details['description']);
