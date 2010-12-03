@@ -359,7 +359,6 @@ class Event {
     {
         $this->load_event_from_array($P);
         $this->_eid = $P['modify_eid'];
-        var_dump($this->_eid);
         $this->_cid = $P['modify_cid'];
         $this->update_to_database($P['modify_eid'], 'c2_submission');
     }
@@ -384,7 +383,7 @@ class Event {
         global $_TABLES;
         //Eid comes from $_POST so it must be verified
         $eid = addslashes($eid);
-        $sql = "select * from {$_TABLES[$table]} where eid = {$eid}";
+        $sql = "select * from {$_TABLES[$table]} where eid = '{$eid}'";
         $result = DB_query($sql);
         $event = DB_fetchArray($result);
         $this->_cid = $event['cid']; 
@@ -404,7 +403,7 @@ class Event {
 
     /**
     *
-    * Returns a string with all the information needed for an event
+    * Returns an array with the information needed for an event
     *
     */     
     public function get_details()

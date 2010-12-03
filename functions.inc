@@ -1221,6 +1221,11 @@ function calendarv2_display_upcoming($calendar)
  
     $start_upcoming = new DateTime();
     $end_upcoming = new DateTime();
+    $timezone = TimeZoneConfig::getUserTimeZone();
+    // Search for upcoming events with timezones applyed.
+    $timezone = new DateTimeZone($timezone);
+    $start_upcoming->setTimezone($timezone);
+    $end_upcoming->setTimeZone($timezone);                 
     $end_upcoming->modify('+' . $_CAV2_CONF['upcoming'] . ' days');
     $calendar->getEventsSpan($start_upcoming, $end_upcoming, $debug = 1);
     $events = $calendar->getEvents();
