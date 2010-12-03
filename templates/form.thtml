@@ -1,8 +1,10 @@
 <link href="{site_url}/style.css" rel = "stylesheet" type = "text/css">      
 <link href="{site_url}/javascript/jquery-ui.css" rel="stylesheet" type="text/css"/>
+<link href="{site_url}/javascript/calendrical.css" rel="stylesheet" type="text/css"/>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 <script src="{site_url}/javascript/jquery.js"></script> 
+<script src="{site_url}/javascript/calendrical.js"></script>
 <p id = "go_back" > {go_back_link} </p> 
 <p id = "form_message"> {lang_intro_msg} </p>
 <form id = "submit_form" method = "post" action = "event.php">

@@ -188,21 +188,20 @@ class Event {
         list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = $permission;
 
         $timezone = TimeZoneConfig::getUserTimeZone();
-        $timezone = new DateTimeZone($timezone); 
-        $start = $A['start_date'] . $A['start_time'];
+        $timezone = new DateTimeZone($timezone);
+        $start = $A['start_date'] .' '. $A['start_time'];
         try { 
             $this->_start = new DateTime($start, $timezone);
         } catch (Exception $e) {
             throw new Exception('DateTime failed' , $e);
         }
 
-        $end = $A['end_date'] . $A['end_time'];
+        $end = $A['end_date'] .' '. $A['end_time'];
         try {
             $this->_end = new DateTime($end, $timezone);
         } catch (Exception $e) {
             throw new Exception('DateTime failed' , $e);
         }
-
         $this->_description = $A['event_description'];
         $this->_location = $A['event_location'];
         if (!isset($this->_cid)) {
@@ -302,7 +301,7 @@ class Event {
     public function remove_from_database($eid)
     {
         global $_TABLES;
-        $sql = "delete from {$_TABLES['c2_events']} where eid = {$eid}";
+        $sql = "delete from {$_TABLES['c2_events']} where eid = '{$eid}'";
         DB_query($sql);
     }
     
