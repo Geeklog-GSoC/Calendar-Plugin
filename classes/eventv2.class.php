@@ -44,12 +44,12 @@ class Event {
     protected $_perm_anon;
 
     // Event details
-    protected $_eid;
-    protected $_cid;
+    protected $_eid;            // event id
+    protected $_cid;            // parent calendar id
     protected $_creation_date;
     protected $_title;
-    protected $_start;
-    protected $_end;
+    protected $_start;          // date/time event begins
+    protected $_end;            // date/time event ends
     protected $_pid;
     protected $_location;
     protected $_description;
@@ -173,8 +173,9 @@ class Event {
         
         $this->_title = $A['event_title'];
         
-        if (!isset($this->_owner)) {
-            if (COM_isAnonUser()) {
+        
+        if (!isset($this->_owner)) {   // NOTE: Should an admin be able to modify the owner here?
+            if (COM_isAnonUser() || empty($_USER['uid'])) {
                 $this->_owner = 1;
             }
             else {
@@ -182,10 +183,12 @@ class Event {
             }
         }
         $this->_group = COM_applyFilter($A['group_id'] , true);
-        if (is_array($A['group_id']) or is_array($A['perm_owner']) or is_array($A['perm_group']) or is_array($A['perm_anon'])) {
-                $permission = SEC_getPermissionValues($A['perm_owner'], $A['perm_group'] , $A['perm_members'], $A['perm_anon']);
+        if (is_array($A['group_id']) or is_array($A['perm_owner']) or 
+            is_array($A['perm_group']) or is_array($A['perm_anon'])) {
+            $permission = SEC_getPermissionValues($A['perm_owner'], $A['perm_group'], 
+                                                  $A['perm_members'], $A['perm_anon']);
+            list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = $permission;
         }
-        list($this->_perm_owner, $this->_perm_group, $this->_perm_members, $this->_perm_anon) = $permission;
 
         $timezone = TimeZoneConfig::getUserTimeZone();
         $timezone = new DateTimeZone($timezone);
@@ -202,17 +205,19 @@ class Event {
         } catch (Exception $e) {
             throw new Exception('DateTime failed' , $e);
         }
+
         $this->_description = $A['event_description'];
         $this->_location = $A['event_location'];
         if (!isset($this->_cid)) {
             $this->_cid = intval($A['calendar_cid']);
         }
-        $this->_allday = 0;                                
         if ($A['all_day'] == 'on') {
             $this->_allday = 1;
+        } else {
+            $this->_allday = 0;                                
         }
 
-        // Deal breakers
+        // Deal breakers  -- NOTE: Should these exceptions be thrown as these fields are processed
 
         // All events should have titles
         if (empty($this->_title)) {
@@ -224,6 +229,7 @@ class Event {
         }
         
     }
+
     /**
     *
     * load_event_from_DB
@@ -275,7 +281,6 @@ class Event {
         // Check to see if the events is directly saved into the database 
         // or mark for admin aproval.
         
-        
         // Check to see if the user has write rights to the calendar
         if (calendarv2_checkCalendar($this->_cid, $_USER['uid'], 3)) {   
             if ($this->_moderation == false) {
@@ -301,8 +306,8 @@ class Event {
     public function remove_from_database($eid)
     {
         global $_TABLES;
-        $sql = "delete from {$_TABLES['c2_events']} where eid = '{$eid}'";
-        DB_query($sql);
+
+        DB_delete($_TABLES['c2_events'], 'eid', $eid);
     }
     
     /**
@@ -321,12 +326,13 @@ class Event {
         global $_TABLES;
         
         $sanitized = $this->getSanitized();
-        $fields = "title = '{$sanitized['title']}' ," . "description = '{$sanitized['description']}',";
-        $fields .= "datestart = '{$sanitized['start']}',";
-        $fields .= "dateend = '{$sanitized['end']}',";
-        $fields .= "location = '{$sanitized['location']}',";
-        $fields .= "allday = '{$this->_allday}',";
-        $fields .= "cid = '{$this->_cid}'";
+        $fields = "title = '{$sanitized['title']}' ," 
+                . "description = '{$sanitized['description']}',";
+                . "datestart = '{$sanitized['start']}',";
+                . "dateend = '{$sanitized['end']}',";
+                . "location = '{$sanitized['location']}',";
+                . "allday = '{$this->_allday}',";
+                . "cid = '{$this->_cid}'";
         $sql = "update {$_TABLES[$table]} set {$fields} where eid = {$sanitized['eid']}";
         DB_query($sql);
     }
@@ -382,9 +388,7 @@ class Event {
         global $_TABLES;
         //Eid comes from $_POST so it must be verified
         $eid = addslashes($eid);
-        $sql = "select * from {$_TABLES[$table]} where eid = '{$eid}'";
-        $result = DB_query($sql);
-        $event = DB_fetchArray($result);
+        $event = DB_getItem($_TABLES[$table], '*', "eid = '{$eid}'");
         $this->_cid = $event['cid']; 
         $this->_title = $event['title'];
         $timezone = TimeZoneConfig::getUserTimeZone();
@@ -434,4 +438,5 @@ class Event {
     }
         
 }                               
+
 ?>

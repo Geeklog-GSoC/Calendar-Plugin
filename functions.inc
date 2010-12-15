@@ -35,7 +35,6 @@
 /**
 * @package calendarv2
 */
-
 if (strpos(strtolower($_SERVER['PHP_SELF']), 'functions.inc') !== false) {
     die ('This file can not be used on its own.');
 }
@@ -45,8 +44,6 @@ if (strpos(strtolower($_SERVER['PHP_SELF']), 'functions.inc') !== false) {
  */
 $plugin_path = $_CONF['path'] . 'plugins/calendarv2/';
 $langfile = $plugin_path . 'language/' . $_CONF['language'] . '.php';
-
-
 
 if (file_exists($langfile)) {
     require_once $langfile;
@@ -71,7 +68,6 @@ require_once $_CONF['path_system'] . 'classes/config.class.php';
 $ca_config = config::get_instance();
 $_CAV2_CONF = $ca_config->get_config('calendarv2');
 $_CAV2_CONF['site_url'] = $_CONF['site_url'] . '/' . $_CAV2_CONF['folder'];
-
 
 // +---------------------------------------------------------------------------+
 // | Geeklog Plugin API Implementation                                         |
@@ -292,7 +288,7 @@ function plugin_upgrade_calendarv2()
 
     require_once $_CONF['path'] . 'plugins/calendarv2/autoinstall.php';
 
-    if (! plugin_compatible_with_this_version_calendarv2('calendarv2')) {
+    if (!plugin_compatible_with_this_version_calendarv2('calendarv2')) {
         return 3002;
     }
 
@@ -329,7 +325,7 @@ function plugin_autouninstall_calendarv2()
         /* give the full name of the feature, as in the db */
         'features' => array('calendarv2.admin, calendarv2.moderate, calendarv2.submit'),
         /* give the full name of the block, including 'phpblock_', etc */
-        'php_blocks' => array(phpblock_calendarv2),
+        'php_blocks' => array('phpblock_calendarv2'),
         /* give all vars with their name */
         'vars' => array()
     );
@@ -382,20 +378,19 @@ function calendarv2_templatePath ($path = '')
     return $retval;
 }
  
- /**
+/**
 * Creates the main page from the template
 *
 * @param    int  $A     Information transmitted via POST or get to display the 
-*                        month the user is seeing.
+*                       month the user is seeing.
 * @param    $calendars  A list of calendars where the user has reads rights
 * @return   string      proper page made from template
 *
 */  
-
 function calendarv2_display($A, $calendars, $calendar)
 {
-    
     global $_CONF, $_CAV2_CONF;
+
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'main.thtml'));                                                                  
     $page->set_var('site_url', $_CAV2_CONF['site_url']);
@@ -412,24 +407,24 @@ function calendarv2_display($A, $calendars, $calendar)
     return $retval;
 }
  
-  /**
+/**
 * Creates the form page from the template
 *
-* @param    $calendars   Array of calendars where user has write rights
-* @return   string  the page from template
+* @param    $calendars  Array of calendars where user has write rights
+* @return   string      the page from template
 *
 */  
 function calendarv2_display_form($calendars)
 {
-    
     global $_CONF, $LANG_CALENDARV2_FORM, $_GROUPS, $LANG_ACCESS, $_USER; 
     global $_CAV2_CONF, $LANG_CALENDARV2_EVENT, $LANG_CALENDARV2_MESSAGES;
+
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'form.thtml',
-                            'calendar' => 'calendars.thtml'));
+                           'calendar' => 'calendars.thtml'));
     $lang = $LANG_CALENDARV2_FORM;
     foreach ($lang as $key => $value) {
-            $page->set_var($key, $value);
+        $page->set_var($key, $value);
     }     
     $go_back_link = $_CAV2_CONF['site_url'] . '/index.php'; 
     $prev = COM_createLink($LANG_CALENDARV2_EVENT['back'] , $go_back_link);
@@ -465,22 +460,21 @@ function calendarv2_display_form($calendars)
     $page->set_var('group_dropdown', SEC_getGroupDropdown($group_id, $acces));
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval; 
-     
 }
 
- /**
- *
- * Searches for events in the current day in the database. If there
- * are events there are displayed at a certain hour.
- * 
- * @param   array   Post Variables
- * @param   object  Calendar to seach in
- * @return  string  display from template
- */   
-
+/**
+*
+* Searches for events in the current day in the database. If there
+* are events there are displayed at a certain hour.
+* 
+* @param   array   Post Variables
+* @param   object  Calendar to seach in
+* @return  string  display from template
+*/   
 function calendarv2_day_events($A, $calendar)
 {
     global $_CAV2_CONF, $LANG_CALENDARV2_EVENT, $LANG_CALENDARV2_SINGLE;
+
     $date = new DateTime();
     $date->setDate($A['year'] , $A['month'], $A['day']);
     $date->setTime(0 , 0, 0);
@@ -499,28 +493,30 @@ function calendarv2_day_events($A, $calendar)
     $page->set_var('go_back_link' , $prev);
     if($events->getNumEvents() > 0) {
         foreach($events as $key => $event) {
-                if ($event) {
-                    $event_link = $_CAV2_CONF['site_url'] . '/event.php?eid=' . $event->getEid();
-                    $timezone = TimeZoneConfig::getUserTimeZone();
-                    $timezone = new DateTimeZone($timezone);
-                    $date_start = new DateTime('@' . $event->getDatestart());
-                    $date_ends = new DateTime('@' . $event->getDateend());
-                    $allday = $event->getAllday();
-                    if ($allday == 1)
-                        $allday = ', ' . $LANG_CALENDARV2_SINGLE['allday'] . ', ';
-                    else
-                        $allday = ''; 
-                    $date_start->setTimezone($timezone);
-                    $date_ends->setTimezone($timezone); 
-                    $new_event = COM_createLink($date_start->format('h:i A') . ' - ' . $date_ends->format('h:i A') ."$allday ". $event->getTitle(), $event_link);
-                    $page->set_var($date_start->format('G') + 1 . '_event', $new_event);
-                } 
+            if ($event) {
+                $event_link = $_CAV2_CONF['site_url'] . '/event.php?eid=' . $event->getEid();
+                $timezone = TimeZoneConfig::getUserTimeZone();
+                $timezone = new DateTimeZone($timezone);
+                $date_start = new DateTime('@' . $event->getDatestart());
+                $date_ends = new DateTime('@' . $event->getDateend());
+                $allday = $event->getAllday();
+                if ($allday == 1) {
+                    $allday = ', ' . $LANG_CALENDARV2_SINGLE['allday'] . ', ';
+                } else {
+                    $allday = ''; 
+                }
+                $date_start->setTimezone($timezone);
+                $date_ends->setTimezone($timezone); 
+                $new_event = COM_createLink($date_start->format('h:i A') . ' - ' . $date_ends->format('h:i A') 
+                                          . "$allday " . $event->getTitle(), $event_link);
+                $page->set_var($date_start->format('G') + 1 . '_event', $new_event);
+            } 
         }
     }
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval; 
 }
-    
+ 
 
 /**
 * Creates the calendar matrix to be displayed from template.
@@ -531,7 +527,6 @@ function calendarv2_day_events($A, $calendar)
 * @return   string      proper page made from template
 *
 */ 
-
 function calendarv2_minimal_display($A, $calendar, $block = false)
 {
     global $_CONF, $_CAV2_CONF, $LANG_CALENDARV2_MONTH, $LANG_CALENDARV2_WEEK;
@@ -540,38 +535,39 @@ function calendarv2_minimal_display($A, $calendar, $block = false)
     $generate = new DateTime();
     if (!isset($A['month']) && (!isset($A['year']))) {
         $A['month'] = $date->format('m');
-        $A['year'] = $date->format('Y');
+        $A['year']  = $date->format('Y');
     }
-    if (isset($A['month']) && isset($A['year'])) {
-        $generate->setDate($A['year'], $A['month'], 1);
-    }
+    $generate->setDate($A['year'], $A['month'], 1);
+
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'month_view.thtml',
-                            'each_element' => 'each_element.thtml',
-                            'each_element2'=> 'each_element2.thtml'));
+                           'each_element' => 'each_element.thtml',
+                           'each_element2'=> 'each_element2.thtml'));
     $link = $_CAV2_CONF['site_url'] . "/event.php?cid={$calendar->getCid()}&";
     $link2 = $_CAV2_CONF['site_url'] . '/index.php?';
     // If we display the calendar in a block, we don't display the prev and next buttons
-    if ($block == false) {
+    if (!$block) {
+        $prev_year  = $generate->format('Y');
         $prev_month = $generate->format('m') - 1;
         if ($prev_month == 0) {
-            $prev_year = -1;
+            $prev_year -= 1;
             $prev_month = 12;
         }
-        $prev_year += $generate->format('Y');
         $prev = COM_createLink('<<', $link2 . 'year=' . $prev_year .'&'. 'month=' . $prev_month . '&cid=' . $calendar->getCid());
         $page->set_var('prev', $prev);
 
+        $next_year  = $generate->format('Y');
         $next_month = $generate->format('m') + 1;
         if ($next_month == 13) {
             $next_month = 1;
-            $next_year =  1;
+            $next_year += 1;
         }
-        $next_year += $generate->format('Y');
         $next = COM_createLink('>>', $link2 . 'year=' . $next_year . '&' . 'month=' . $next_month . '&cid=' . $calendar->getCid());
         $page->set_var('next', $next);
     }
-    $month_name = $LANG_CALENDARV2_MONTH[intval($generate->format("m"))];
+
+    // NOTE: locale could be used to get month name is correct language instead of using language file 
+    $month_name = $LANG_CALENDARV2_MONTH[intval($generate->format("m"))]; 
     $page->set_var('month', $month_name);
     $page->set_var('year' , $generate->format('Y'));
     $i = 0;
@@ -612,13 +608,13 @@ function calendarv2_minimal_display($A, $calendar, $block = false)
                 $page->parse('line' . $i, 'each_element2', true);
             }
         }
-    // Add an add event link in the block footer
-    if ($block == true) {
-        $quick_add = COM_createLink('Add Event' , $_CAV2_CONF['site_url'] . '/event.php?new=true&cid=' . $calendar->getCid());
-        $page->set_var('footer_info', $quick_add);
-    }  
+        // Add an add event link in the block footer
+        if ($block == true) {
+            $quick_add = COM_createLink('Add Event' , $_CAV2_CONF['site_url'] . '/event.php?new=true&cid=' . $calendar->getCid());
+            $page->set_var('footer_info', $quick_add);
+        }  
 
-    $page->finish($page->parse('calendar_view', 'each_element')); 
+        $page->finish($page->parse('calendar_view', 'each_element')); 
     }
     $retval .= $page->finish($page->parse('output', 'page'));
     return $retval;
@@ -633,10 +629,10 @@ function calendarv2_minimal_display($A, $calendar, $block = false)
 * @return   string      proper page made from template
 *
 */  
-
 function calendarv2_single_event($event, $upcoming = false)
 {
     global $_CAV2_CONF, $LANG_CALENDARV2_SINGLE;
+
     $details = $event->get_details();
     // start creating the page based on event details
     $page = new Template(calendarv2_templatePath());
@@ -656,17 +652,19 @@ function calendarv2_single_event($event, $upcoming = false)
     $dateend->setTimezone($timezone);
     $page->set_var('event_title_value' , $details['title']);
     $allday = $details['allday'];
-    if ($allday == 1)
+    if ($allday == 1) {
         $allday = $LANG_CALENDARV2_SINGLE['allday'];
-    else
+    } else {
         $allday = '';
+    }
     $page->set_var('when_content' , $datestart->format('h:i A') . ' - ' . $dateend->format('h:i A') . ', '. $allday);
     $page->set_var('where_content' , $details['location']);
     $page->set_var('description_content' , $details['description']);
     $page->set_var('hidden_eid' , $details['eid']);
     list($day, $month, $year) = array($datestart->format('d'), $datestart->format('m'), $datestart->format('Y'));
     if (!($upcoming)) {
-        $link = COM_createLink($lang['go_back'], $_CAV2_CONF['site_url'] . "/event.php?cid={$details['cid']}&day=$day&month=$month&year=$year");
+        $link = COM_createLink($lang['go_back'], $_CAV2_CONF['site_url'] 
+            . "/event.php?cid={$details['cid']}&day=$day&month=$month&year=$year");
     }
     $page->set_var('go_back_link' , $link); 
     // if the event is recurring we will have to display aditional information
@@ -687,10 +685,10 @@ function calendarv2_single_event($event, $upcoming = false)
 * @return   string      proper page made from template
 *
 */
-
 function calendarv2_modify_event($event)
 {
     global $LANG_CALENDARV2_FORM, $CAV2_CONF;
+
     $lang = $LANG_CALENDARV2_FORM;
     $details = $event->get_details();   
     $timezone = TimeZoneConfig::getUserTimeZone();
@@ -702,7 +700,7 @@ function calendarv2_modify_event($event)
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'modify_instance.thtml'));
     foreach ($lang as $key => $value) {
-            $page->set_var($key, $value);
+        $page->set_var($key, $value);
     }
     if ($details['allday'] == 1) {
         $page->set_var('checked' , 'checked="checked"');
@@ -737,6 +735,7 @@ function calendarv2_modify_event($event)
 function calendarv2_display_calendars($calendars)
 {   
     global $_CAV2_CONF, $LANG_CALENDARV2_EVENT;
+
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'calendars.thtml'));
     foreach($calendars as $key => $calendar) {
@@ -758,10 +757,10 @@ function calendarv2_display_calendars($calendars)
 * @return   string  html
 *
 */  
-
 function calendarv2_display_calendars_new()
 {
     global $LANG_CALENDARV2_EVENT, $_GROUPS, $LANG_ACCESS, $_USER;
+
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'create_calendars.thtml'));
     $page->set_var('lang_calendar_name', $LANG_CALENDARV2_EVENT['calendar_name']); 
@@ -784,12 +783,13 @@ function calendarv2_display_calendars_new()
 * @param    array   $A info from POST for a new calendar 
 *
 */   
-
 function calendarv2_create_calendar($A) 
 {
     global $_TABLES, $_USER; 
+
+    //FIXME: Does this need an else?
     if (is_array($A['group_id']) or is_array($A['perm_owner']) or is_array($A['perm_group']) or is_array($A['perm_anon'])) {
-            list($perm_owner, $perm_group, $perm_members, $perm_anon) = 
+        list($perm_owner, $perm_group, $perm_members, $perm_anon) = 
             SEC_getPermissionValues($A['perm_owner'], $A['perm_group'] , $A['perm_members'], $A['perm_anon']); 
     }       
     $A['group_id'] = COM_applyFilter($A['group_id'], true);
@@ -807,10 +807,10 @@ function calendarv2_create_calendar($A)
 * @return   string      proper page made from template
 *
 */   
-
 function calendarv2_display_leftBlock($calendars)
 {
     global $_CAV2_CONF, $LANG_CALENDARV2_MESSAGES, $LANG_CALENDARV2_EVENT;
+
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'left_right_main.thtml'));
     $link = $_CAV2_CONF['site_url'] . '/index.php?';
@@ -837,10 +837,10 @@ function calendarv2_display_leftBlock($calendars)
 * @return   string      proper page made from template
 *
 */    
-
 function calendarv2_display_rightBlock($calendar)
 {   
     global $_CAV2_CONF, $LANG_CALENDARV2_MESSAGES, $LANG_CALENDARV2_EVENT;
+
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'left_right_main.thtml'));
     $page->set_var('message', $LANG_CALENDARV2_MESSAGES['right_block']);
@@ -870,10 +870,10 @@ function calendarv2_display_rightBlock($calendar)
 * @return   string      proper page made from template
 *
 */      
-
 function calendarv2_display_uploadForm($calendars)
 {
     global $LANG_CALENDARV2_FORM;
+
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'uploadfile.thtml'));
     $page->set_var('lang_upload', $LANG_CALENDARV2_FORM['lang_upload']);
@@ -883,10 +883,7 @@ function calendarv2_display_uploadForm($calendars)
     return $retval;
 }
 
-
-
 // Site Wide Event Submission functions, Part of the moderation capability
-
 function plugin_ismoderator_calendarv2()
 {
     global $_USER, $_TABLES;
@@ -905,20 +902,22 @@ function plugin_savesubmission_calendarv2($event, $moderate)
     if ($object_type = 'Event') {        
         $eid = COM_makeSid();
         $event->setEid($eid);
+        $event->setModeration($moderate);
+        $event->save_to_database();
     }
-    $event->setModeration($moderate);
-    $event->save_to_database();
 }
 
 function plugin_moderationvalues_calendarv2()
 {
     global $_TABLES;
+
     return array('eid' , $_TABLES['c2_events'], 'eid, datestart, dateend, description, title, location', $_TABLES['c2_submission']);
 }
 
 function plugin_itemlist_calendarv2()
 {
     global $_TABLES, $LANG_CALENDARV2_MODERATION;
+
     $lang = $LANG_CALENDARV2_MODERATION;
     if (plugin_ismoderator_calendarv2()) {
         $plugin = new Plugin();
@@ -926,23 +925,24 @@ function plugin_itemlist_calendarv2()
         $plugin->getsubmissionssql = "select eid, location, description from {$_TABLES['c2_submission']}";
         $plugin->addSubmissionHeading($lang[2]);
         $plugin->addSubmissionHeading($lang[3]);
-    return $plugin;
+        return $plugin;
     }
+    //FIXME: is a return value needed here?
 }
 
 /**
 * This function handles fixed recurence via DateTime::modify method
 * 
 *
-* @param    object  $start_generating   DateTime object where the generation is started
-* @param    object  $end_generating     DateTime object where generating is ended.
-* @param    array   $array  Info about the event. It is passed by reference so that inside
-*                            timespans to be permanently modified.
-* @return   object  $events     A list of events that were generated in the timespan based on
-*                                the recurrence $rule
+* @param    object  $start_generating DateTime object where the generation is started
+* @param    object  $end_generating   DateTime object where generating is ended.
+* @param    array   $array            Info about the event. It is passed by reference so that inside
+*                                     timespans to be permanently modified.
+* @param    FIXME   $rule             FIXME
+* @return   object  $events           A list of events that were generated in the timespan based on
+*                                     the recurrence $rule
 *
-*/       
-
+*/
 function calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule) 
 {
     $recurrence_start = new DateTime('@' . $array['datestart']);
@@ -966,7 +966,6 @@ function calendarv2_fixed_recurrence($start_generating, $end_generating, &$array
     return $events; 
 }
 
-
 /**
 * This function does the dirty work of recurring events. It searches the database and deciedes
 * what recurring events need modification
@@ -980,6 +979,7 @@ function calendarv2_fixed_recurrence($start_generating, $end_generating, &$array
 function calendarv2_create_events(DateTime $last_event_generated = NULL) 
 {
     global $_TABLES;
+
     // Here will have to be added exceptions hashtable when exceptions are implemented
     $events = new Aevents();
     $sql = "select * from {$_TABLES['c2_recurring_events']} left join {$_TABLES['c2_recurring_specification']} on " . 
@@ -1002,46 +1002,46 @@ function calendarv2_create_events(DateTime $last_event_generated = NULL)
             // There are many, many types of recurrences that can / must be handled here.
             // They should be grouped so that there are not many code duplications
             // This part handles the fixed size recurrences. Daily, Monthly and Yearly.
-                if (!is_null($array['day_period'])) {
-                    $rule = ('+' . $array['day_period'] . ' days');
-                    $events = calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule);
+            if (!is_null($array['day_period'])) {
+                $rule = ('+' . $array['day_period'] . ' days');
+                $events = calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule);
+            }
+            if (!is_null($array['month_period'])) {
+                $rule = ('+' .$array['month_period'] . ' months');
+                $events = calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule);
+            }
+            if (!is_null($array['year_period'])) {
+                $rule = ('+' .$array['year_period'] . ' years');
+                $events = calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule);
+            }
+            if (!is_null($array['which_day'])) {
+                $date_start = new DateTime('@'. $array['datestart']);
+                $date_end = new DateTime('@'. $array['dateend']);
+                $days = 7 * $array['week_period'];
+                $rule = ("+$days days");
+                
+                if ($date_start->format('w') == $array['which_day']) {
+                    $events = calendarv2_fixed_recurrence($start_generating, $end_generating, $array, $rule);
                 }
-                if (!is_null($array['month_period'])) {
-                    $rule = ('+' .$array['month_period'] . ' months');
-                    $events = calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule);
-                }
-                if (!is_null($array['year_period'])) {
-                    $rule = ('+' .$array['year_period'] . ' years');
-                    $events = calendarv2_fixed_recurrence($start_generating, $end_generating, &$array, $rule);
-                }
-                if (!is_null($array['which_day'])) {
-                    $date_start = new DateTime('@'. $array['datestart']);
-                    $date_end = new DateTime('@'. $array['dateend']);
-                    $days = 7 * $array['week_period'];
-                    $rule = ("+$days days");
-                    
-                    if ($date_start->format('w') == $array['which_day']) {
-                        $events = calendarv2_fixed_recurrence($start_generating, $end_generating, $array, $rule);
+                else {
+                    $jump1 = $array['which_day'] - $date_start->format('w');
+                    $jump2 = $array['which_day'] - $date_end->format('w');
+                    if ($jump1 < 0) {
+                        $jump1 = $jump1 + 7;
                     }
-                    else {
-                        $jump1 = $array['which_day'] - $date_start->format('w');
-                        $jump2 = $array['which_day'] - $date_end->format('w');
-                        if ($jump1 < 0) {
-                            $jump1 = $jump1 + 7;
-                        }
-                        if ($jump2 < 0) {
-                            $jump2 = $jump2 + 7;
-                        }
-                        $date_start->modify('+' . $jump1 . ' days');
-                        $date_end->modify('+' . $jump2 . ' days');
-                        $array['datestart'] = $date_start->format('U');
-                        $array['dateend'] = $date_end->format('U');
-                        $events = calendarv2_fixed_recurrence($start_generating, $end_generating, $array, $rule);
+                    if ($jump2 < 0) {
+                        $jump2 = $jump2 + 7;
                     }
+                    $date_start->modify('+' . $jump1 . ' days');
+                    $date_end->modify('+' . $jump2 . ' days');
+                    $array['datestart'] = $date_start->format('U');
+                    $array['dateend'] = $date_end->format('U');
+                    $events = calendarv2_fixed_recurrence($start_generating, $end_generating, $array, $rule);
                 }
-                foreach($events as $key => $event) {
-                    $event->save_to_database();
-                }
+            }
+            foreach($events as $key => $event) {
+                $event->save_to_database();
+            }
         }
         // After generating 1 year of recurring events, we must update our event in the
         // recurring events table so that in can spawn again, another year. 
@@ -1053,11 +1053,11 @@ function calendarv2_create_events(DateTime $last_event_generated = NULL)
     }
 }
 
-
 //Deletes a recurring event
 function calendarv2_delete_recurring($id) 
 {
     global $_TABLES;
+
     $sql = "delete from {$_TABLES['c2_recurring_events']} where reid = {$id}";
     DB_query($sql);
     $sql = "delete from {$_TABLES['c2_recurring_specification']} where preid = {$id}";
@@ -1066,11 +1066,11 @@ function calendarv2_delete_recurring($id)
     DB_query($sql);
 }
 
-
 // Verifies that a certain user has read or read-write acces to a certain calendar
 function calendarv2_checkCalendar($cid, $user, $right) 
 {
     global $_TABLES;
+
     $sql = "select * from {$_TABLES['c2_calendars']} where (cid = '$cid')";
     $sql .= COM_getPermSQL('AND', $user, $right); 
     $result = DB_query($sql);
@@ -1079,13 +1079,13 @@ function calendarv2_checkCalendar($cid, $user, $right)
         return true;
     }
     return false;
-
 }
 
 // Verifies if an user can create more calendars
 function calendarv2_checkMaxCalendar() 
 {                                                                 
     global $_CAV2_CONF, $_USER, $_TABLES;
+
     // if the user is admin or in calendarv2 group
     //  he can create as many calendars as he wants
     if ((SEC_inGroup('Root')) or (SEC_inGroup('Calendarv2 Admin'))) {
@@ -1093,9 +1093,7 @@ function calendarv2_checkMaxCalendar()
     }
     
     // else check how many calendars a user has created so far
-    $sql = "select * from {$_TABLES['c2_calendars']} where owner_id = {$_USER['uid']}";
-    $result = DB_query($sql);                           
-    $result = DB_numRows($result);
+    $result = DB_count($_TABLES['c2_calendars'], 'owner_id', $_USER['uid']);
     // if the cap is reached don't allow anymore
     if ($result >= $_CAV2_CONF['calendarlimit']) {
         return false;
@@ -1104,6 +1102,7 @@ function calendarv2_checkMaxCalendar()
 }
 
 // Creates a date based on a GMT date and a timezone
+//NOTE: Not sure this is doing as expected...
 function calendarv2_createDate($date, $timezone) 
 {
     // If the tz is set to Z then we have an UTC time and we ignore the timezone
@@ -1114,9 +1113,7 @@ function calendarv2_createDate($date, $timezone)
     $datetime->setDate($date['year'] , $date['month'], $date['day']);
     $datetime->setTime($date['hour'] , $date['min'], $date['sec']);
     return $datetime;
-    
 }
-
 
 /**
 * This function handles the proper display of a list of events after the upload
@@ -1129,10 +1126,11 @@ function calendarv2_createDate($date, $timezone)
 function calendarv2_display_uploadEvents($calendar, $filename) 
 {
     global $CAV2_CONF, $LANG_CALENDARV2_SINGLE;
+
     $page = new Template(calendarv2_templatePath());
     $page->set_file(array ('page' => 'uploadevents.thtml',
-                            'single_event' => 'single_event.thtml',
-                            'recurring_info' => 'recurring_info.thtml'));
+                           'single_event' => 'single_event.thtml',
+                           'recurring_info' => 'recurring_info.thtml'));
     // I am using recurring_info because it curently does the job needed. Must be renamed because does not work only with recurring.
     $pseudo = $calendar->getEvents();
     $lang = $LANG_CALENDARV2_SINGLE;
@@ -1172,6 +1170,7 @@ function calendarv2_display_uploadEvents($calendar, $filename)
 function calendarv2_exportics($cid)
 {        
     global $_USER, $_CONF;
+
     //check to see if the user has read rights on the requested calendar
     $calendar = new calendarv2();
     $calendar->getCalendar($cid);
@@ -1215,6 +1214,7 @@ function calendarv2_exportics($cid)
 function calendarv2_display_upcoming($calendar) 
 {
     global $_CAV2_CONF, $LANG_CALENDARV2_MESSAGES;
+
     // Generate Recurring Events in the database if it's the case (1 year have passed)
     $date = new DateTime();
     calendarv2_create_events($date);
@@ -1264,13 +1264,11 @@ function phpblock_calendarv2()
         $calendar = new Calendarv2();
         $calendar->getCalendar($cid);
         $result = calendarv2_minimal_display(NULL, $calendar, true);
-    }
-    else {
+    } else {
         $result = "You don't have acces to the site wide calendar";
     }
     return $result;
 }
-
 
 /**
 *   
@@ -1280,8 +1278,7 @@ function phpblock_calendarv2()
 */
 function calendarv2_listevents()
 {
-    global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_CALV2_ADMIN, $LANG_ACCESS,
-           $_CAV2_CONF;
+    global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_CALV2_ADMIN, $LANG_ACCESS, $_CAV2_CONF;
 
     require_once( $_CONF['path_system'] . 'lib-admin.php' );
 
@@ -1305,7 +1302,7 @@ function calendarv2_listevents()
     $menu_arr = array (
         array('url' => $_CAV2_CONF['site_url'] . '/event.php?new=true',
               'text' => $LANG_ADMIN['create_new']),
-        //Batch delete not yet implemented. Must decide what to do with recurring events 
+        //FIXME: Batch delete not yet implemented. Must decide what to do with recurring events 
         /*
         array('url' => $_CONF['site_admin_url'] . '/plugins/calendarv2/index.php?mode=batchdelete',
               'text' => $LANG_CALV2_ADMIN[26]),
@@ -1337,8 +1334,7 @@ function calendarv2_listevents()
     );
 
     $retval .= ADMIN_list ('calendarV2', 'plugin_getListField_calendarv2',
-                           $header_arr, $text_arr, $query_arr,
-                           $defsort_arr);
+                           $header_arr, $text_arr, $query_arr, $defsort_arr);
 
     $retval .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
 
@@ -1351,12 +1347,11 @@ function calendarv2_listevents()
 *
 *
 */ 
-
 function plugin_getListField_calendarv2($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CAV2_CONF, $LANG_ACCESS;
     $access = SEC_hasAccess($A['owner_id'], $A['group_id'], $A['perm_owner'], 
-                    $A['perm_group'], $A['perm_members'], $A['perm_anon']);
+                            $A['perm_group'], $A['perm_members'], $A['perm_anon']);
 
     switch($fieldname) {
 
@@ -1379,11 +1374,8 @@ function plugin_getListField_calendarv2($fieldname, $fieldvalue, $A, $icon_arr)
 
         case 'edit':
             if ($access == 3) {
-                $retval = COM_createLink(
-                        $icon_arr['edit'],
-                        "{$_CAV2_CONF['site_url']}/event.php"
-                        . "?eid={$A['eid']}");
-            break;
+                $retval = COM_createLink( $icon_arr['edit'], "{$_CAV2_CONF['site_url']}/event.php"
+                                        . "?eid={$A['eid']}");
             }
             break;
         case 'datestart':

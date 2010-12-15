@@ -40,6 +40,7 @@ class Aevents implements arrayaccess, iterator {
     public function __construct() {
         $this->_position = 0;
     }
+
     public function rewind() {
         $this->_position = 0;
     }
@@ -60,16 +61,17 @@ class Aevents implements arrayaccess, iterator {
         return isset($this->_events[$this->_position]);
     }
 
-    //Implement array acces abastract methods.
+    //Implement array acces abstract methods.
     public function offsetSet($offset, $value) {
-        if ($value instanceof Aevents) {
+        if ($value instanceof Event) {
             if ($offset == "") {
                 $this->_events[] = $value;
-            }
-            else {
+            } else {
                 $this->_events[$offset] = $value;
             }
-        }
+        } else {
+	    // FIXME: Handle bad type error
+	}
     }
     
     public function offsetExists($offset) {
@@ -94,15 +96,17 @@ class Aevents implements arrayaccess, iterator {
     */
     public function getElements(DateTime $date_start, DateTime $date_end, $cid) {
         global $_TABLES;           
+
         $sql = "select * from {$_TABLES['c2_events']} where {$date_start->format('U')}";
         $sql .= "<= datestart AND datestart < {$date_end->format('U')} AND cid = '$cid'";
         $result = DB_query($sql);
-        $i = 0;
         while($event = DB_fetchArray($result)) {
-            $this->_events[] = new Event();
             if($event['eid'] != NULL) {
-                $this->_events[$i]->load_event_from_DB_array($event, 'c2_events');
-                $i++;
+                $event = new Event();
+                $event->load_event_from_DB_array($event, 'c2_events');
+                $this->_events[] = $event;
+            } else {
+                // FIXME: Handle error case, exception?
             }
         }
     }
@@ -115,6 +119,7 @@ class Aevents implements arrayaccess, iterator {
     public function addEvent($event) {
             $this->_events[$this->getNumEvents()] = $event;
     }
+
     /**
     *
     * Get the Number of events
@@ -123,6 +128,7 @@ class Aevents implements arrayaccess, iterator {
     public function getNumEvents() {
         return count($this->_events);
     }
+
     /**
     *
     * Gets an event with a specific id
@@ -130,7 +136,6 @@ class Aevents implements arrayaccess, iterator {
     * @param integer    $eid    The id
     *
     */
-    
     public function getEvent($eid) {
         foreach ($this->_events as $event) {
             if ($event->getEid() == $eid) {
@@ -149,6 +154,7 @@ class Aevents implements arrayaccess, iterator {
     public function getEvents($cid) 
     {
         global $_TABLES, $_USER;
+
         $cid = COM_applyFilter($cid, true);
         if (COM_isAnonUser()) {
             $_USER['uid'] = 1;
@@ -161,16 +167,20 @@ class Aevents implements arrayaccess, iterator {
                             $result['perm_group'], $result['perm_members'], $result['perm_anon']);
             // More than, or read rights.
             if ($access >= 2) { 
-                $i = 0;
                 while($event = DB_fetchArray($result)) {
-                    $this->_events[] = new Event();
                     if($event['eid'] != NULL) {
-                        $this->_events[$i]->load_event_from_DB_array($event, 'c2_events');
-                        $i++;
+                        $event = new Event();
+                        $event->load_event_from_DB_array($event, 'c2_events');
+                        $this->_events[] = $event;
+                    } else {
+                        // FIXME: Handle missing eid (bad event) error
                     }
                 }
+            } else {
+                // FIXME: Handle lack of access error (at the very least log)
             }
         }
     }
 }
+
 ?>

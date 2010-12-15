@@ -45,8 +45,8 @@ $A = $_GET;
 // Ensure user even has the rights to access this page
 if (! SEC_hasRights('calendarv2.admin')) {
     $display .= COM_siteHeader('menu', $MESSAGE[30])
-             . COM_showMessageText($MESSAGE[29], $MESSAGE[30])
-             . COM_siteFooter();
+              . COM_showMessageText($MESSAGE[29], $MESSAGE[30])
+              . COM_siteFooter();
 
     // Log attempt to access.log
     COM_accessLog("User {$_USER['username']} tried to illegally access the calendarv2 plugin administration screen.");
@@ -55,21 +55,17 @@ if (! SEC_hasRights('calendarv2.admin')) {
     exit;
 }
 
-
 if ($A['mode'] == 'editsubmission') {
     $event = new Event();
     $event->get_event($A['id'], 'c2_submission');
     $page = calendarv2_modify_event($event);
-    
-}
-else {
-    $page .= calendarv2_listevents();
+} else {
+    $page = calendarv2_listevents();
 }
 
-
-// MAIN
 $display .= COM_siteHeader('menu', $LANG_CALENDARV2_1['plugin_name']);
 $display .= COM_startBlock($LANG_CALENDARV2_1['plugin_name']);
+// FIXME: below text needs to come from language file and should be templated
 $display .= '<p>Welcome to the ' . $LANG_CALENDARV2_1['plugin_name'] . ' plugin, '
          . $_USER['username'] . '!</p>';
 $display .= $page;

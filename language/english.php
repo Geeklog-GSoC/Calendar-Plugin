@@ -51,7 +51,7 @@ global $LANG32;
 
 $LANG_CALENDARV2 = array(
     'calendarv2_display' => 'calendarv2',
-    'display_name' => 'Calendarv2'
+    'display_name'       => 'Calendarv2'
 );
 
 $LANG_CALENDARV2_FORM = array (
@@ -74,7 +74,7 @@ $LANG_CALENDARV2_FORM = array (
     'lang_does_not' => 'Does not repeat',
     'lang_monday' => 'Monday',
     'lang_tuesday' => 'Tuesday',
-    'lang_wednesday' => 'Wensday',
+    'lang_wednesday' => 'Wednesday',
     'lang_thursday' => 'Thursday',
     'lang_friday' => 'Friday',
     'lang_saturday' => 'Saturday',
@@ -87,7 +87,7 @@ $LANG_CALENDARV2_FORM = array (
     'lang_calendars' => 'Calendar',
     'lang_upload' => 'Upload',
     'lang_cancel' => 'Cancel',
-    'lang_weeks' => "Weeks",
+    'lang_weeks' => 'Weeks',
 );
 
 $LANG_CALENDARV2_MONTH = array (
@@ -174,17 +174,14 @@ $LANG_configsubgroups['calendarv2'] = array(
 );
 
 $LANG_configselects['calendarv2'] = array(
-        0 => array('True' => 1, 'False' => 0),
-        1 => array('True' => TRUE, 'False' => FALSE),
-        2 => array('Sun' => 1, 'Mon' => 2, 'Tue' => 3, 'Wed' => 4, 'Thu' => 5,
-                    'Fri' => 6, 'Sat' => 7),
-        3 => array('1 day' => 1, '2 days' => 2, '3 days' => 3
+    0 => array('True' => 1, 'False' => 0),
+    1 => array('True' => TRUE, 'False' => FALSE),
+    2 => array('Sun' => 1, 'Mon' => 2, 'Tue' => 3, 'Wed' => 4, 'Thu' => 5,
+               'Fri' => 6, 'Sat' => 7),
+    3 => array('1 day' => 1, '2 days' => 2, '3 days' => 3
 ));
 
-$LANG_fs['calendarv2'] = array(
-            'fs_main' => 'Calendarv2 Settings'
-            );
-
+$LANG_fs['calendarv2'] = array( 'fs_main' => 'Calendarv2 Settings');
 
 $LANG_CALV2_ADMIN = array(
     1 => 'Event Editor',
@@ -224,7 +221,6 @@ $LANG_CALV2_ADMIN = array(
     35 => 'could not be deleted',
     36 => 'Sucessfully deleted'
 ); 
-
 
 // Messages for the plugin upgrade
 $PLG_calendarv2_MESSAGE3002 = $LANG32[9]; // "requires a newer version of Geeklog"

@@ -41,6 +41,7 @@ class Revent extends Event {
     private $_day;
     private $_reid;
     private $_period;
+
     public function __construct($A) {
         $this->load_event_from_array($A);
     }
@@ -53,15 +54,16 @@ class Revent extends Event {
         parent::load_event_from_array($A);
         if ($A['recurring_ends_never'] == 'on') {
             $this->_recurring_ends = 1;
-        }
-        else {
+        } else {
             $this->_recurring_ends = new DateTime($A['recurring_ends']);
             // Usualy datetime objects are kept, but now it's really not necesary since only
             // the timestamp is needed.
             $this->_recurring_ends = $this->_recurring_ends->format('U');
         }
-        $this->_recurring_type = intval($A['recurring_type']);
+
         $this->_reid = COM_makeSid();
+
+        $this->_recurring_type = intval($A['recurring_type']);
         switch ($this->_recurring_type) {
             case 2:
                 $this->_day = $A['recurring_every_day'];
@@ -91,15 +93,16 @@ class Revent extends Event {
     */ 
     private function save_recurring_events() {
         global $_TABLES, $_USER;
+
         $sanitized = $this->getSanitized();
-        $fields = 'reid,' . 'title,' . 'description,'. 'datestart,'. 'dateend,'. 'location,'. 'allday,' . 'recurring_ends,' . 'cid';
-        $values = "'$this->_reid'," . "'{$sanitized['title']}'," . "'{$sanitized['description']}'," . 
-                    "'{$sanitized['start']}' ," . "'{$sanitized['end']}'," ."'{$sanitized['location']}'," . "'$this->_allday'," . "'$this->_recurring_ends'," . "'$this->_cid'";
+        $fields = 'reid, title, description, datestart, dateend, location, allday, recurring_ends, cid';
+        $values = "'$this->_reid', '{$sanitized['title']}', '{$sanitized['description']}',"
+                . "'{$sanitized['start']}' , '{$sanitized['end']}', '{$sanitized['location']}'," 
+                . "'$this->_allday', '$this->_recurring_ends', '$this->_cid'";
         if (calendarv2_checkCalendar($this->_cid, $_USER['uid'], 3)) {   
             DB_save($_TABLES['c2_recurring_events'], $fields, $values);
-        }
-        else {
-            // Throw some exceptions?
+        } else {
+            // FIXME: Throw some exceptions?
         }
     } 
     
@@ -109,37 +112,37 @@ class Revent extends Event {
     */
     public function save_to_database() {
         global $_TABLES;
+
         $this->save_recurring_events(); 
         $fields = "preid,";
         $values = "'$this->_reid',";
-        $save = true;
-        if (isset($this->_year)) { 
-            $fields .= "year_period";
-            $values .= "'$this->_year'";
-        }
-        if (isset($this->_month)) {
-            $fields .= "month_period";
-            $values .= "'$this->_month'";
-        }
-        
-        if (isset($this->_day)) {
-            $fields .= "day_period";
-            $values .= "'$this->_day'";
-        }
+
+        // Weekly recurrances are handled specially (one row per weekday in the recurrance)
         if (isset($this->_week)) {
             for ($i = 0; $i < 7; $i++) {
                 if ($this->_week[$i]) {
                     $fields = 'week_period,' . 'preid,' . 'which_day';
                     $values = "'$this->_period', '$this->_reid'," . "'$i'";
                     DB_save($_TABLES['c2_recurring_specification'], $fields, $values);
-                    $save = false;
                 }
             }
-        }
-        if ($save) {
+        } else {
+            if (isset($this->_year)) { 
+                $fields .= "year_period";
+                $values .= "'$this->_year'";
+            }
+            if (isset($this->_month)) {
+                $fields .= "month_period";
+                $values .= "'$this->_month'";
+            }
+            if (isset($this->_day)) {
+                $fields .= "day_period";
+                $values .= "'$this->_day'";
+            }
             DB_save($_TABLES['c2_recurring_specification'], $fields, $values);
         }
     }
+
 }
 
-?> 
+?>

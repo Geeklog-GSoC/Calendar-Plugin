@@ -49,11 +49,9 @@ class Calendarv2 {
     private $_title;
  
     /**
-    *
     * Constructor
     *
     * Initializes calendar object
-    *
     */
     public function __construct() {
         $this->_creation_date = getdate(time());
@@ -95,7 +93,7 @@ class Calendarv2 {
     * @param    int     $first_day_config the first day of the week for display.
     * @return   array   
     */ 
-     public function generateMatrix($month, $year, $first_day_config = 1) {
+    public function generateMatrix($month, $year, $first_day_config = 1) {
         $start_date = mktime(0,0,0, $month, 1, $year);
         $days_in_month = date('t', $start_date);
         $first_day = date('w', $start_date);
@@ -167,7 +165,7 @@ class Calendarv2 {
     }
 
     /**
-    * Saves an event to the database
+    * Saves events to the database
     *
     */
     public function saveEvents() {
@@ -190,10 +188,12 @@ class Calendarv2 {
 class Acalendarv2 implements arrayaccess, iterator {
     private $_position;
     private $_calendars = array(); 
+
     // Implement iterator abastract methods
     public function __construct() {
         $this->_position = 0;
     }
+
     public function rewind() {
         $this->_position = 0;
     }
@@ -214,16 +214,17 @@ class Acalendarv2 implements arrayaccess, iterator {
         return isset($this->_calendars[$this->_position]);
     }
 
-    //Implement array acces abastract methods.
+    // Implement array access abstract methods.
     public function offsetSet($offset, $value) {
-        if ($value instanceof Aevents) {
+        if ($value instanceof Calendarv2) {
             if ($offset == "") {
                 $this->_calendars[] = $value;
-            }
-            else {
+            } else {
                 $this->_calendars[$offset] = $value;
             }
-        }
+        } else {
+	    // FIXME: Handle bad type error
+	}
     }
     
     public function offsetExists($offset) {
@@ -248,14 +249,13 @@ class Acalendarv2 implements arrayaccess, iterator {
     */  
     public function getCalendars($rights) {
         global $_TABLES, $_USER;
-        $sql = "select * from {$_TABLES['c2_calendars']}" ;
+        $sql  = "select * from {$_TABLES['c2_calendars']}" ;
         $sql .= COM_getPermSQL('where', $_USER['uid'], $rights);
         $result = DB_query($sql);
-        $i = 0;
         while ($array = DB_fetchArray($result)) {
-            $this->_calendars[] = new Calendarv2();
-            $this[$i]->loadFromArray($array);
-            $i++;
+            $calendar = new Calendarv2();
+            $calendar->loadFromArray($array);
+            $this->_calendars[] = $calendar;
         }
     }
 
@@ -269,4 +269,3 @@ class Acalendarv2 implements arrayaccess, iterator {
 }
 
 ?>
-    

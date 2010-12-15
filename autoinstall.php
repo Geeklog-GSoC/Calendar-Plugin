@@ -64,12 +64,11 @@ function plugin_autoinstall_calendarv2($pi_name)
     );
 
     $features = array(
-        $pi_name . '.admin'    => 'Full access to ' . $pi_display_name
-                                  . ' plugin'
+        $pi_name . '.admin' => 'Full access to ' . $pi_display_name . ' plugin'
     );
 
     $mappings = array(
-        $pi_name . '.admin'     => array($pi_admin)
+        $pi_name . '.admin' => array($pi_admin)
     );
 
     $tables = array(
@@ -92,7 +91,6 @@ function plugin_autoinstall_calendarv2($pi_name)
 }
 
 
-
 function plugin_load_configuration_calendarv2($pi_name)
 {
     global $_CONF;
@@ -110,7 +108,6 @@ function plugin_load_configuration_calendarv2($pi_name)
 * @return   boolean             true: plugin compatible; false: not compatible
 *
 */
-
 function plugin_compatible_with_this_version_calendarv2($pi_name)
 {
     global $_CONF, $_DB_dbms;
@@ -118,11 +115,12 @@ function plugin_compatible_with_this_version_calendarv2($pi_name)
     // check if we support the DBMS the site is running on
     $dbFile = $_CONF['path'] . 'plugins/' . $pi_name . '/sql/'
             . $_DB_dbms . '_install.php';
-    if (! file_exists($dbFile)) {
+    if (!file_exists($dbFile)) {
         return false;
     }
 
     // add checks here
+    //FIXME: Check PHP/Geeklog version
 
     return true;
 }

@@ -43,6 +43,8 @@ if (! in_array('calendarv2', $_PLUGINS)) {
     exit;
 }
 
+// FIXME: should there be an access check here?
+
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/eventv2.class.php';
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/calendarv2.class.php'; 
 require_once $_CONF['path'] . 'plugins/calendarv2/classes/reventv2.class.php';
@@ -55,7 +57,7 @@ $cid = COM_applyFilter($_GET['cid']);
 $calendar = new Calendarv2();
 $calendar->setCid($cid);
 if (empty($B)) {
-    // Check if we need to display a single event.
+    // Check if we need to display a single event. FIXME: should 2nd,3rd ifs be "else if"?
     if ($A['new'] == true) {
         $cid = COM_applyFilter($A['cid'], true);
         $calendars = new Acalendarv2();
@@ -70,8 +72,8 @@ if (empty($B)) {
         $page_title = $event->getTitle();
     }
     if (isset($A['day'])) {
-            $page .= calendarv2_day_events($_GET, $calendar);
-            $page_title = "Today Events";
+        $page .= calendarv2_day_events($_GET, $calendar);
+        $page_title = "Today Events";
     }
 }
 // Check if mofication of an event or deletion is asked by a $_POST variable
@@ -149,9 +151,6 @@ else {
         COM_output(COM_refresh('index.php?alert=4'));
     }
 }
-
-    
-
 
 // MAIN
 $display .= COM_siteHeader('menu', $page_title, $_LANG_CALENDARV2['display_name']);
